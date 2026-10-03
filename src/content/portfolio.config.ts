@@ -1,0 +1,176 @@
+import type { Portfolio } from './types'
+
+/**
+ * THE ONE FILE TO EDIT FIRST.
+ *
+ * Anything wrapped in square brackets, such as "[Add your biography]", is a visible
+ * placeholder. Empty strings and null values are hidden automatically, so links,
+ * images and statistics only appear once you supply real information.
+ * Never add results, clients or qualifications that are not genuinely yours.
+ */
+export const portfolio: Portfolio = {
+  profile: {
+    fullName: 'Your Name',
+    preferredName: 'Your Name',
+    title: 'Social Media Manager and Digital Marketer',
+    roles: ['Social Media Strategist', 'Content Creator', 'Brand Storyteller', 'Digital Marketer'],
+    tagline: 'Marketing with a point of view, measured by what it moves.',
+    intro:
+      'I plan, produce and measure social-first marketing that gives brands a clear voice and gives audiences a reason to act.',
+    bio: [
+      '[Add paragraph one: the kind of marketing you do, who you do it for and the problems you solve.]',
+      '[Add paragraph two: how you work. Research first, then positioning, content, community and reporting.]',
+      '[Add paragraph three: what you want to do next and the kind of team you want to join.]',
+    ],
+    yearsExperience: null,
+    location: '',
+    email: '',
+    phone: '',
+    whatsapp: '',
+    social: {
+      linkedin: '',
+      instagram: '',
+      tiktok: '',
+      facebook: '',
+      youtube: '',
+      pinterest: '',
+      website: '',
+    },
+    profilePhoto: null,
+    heroPortrait: null,
+    heroCutout: null,
+    heroFlowers: null,
+    signature: '',
+    cvFile: '',
+    availability: 'Open to new opportunities',
+    employmentType: 'Full-time, hybrid or remote',
+    targetJobs: [
+      'Social Media Manager',
+      'Digital Marketing Manager',
+      'Content Strategist',
+      'Brand and Communications Manager',
+    ],
+    highlights: [],
+  },
+  site: {
+    url: '',
+    title: 'Your Name | Social Media and Digital Marketing Portfolio',
+    description:
+      'Portfolio of a social media manager and digital marketer: strategy, content, campaigns and measured results.',
+    ogImage: '',
+    locale: 'en-GB',
+    currency: 'GBP',
+  },
+  theme: {
+    colors: {
+      stone: '#A08F80',
+      green: '#055C2F',
+      red: '#B5262E',
+      sand: '#EED9B4',
+      ink: '#17323F',
+      sea: '#2A8DB0',
+      aqua: '#8FD3CF',
+      pink: '#F39CAB',
+      sage: '#93C383',
+      butter: '#F6DC8C',
+      peach: '#F4A77E',
+      sky: '#A9DCEB',
+      paper: '#FBF4E4',
+    },
+    fonts: {
+      display: "'Italiana', 'Didot', 'Bodoni 72', Georgia, serif",
+      script: "'Pinyon Script', 'Snell Roundhand', cursive",
+      body: "'Figtree Variable', 'Figtree', system-ui, sans-serif",
+    },
+    borderStyle: 'perforated',
+    animationIntensity: 'full',
+    bubbleCursor: true,
+    stampNumeral: '25',
+  },
+  sections: {
+    showHero: true,
+    showRecruiterOverview: true,
+    showAbout: true,
+    showServices: true,
+    showWork: true,
+    showCaseStudies: true,
+    showTools: true,
+    showContentGallery: true,
+    showStrategy: true,
+    showWebsiteProjects: true,
+    showTestimonials: true,
+    // Off until you genuinely offer mentoring or training.
+    showMentoring: false,
+    showContact: true,
+  },
+  stats: [
+    // Every statistic is optional. Leave value as null (or 0) to hide it.
+    { key: 'projects', label: 'Projects delivered', value: null },
+    { key: 'brands', label: 'Brands managed', value: null },
+    { key: 'campaigns', label: 'Campaigns executed', value: null },
+    { key: 'content', label: 'Content pieces produced', value: null },
+    { key: 'audience', label: 'Audience grown', value: null, suffix: '+' },
+    { key: 'engagement', label: 'Engagement uplift', value: null, suffix: '%', note: 'State the period and platform in the note.' },
+  ],
+  recruiter: {
+    competencies: [
+      'Social media strategy',
+      'Content strategy and creation',
+      'Community management',
+      'Campaign planning',
+      'Performance reporting',
+      'Brand voice and copywriting',
+    ],
+    platforms: [],
+    industries: [],
+    achievements: [],
+    education: [],
+    certifications: [],
+    employment: [],
+  },
+  contact: {
+    budgetRanges: [
+      { min: 500, max: 1000 },
+      { min: 1000, max: 2500 },
+      { min: 2500, max: 5000 },
+      { min: 5000, max: null },
+    ],
+    enquiryTypes: [
+      'Recruitment and job opportunities',
+      'Freelance project',
+      'Social media management',
+      'Content creation',
+      'Campaign or brand strategy',
+      'Something else',
+    ],
+    whatsappGreeting: 'Hello, I found your portfolio and would like to talk.',
+    showBudget: true,
+  },
+  mentoring: {
+    heading: 'Learn social media marketing with me',
+    overview: '[Describe your course or mentoring offer.]',
+    topics: [],
+    outcomes: [],
+    format: '',
+    instructorPhoto: null,
+    showLiveBadge: false,
+  },
+  strategy: {
+    label: 'Sample framework',
+    heading: 'How a marketing plan comes together',
+    intro:
+      'This is an illustrative framework showing how I structure planning. It is not a client project and contains no results.',
+    steps: [
+      { title: 'Audience research', color: '#A9DCEB', summary: 'Who they are, where they spend time and what they already trust.', questions: ['Who is the core audience?', 'Which platforms do they use daily?', 'What do they ask or complain about?'] },
+      { title: 'Competitor research', color: '#F6DC8C', summary: 'What the category sounds like and where the open space is.', questions: ['Who competes for attention?', 'Which formats earn engagement?', 'What is nobody saying?'] },
+      { title: 'Brand positioning', color: '#F39CAB', summary: 'One clear idea the audience can repeat.', questions: ['What do we stand for?', 'What proof do we have?', 'What tone fits?'] },
+      { title: 'Content pillars', color: '#93C383', summary: 'Three to five themes that keep output focused.', questions: ['Which themes serve the objective?', 'Which are educational, which are emotional?', 'What is the content mix?'] },
+      { title: 'Marketing objectives', color: '#F4A77E', summary: 'Goals tied to the business with a baseline and a date.', questions: ['What does success change commercially?', 'What is the baseline?', 'By when?'] },
+      { title: 'Campaign planning', color: '#8FD3CF', summary: 'Big idea, phases, creative routes and owners.', questions: ['What is the one idea?', 'What are the phases?', 'Who approves what?'] },
+      { title: 'Customer journey', color: '#EED9B4', summary: 'From first glance to enquiry, purchase or advocacy.', questions: ['Where do people discover us?', 'What nudges them forward?', 'Where do they drop out?'] },
+      { title: 'Channel selection', color: '#A9DCEB', summary: 'Fewer channels done well beat every channel done thinly.', questions: ['Where is the audience?', 'What can we sustain?', 'What role does each channel play?'] },
+      { title: 'Content calendar', color: '#F6DC8C', summary: 'A rhythm the team can actually keep.', questions: ['What is the weekly cadence?', 'What is planned versus reactive?', 'What is the approval flow?'] },
+      { title: 'Performance measurement', color: '#F39CAB', summary: 'Report against the baseline, learn, adjust.', questions: ['Which metrics match the objective?', 'What changed and why might that be?', 'What do we do next?'] },
+    ],
+  },
+}
