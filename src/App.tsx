@@ -1,60 +1,74 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, type ComponentType } from 'react'
 import { useContent } from './hooks/useContent'
-import { useMotion } from './hooks/useMotion'
+import { useTheme } from './hooks/useTheme'
+import type { SectionConfig, SectionType } from './content/types'
 import { Loader } from './components/layout/Loader'
 import { Header } from './components/layout/Header'
 import { ScrollProgress } from './components/layout/ScrollProgress'
 import { BubbleCursor } from './components/layout/BubbleCursor'
+import { Decor } from './components/layout/Decor'
 import { Hero } from './components/hero/Hero'
 import { RecruiterOverview } from './components/about/RecruiterOverview'
 import { About } from './components/about/About'
 import { Services } from './components/services/Services'
-import { Strategy } from './components/strategy/Strategy'
 import { Contact } from './components/contact/Contact'
 import { Footer } from './components/footer/Footer'
 import { ViewerProvider } from './components/projects/Viewer'
 
-// Sections that only render when real content exists are code split.
-const Work = lazy(() => import('./components/projects/Work').then((m) => ({ default: m.Work })))
-const CaseStudies = lazy(() => import('./components/case-studies/CaseStudies').then((m) => ({ default: m.CaseStudies })))
-const Tools = lazy(() => import('./components/tools/Tools').then((m) => ({ default: m.Tools })))
-const ContentGallery = lazy(() => import('./components/content-gallery/ContentGallery').then((m) => ({ default: m.ContentGallery })))
-const Websites = lazy(() => import('./components/websites/Websites').then((m) => ({ default: m.Websites })))
-const Testimonials = lazy(() => import('./components/testimonials/Testimonials').then((m) => ({ default: m.Testimonials })))
-const Mentoring = lazy(() => import('./components/mentoring/Mentoring').then((m) => ({ default: m.Mentoring })))
+type SectionComponent = ComponentType<{ config: SectionConfig }>
+const lazySection = <K extends string>(load: () => Promise<Record<K, SectionComponent>>, name: K) =>
+  lazy(() => load().then((m) => ({ default: m[name] })))
+
+// Everything below the first screen is code split.
+const REGISTRY: Record<SectionType, SectionComponent> = {
+  hero: Hero,
+  overview: RecruiterOverview,
+  about: About,
+  services: Services,
+  contact: Contact,
+  skills: lazySection(() => import('./components/skills/Skills'), 'Skills'),
+  platforms: lazySection(() => import('./components/skills/Platforms'), 'Platforms'),
+  process: lazySection(() => import('./components/strategy/Process'), 'Process'),
+  work: lazySection(() => import('./components/projects/Work'), 'Work'),
+  caseStudies: lazySection(() => import('./components/case-studies/CaseStudies'), 'CaseStudies'),
+  results: lazySection(() => import('./components/results/Results'), 'Results'),
+  tools: lazySection(() => import('./components/tools/Tools'), 'Tools'),
+  ai: lazySection(() => import('./components/skills/AiSkills'), 'AiSkills'),
+  content: lazySection(() => import('./components/content-gallery/ContentGallery'), 'ContentGallery'),
+  screenshots: lazySection(() => import('./components/screenshots/Screenshots'), 'Screenshots'),
+  strategy: lazySection(() => import('./components/strategy/Strategy'), 'Strategy'),
+  websites: lazySection(() => import('./components/websites/Websites'), 'Websites'),
+  testimonials: lazySection(() => import('./components/testimonials/Testimonials'), 'Testimonials'),
+  mentoring: lazySection(() => import('./components/mentoring/Mentoring'), 'Mentoring'),
+  richText: lazySection(() => import('./components/about/RichTextSection'), 'RichTextSection'),
+}
 
 export default function App() {
-  const { content, visible } = useContent()
-  const { reduced, intensity, finePointer } = useMotion()
+  const { content, sections } = useContent()
+  const { plan, resolved } = useTheme()
   const { profile, theme } = content.portfolio
+  const trail = theme.bubbleCursor && plan.cursorTrail && resolved.decorations.includes('bubbles')
 
   return (
     <ViewerProvider>
-      <Loader name={profile.preferredName} skip={reduced} />
+      <Loader name={profile.preferredName} label={resolved.theme.postLabel} skip={plan.reduced} />
       <a className="skip" href="#main">Skip to content</a>
       <Header />
+      <Decor />
       <main id="main">
-        {visible.hero && <Hero />}
-        {visible.recruiter && <RecruiterOverview />}
-        {visible.about && <About />}
-        {visible.services && <Services />}
-        <Suspense fallback={null}>
-          {visible.work && <Work />}
-          {visible.caseStudies && <CaseStudies />}
-          {visible.tools && <Tools />}
-          {visible.content && <ContentGallery />}
-        </Suspense>
-        {visible.strategy && <Strategy />}
-        <Suspense fallback={null}>
-          {visible.websites && <Websites />}
-          {visible.testimonials && <Testimonials />}
-          {visible.mentoring && <Mentoring />}
-        </Suspense>
-        {visible.contact && <Contact />}
+        {sections.map(({ config, visible }) => {
+          if (!visible) return null
+          const Component = REGISTRY[config.type]
+          return (
+            <Suspense key={config.id} fallback={null}>
+              <Component config={config} />
+            </Suspense>
+          )
+        })}
       </main>
       <Footer />
       <ScrollProgress />
-      {theme.bubbleCursor && finePointer && !reduced && intensity === 'full' && <BubbleCursor />}
+      {trail && <BubbleCursor stroke={resolved.theme.cursor.stroke} fill={resolved.theme.cursor.fill} />}
     </ViewerProvider>
   )
 }

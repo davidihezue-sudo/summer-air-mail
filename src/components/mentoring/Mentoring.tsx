@@ -1,15 +1,16 @@
+import type { SectionConfig } from '../../content/types'
 import { Heart, MessageCircle } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { Section } from '../ui/Section'
 import { Img } from '../ui/Img'
 import { hasValue, whatsappUrl } from '../../utils/text'
 
-export function Mentoring() {
+export function Mentoring({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const { mentoring, profile } = content.portfolio
   const wa = whatsappUrl(profile.whatsapp, `Hello, I would like to ask about your training: ${mentoring.heading}`)
   return (
-    <Section id="mentoring" tone="var(--c-peach)" eyebrow="Mentoring and training" title={mentoring.heading} className="mentoring">
+    <Section config={config} tone="var(--c-peach)" eyebrow="Mentoring and training" title={mentoring.heading} className="mentoring">
       <div className="mentoring__grid">
         <div className="live" aria-hidden={!mentoring.showLiveBadge}>
           {mentoring.instructorPhoto ? <Img image={mentoring.instructorPhoto} /> : <div className="live__ph" />}

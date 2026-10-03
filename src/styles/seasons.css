@@ -1,0 +1,88 @@
+/* ===== Texture and transitions ===== */
+body::after { content: ''; position: fixed; inset: 0; z-index: 45; pointer-events: none; background-image: var(--texture); opacity: var(--texture-opacity); mix-blend-mode: multiply; }
+html.theme-fading *, html.theme-fading *::before, html.theme-fading *::after { transition: background-color .8s ease, color .8s ease, border-color .8s ease, fill .8s ease, stroke .8s ease !important; }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .9s; }
+
+/* ===== Seasonal decoration layer ===== */
+.decor { position: fixed; inset: 0; z-index: 30; pointer-events: none; overflow: hidden; contain: layout paint; }
+.decor__p { position: absolute; top: -6vh; display: block; will-change: transform; animation: decor-fall linear infinite; }
+.decor__p--glints, .decor__p--stars { top: auto; animation-name: decor-twinkle; animation-timing-function: ease-in-out; }
+.decor__p--petals { background: color-mix(in srgb, var(--c-pink) 85%, white); border-radius: 80% 0 80% 0; opacity: .85; box-shadow: inset -2px -2px 3px rgb(179 58 99 / .18); }
+.decor__p--leaves { border-radius: 90% 0 90% 0; opacity: .9; background: var(--c-sage); }
+[data-season='autumn'] .decor__p--leaves[data-h='0'] { background: #a3501f; }
+[data-season='autumn'] .decor__p--leaves[data-h='1'] { background: #7e1f2e; }
+[data-season='autumn'] .decor__p--leaves[data-h='2'] { background: #c98b2b; }
+[data-season='spring'] .decor__p--leaves[data-h='1'] { background: var(--c-green); opacity: .65; }
+.decor__p--snow { border-radius: 50%; background: #fff; box-shadow: 0 0 3px 1px rgb(42 90 135 / .35); opacity: .9; }
+.decor__p--glints, .decor__p--stars { background: var(--c-butter); clip-path: polygon(50% 0, 62% 38%, 100% 50%, 62% 62%, 50% 100%, 38% 62%, 0 50%, 38% 38%); opacity: 0; }
+.decor__p--stars { background: #fff; filter: drop-shadow(0 0 2px rgb(42 90 135 / .6)); }
+.decor__glow { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 120%, rgb(214 120 40 / .22), transparent 60%); }
+.decor__frost { position: absolute; inset: 0; box-shadow: inset 0 0 90px 24px rgb(230 240 250 / .55); }
+@keyframes decor-fall {
+  from { transform: translate3d(0, -8vh, 0) rotate(0deg); }
+  to { transform: translate3d(var(--sway, 40px), 112vh, 0) rotate(var(--spin, 360deg)); }
+}
+@keyframes decor-twinkle { 0%, 100% { opacity: 0; transform: scale(.4) rotate(0deg); } 50% { opacity: .85; transform: scale(1) rotate(45deg); } }
+[data-motion='none'] .decor { display: none; }
+
+/* ===== Surfaces for the services section ===== */
+.towel--summer { background: repeating-linear-gradient(90deg, var(--c-paper) 0 38px, var(--c-red) 38px 58px, var(--c-paper) 58px 70px, var(--c-sea) 70px 90px, var(--c-paper) 90px 128px, var(--c-butter) 128px 148px); }
+.towel--spring { background: repeating-linear-gradient(0deg, color-mix(in srgb, var(--c-red) 38%, transparent) 0 22px, transparent 22px 44px), repeating-linear-gradient(90deg, color-mix(in srgb, var(--c-red) 38%, transparent) 0 22px, transparent 22px 44px), var(--c-paper); }
+.towel--autumn { background: repeating-linear-gradient(0deg, transparent 0 30px, color-mix(in srgb, var(--c-butter) 70%, transparent) 30px 36px, transparent 36px 66px), repeating-linear-gradient(90deg, color-mix(in srgb, var(--c-red) 85%, transparent) 0 40px, color-mix(in srgb, var(--c-green) 80%, transparent) 40px 46px, color-mix(in srgb, var(--c-red) 85%, transparent) 46px 86px, var(--c-ink) 86px 90px); }
+.towel--winter { background: repeating-linear-gradient(90deg, var(--c-paper) 0 14px, color-mix(in srgb, var(--c-aqua) 70%, white) 14px 18px), var(--c-paper); }
+.towel--autumn::before { background: rgb(251 243 227 / .35); }
+.towel--winter::before { background: rgb(248 250 252 / .3); }
+.towel--spring .towel__fringe, .towel--autumn .towel__fringe { opacity: .9; }
+
+/* ===== Dividers by season ===== */
+[data-divider='deckle'] .wave { filter: drop-shadow(0 -1px 0 rgb(0 0 0 / .08)); }
+
+/* ===== Seasonal tweaks to the hero ===== */
+[data-season='spring'] .tide__moon, [data-season='autumn'] .tide__moon { display: none; }
+[data-season='autumn'] .stamp3d .layer--bg { filter: drop-shadow(0 22px 26px rgb(42 26 19 / .4)) sepia(.1); }
+[data-season='winter'] .hero-roles__line--1 { color: var(--c-red-text); }
+[data-hero-bg='plain'] .hero__stage { background: var(--c-sand); }
+[data-hero-decor='false'] .hero__sun { display: none; }
+
+/* ===== Hero layouts ===== */
+.hero-supporting { font-family: var(--font-display); font-style: italic; font-size: clamp(1.2rem, 3vw, 1.7rem); color: var(--c-red-text); }
+.hero-ctas { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .4rem; opacity: calc(1 - var(--p, 0) * 3); }
+.hero-ctas .btn { min-height: 44px; padding: .5rem 1.1rem; font-size: .9rem; }
+.hero--align-center .scene__text { text-align: center; justify-items: center; }
+.hero--align-center .hero-ctas { justify-content: center; }
+@media (min-width: 900px) {
+  .hero--stamp-left .scene { grid-template-columns: .85fr 1.15fr; }
+  .hero--stamp-left .scene__stamp { order: 0; }
+  .hero--centered .scene { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; }
+  .hero--centered .scene__stamp { order: -1; flex: 0 0 auto; }
+  .hero--centered .scene__text { justify-items: center; }
+  .hero--centered .hero-ctas { justify-content: center; }
+  .hero--centered { --stamp-h: min(46svh, 420px); --shift-x: 0px; }
+}
+
+/* ===== Professional intensity ===== */
+[data-professional='professional'] .progress__surfer, [data-professional='professional'] .sticker, [data-professional='professional'] .surfboard, [data-professional='professional'] .hero__sun { display: none; }
+[data-professional='professional'] .stamp-float, [data-professional='professional'] .polaroid, [data-professional='professional'] .ring__float { animation: none; }
+[data-professional='professional'] .polaroid { transform: none; box-shadow: 0 10px 24px -14px rgb(23 50 63 / .5); }
+[data-professional='professional'] .polaroid-wrap::before, [data-professional='professional'] .polaroid__pin { display: none; }
+[data-professional='professional'] .polaroid-wrap { padding-top: 0; }
+[data-professional='professional'] .note { rotate: 0deg; }
+[data-professional='professional'] .casecard__img, [data-professional='professional'] .casecard--flip .casecard__img { rotate: 0deg; }
+[data-professional='professional'] .rattan { rotate: 0deg; transition: none; }
+[data-professional='professional'] .btn--shine::after { display: none; }
+[data-professional='professional'] .footprints { display: none; }
+[data-professional='professional'] .h2 { letter-spacing: -.02em; }
+[data-professional='balanced'] .polaroid { animation-duration: 9s; }
+[data-professional='balanced'] .stamp-float { animation-duration: 10s; }
+[data-motion='subtle'] .polaroid { animation-duration: 12s; }
+[data-motion='none'] .polaroid, [data-motion='none'] .stamp-float, [data-motion='none'] .ring__float, [data-motion='none'] .sticker, [data-motion='none'] .hero__hint { animation: none; }
+
+/* ===== Service cards (Professional layout) ===== */
+.svc-groups { display: grid; gap: 2.4rem; }
+.svc-group .h4 { margin-top: 0; }
+.svc-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 1rem; }
+.svc-card { width: 100%; height: 100%; text-align: left; display: grid; gap: .5rem; align-content: start; padding: 1.2rem; background: var(--c-paper); border: 1.5px solid var(--c-ink); border-radius: 14px; border-top: 6px solid var(--tone); transition: transform .2s, box-shadow .2s; }
+.svc-card:hover { transform: translateY(-3px); box-shadow: var(--shadow); }
+.svc-card__art .towel-art { width: 54px; }
+.svc-card__name { font-family: var(--font-display); font-size: 1.4rem; line-height: 1.1; }
+.svc-card__desc { font-size: .92rem; opacity: .85; }

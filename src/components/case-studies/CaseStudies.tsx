@@ -1,17 +1,18 @@
 import { ArrowRight } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
+import type { SectionConfig } from '../../content/types'
 import { getCaseStudyProjects } from '../../content/selectors'
 import { Section } from '../ui/Section'
 import { Reveal } from '../ui/Reveal'
 import { Img } from '../ui/Img'
 import { useViewer } from '../projects/Viewer'
 
-export function CaseStudies() {
+export function CaseStudies({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const projects = getCaseStudyProjects(content)
   const { openCase } = useViewer()
   return (
-    <Section id="case-studies" tone="var(--c-ink)" dark eyebrow="Case studies" title="The thinking behind the work" intro="Challenge, strategy, execution and measured results, with a clear line between what I did and what the team did." className="cases">
+    <Section config={config} tone="var(--c-ink)" dark eyebrow="Case studies" title="The thinking behind the work" intro="Challenge, strategy, execution and measured results, with a clear line between what I did and what the team did." className="cases">
       <div className="cases__list">
         {projects.map((p, i) => (
           <Reveal key={p.id} className={`casecard ${i % 2 ? 'casecard--flip' : ''}`}>
@@ -19,7 +20,7 @@ export function CaseStudies() {
             <div className="casecard__body">
               <p className="eyebrow">{p.client} · {p.industry}</p>
               <h3 className="h3">{p.title}</h3>
-              <p className="prose">{p.caseStudy!.objective}</p>
+              <p className="prose">{p.caseStudy!.objective || p.description}</p>
               {p.caseStudy!.metrics && p.caseStudy!.metrics.length > 0 && (
                 <ul className="chips chips--light">{p.caseStudy!.metrics.slice(0, 3).map((m) => <li key={m.label}>{m.label}</li>)}</ul>
               )}

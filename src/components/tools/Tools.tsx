@@ -1,8 +1,10 @@
+import type { SectionConfig } from '../../content/types'
 import { useState } from 'react'
 import { useContent } from '../../hooks/useContent'
 import { getTools } from '../../content/selectors'
 import type { Tool } from '../../content/types'
 import { Section } from '../ui/Section'
+import { useTheme } from '../../hooks/useTheme'
 
 const CATEGORY_ORDER = ['Social Media Management', 'Content Creation', 'Design', 'Analytics', 'Advertising', 'AI and Automation']
 const initials = (n: string) => n.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase()
@@ -25,12 +27,13 @@ function Ring({ tool }: { tool: Tool }) {
   )
 }
 
-export function Tools() {
+export function Tools({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const tools = getTools(content)
+  const { copy } = useTheme()
   const groups = CATEGORY_ORDER.map((c) => ({ c, items: tools.filter((t) => t.category === c) })).filter((g) => g.items.length)
   return (
-    <Section id="tools" tone="var(--c-sea)" dark eyebrow="Tools and platforms" title="What floats my boat" intro="Software I genuinely use. Select a ring to see how." className="tools">
+    <Section config={config} tone="var(--c-sea-deep)" dark eyebrow="Tools and platforms" title={copy.toolsTitle} intro="Software I genuinely use. Select a ring to see how." className="tools">
       {groups.map((g) => (
         <div key={g.c} className="toolgroup">
           <h3 className="h4 toolgroup__title">{g.c}</h3>

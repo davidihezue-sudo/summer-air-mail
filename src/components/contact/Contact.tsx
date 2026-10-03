@@ -1,4 +1,5 @@
 import React from 'react'
+import type { SectionConfig } from '../../content/types'
 import { useState, type FormEvent } from 'react'
 import { Download, Mail, MessageCircle } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
@@ -9,13 +10,13 @@ import { Img } from '../ui/Img'
 import { PortraitPlaceholder } from '../ui/art'
 import { SocialRow } from './Socials'
 import {
-  buildEnquiryMessage, formatBudget, hasValue, mailtoUrl, validateEnquiry, whatsappUrl,
+  buildEnquiryMessage, cvLink, formatBudget, hasValue, mailtoUrl, validateEnquiry, whatsappUrl,
   type EnquiryErrors, type EnquiryValues,
 } from '../../utils/text'
 
-const EMPTY: EnquiryValues = { name: '', email: '', company: '', enquiryType: '', service: '', budget: '', message: '' }
+const EMPTY: EnquiryValues = { name: '', email: '', company: '', role: '', enquiryType: '', service: '', budget: '', message: '' }
 
-export function Contact() {
+export function Contact({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const { portfolio } = content
   const { profile, contact, site } = portfolio
@@ -26,6 +27,8 @@ export function Contact() {
   const [values, setValues] = useState<EnquiryValues>(EMPTY)
   const [errors, setErrors] = useState<EnquiryErrors>({})
   const [status, setStatus] = useState('')
+  const cv = cvLink(portfolio)
+  const recruiter = values.enquiryType === contact.recruiterType
   const signature = hasValue(profile.signature) ? profile.signature : profile.preferredName
   const set = (k: keyof EnquiryValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setValues((v) => ({ ...v, [k]: e.target.value }))
   const canSend = hasEmail || hasWa
@@ -57,12 +60,18 @@ export function Contact() {
   const field = (id: keyof EnquiryValues, label: string, required = false) => ({ id: `enquiry-${id === 'enquiryType' ? 'type' : id}`, label, required, error: errors[id] })
 
   return (
-    <Section id="contact" tone="var(--c-peach)" eyebrow="Let's connect" title="Let's talk about your next project." className="contact">
+    <Section config={config} tone="var(--c-peach)" eyebrow="Let's connect" title="Let's talk about your next project." className="contact">
       <div className="contact__grid">
         <Reveal className="contact__intro">
           <div className="contact__portrait">{profile.profilePhoto ? <Img image={profile.profilePhoto} /> : <PortraitPlaceholder />}</div>
           <p className="script contact__sig">{signature}</p>
           <p className="lede">Hiring, collaborating or just curious about what social-first marketing could do for your brand? Send a note and I will reply personally.</p>
+          {(contact.availableFor.length > 0 || contact.workModes.length > 0) && (
+            <div>
+              <p className="eyebrow">Available for</p>
+              <ul className="chips">{[...contact.availableFor, ...contact.workModes].map((x) => <li key={x}>{x}</li>)}</ul>
+            </div>
+          )}
           <ul className="contact__links">
             {hasEmail && <li><a href={`mailto:${profile.email}`}><Mail size={18} aria-hidden /> {profile.email}</a></li>}
             {hasWa && <li><a href={whatsappUrl(profile.whatsapp, contact.whatsappGreeting)} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} aria-hidden /> WhatsApp<span className="sr-only"> (opens in a new tab)</span></a></li>}
@@ -70,7 +79,7 @@ export function Contact() {
           <SocialRow social={profile.social} />
           <div className="contact__ctas">
             <button type="button" className="btn btn--solid btn--shine" onClick={() => document.getElementById('enquiry-name')?.focus()}>Let&rsquo;s talk about your next project.</button>
-            {hasValue(profile.cvFile) && <a className="btn btn--ghost" href={profile.cvFile} download><Download size={18} aria-hidden /> Download my CV</a>}
+            {cv && <a className="btn btn--ghost" href={cv.href} download={cv.filename}><Download size={18} aria-hidden /> Download my CV</a>}
           </div>
         </Reveal>
 
@@ -88,14 +97,17 @@ export function Contact() {
 
               <Field {...field('name', 'Full name', true)}><input id="enquiry-name" autoComplete="name" value={values.name} onChange={set('name')} /></Field>
               <Field {...field('email', 'Email', true)}><input id="enquiry-email" type="email" autoComplete="email" value={values.email} onChange={set('email')} /></Field>
-              <Field {...field('company', 'Company')}><input id="enquiry-company" autoComplete="organization" value={values.company} onChange={set('company')} /></Field>
+              <Field {...field('company', recruiter ? 'Company (the hiring organisation)' : 'Company')}><input id="enquiry-company" autoComplete="organization" value={values.company} onChange={set('company')} /></Field>
               <Field {...field('enquiryType', 'Position or enquiry type', true)}>
                 <select id="enquiry-type" value={values.enquiryType} onChange={set('enquiryType')}>
                   <option value="">Choose one</option>
                   {contact.enquiryTypes.map((t) => <option key={t}>{t}</option>)}
                 </select>
               </Field>
-              {services.length > 0 && (
+              {recruiter && (
+                <Field {...field('role', 'Role you are hiring for')}><input id="enquiry-role" value={values.role} onChange={set('role')} placeholder="For example: Social Media Manager" /></Field>
+              )}
+              {services.length > 0 && !recruiter && (
                 <Field {...field('service', 'Service of interest')}>
                   <select id="enquiry-service" value={values.service} onChange={set('service')}>
                     <option value="">Not sure yet</option>
@@ -103,7 +115,7 @@ export function Contact() {
                   </select>
                 </Field>
               )}
-              {contact.showBudget && contact.budgetRanges.length > 0 && (
+              {contact.showBudget && !recruiter && contact.budgetRanges.length > 0 && (
                 <Field {...field('budget', 'Budget (optional)')}>
                   <select id="enquiry-budget" value={values.budget} onChange={set('budget')}>
                     <option value="">Prefer to discuss</option>

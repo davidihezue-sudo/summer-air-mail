@@ -59,6 +59,8 @@ export interface EnquiryValues {
   name: string
   email: string
   company: string
+  /** Role being recruited for. Only used for recruiter enquiries. */
+  role: string
   enquiryType: string
   service: string
   budget: string
@@ -87,10 +89,53 @@ export function buildEnquiryMessage(v: EnquiryValues, ownerName: string): string
     `Email: ${v.email.trim()}`,
   ]
   if (v.company.trim()) lines.push(`Company: ${v.company.trim()}`)
+  if (v.role.trim()) lines.push(`Role: ${v.role.trim()}`)
   lines.push(`Enquiry: ${v.enquiryType}`)
   if (v.service) lines.push(`Service of interest: ${v.service}`)
   if (v.budget) lines.push(`Budget: ${v.budget}`)
   return lines.join('\n')
+}
+
+/** CV link only when a file is configured and the button is enabled. */
+export function cvLink(p: Portfolio): { href: string; filename: string; label: string } | null {
+  if (!p.cv.enabled || !hasValue(p.profile.cvFile)) return null
+  const href = safeHref(p.profile.cvFile)
+  if (!href) return null
+  const base = p.cv.filename.trim() || p.profile.cvFile.split('/').pop() || 'cv.pdf'
+  const filename = /\.[a-z0-9]{2,4}$/i.test(base) ? base : `${base}.pdf`
+  return { href, filename: filename.replace(/[^\w.\- ]/g, ''), label: 'Download CV' }
+}
+
+export type VideoSource =
+  | { kind: 'file'; src: string }
+  | { kind: 'youtube'; id: string }
+  | { kind: 'vimeo'; id: string }
+  | { kind: 'external'; src: string }
+  | { kind: 'none' }
+
+/** Classifies a video URL. Only direct files and YouTube/Vimeo are played in the page; everything else is a link. */
+export function parseVideo(url: string | undefined): VideoSource {
+  if (!hasValue(url)) return { kind: 'none' }
+  const u = (url as string).trim()
+  if (/^\/[^\s]+\.(mp4|webm)(\?.*)?$/i.test(u)) return { kind: 'file', src: u }
+  try {
+    const parsed = new URL(u)
+    if (!['https:', 'http:'].includes(parsed.protocol)) return { kind: 'none' }
+    const host = parsed.hostname.replace(/^www\./, '')
+    if (/\.(mp4|webm)$/i.test(parsed.pathname)) return { kind: 'file', src: u }
+    if (host === 'youtu.be') return /^[\w-]{6,15}$/.test(parsed.pathname.slice(1)) ? { kind: 'youtube', id: parsed.pathname.slice(1) } : { kind: 'external', src: u }
+    if (host === 'youtube.com' || host === 'm.youtube.com' || host === 'youtube-nocookie.com') {
+      const v = parsed.searchParams.get('v') ?? parsed.pathname.match(/^\/(?:shorts|embed|live)\/([\w-]{6,15})/)?.[1]
+      if (v && /^[\w-]{6,15}$/.test(v)) return { kind: 'youtube', id: v }
+    }
+    if (host === 'vimeo.com') {
+      const id = parsed.pathname.match(/^\/(\d{5,12})/)?.[1]
+      if (id) return { kind: 'vimeo', id }
+    }
+    return { kind: 'external', src: u }
+  } catch {
+    return { kind: 'none' }
+  }
 }
 
 export function visibleStats(p: Portfolio) {

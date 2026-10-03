@@ -1,3 +1,4 @@
+import type { SectionConfig } from '../../content/types'
 import { Download } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { Section } from '../ui/Section'
@@ -5,16 +6,19 @@ import { Reveal } from '../ui/Reveal'
 import { Img } from '../ui/Img'
 import { AnimatedNumber } from '../ui/AnimatedNumber'
 import { PortraitPlaceholder, Surfboard } from '../ui/art'
-import { hasValue, visibleStats } from '../../utils/text'
+import { cvLink, hasValue, visibleStats } from '../../utils/text'
+import { useTheme } from '../../hooks/useTheme'
 
-export function About() {
+export function About({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const { portfolio } = content
   const { profile, site } = portfolio
   const stats = visibleStats(portfolio)
+  const cv = cvLink(portfolio)
+  const { copy } = useTheme()
 
   return (
-    <Section id="about" tone="var(--c-sand)" eyebrow="About" title={`Meet ${profile.preferredName}`} className="about">
+    <Section config={config} tone="var(--c-sand)" eyebrow="About" title={`Meet ${profile.preferredName}`} className="about">
       <div className="about__grid">
         <Reveal className="about__photo-col">
           <div className="rattan">
@@ -24,7 +28,7 @@ export function About() {
               )}
             </div>
           </div>
-          <span className="sticker script" aria-hidden>hello!</span>
+          {copy.sticker && <span className="sticker script" aria-hidden>{copy.sticker}</span>}
           <Surfboard />
         </Reveal>
 
@@ -55,12 +59,15 @@ export function About() {
             </Reveal>
           )}
           <Reveal className="about__actions">
-            {hasValue(profile.cvFile) && (
-              <a className="btn btn--solid" href={profile.cvFile} download>
-                <Download size={18} aria-hidden /> Download CV
+            {cv && (
+              <a className="btn btn--solid" href={cv.href} download={cv.filename}>
+                <Download size={18} aria-hidden /> {cv.label}
               </a>
             )}
             {hasValue(profile.availability) && <p className="availability"><span className="dot" aria-hidden />{profile.availability}{hasValue(profile.employmentType) ? `. ${profile.employmentType}.` : ''}</p>}
+            {(content.portfolio.contact.availableFor.length > 0 || content.portfolio.contact.workModes.length > 0) && (
+              <ul className="chips" aria-label="Available for">{[...content.portfolio.contact.availableFor, ...content.portfolio.contact.workModes].map((x) => <li key={x}>{x}</li>)}</ul>
+            )}
           </Reveal>
         </div>
       </div>

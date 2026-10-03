@@ -2,38 +2,21 @@ import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { portfolio } from './src/content/portfolio.config'
-import { buildJsonLd, buildMeta } from './src/utils/seo'
+import { THEMES } from './src/themes'
+import { buildCsp, buildRobots, buildSitemap, injectHead } from './shared/head.mjs'
 
-/** Injects SEO metadata, social previews and JSON-LD from the central config at build time. */
+/** Static fallback: bakes SEO tags from the bundled defaults. The Node server regenerates them from published content. */
 function seoPlugin(): Plugin {
   return {
     name: 'portfolio-seo',
     transformIndexHtml(html) {
-      const meta = buildMeta(portfolio)
-      const ld = JSON.stringify(buildJsonLd(portfolio))
-      return html
-        .replaceAll('%LANG%', meta.lang)
-        .replaceAll('%TITLE%', meta.title)
-        .replaceAll('%DESCRIPTION%', meta.description)
-        .replaceAll('%CANONICAL%', meta.url)
-        .replaceAll('%OG_IMAGE%', meta.image)
-        .replaceAll('%THEME_COLOR%', portfolio.theme.colors.sand)
-        .replace('%JSON_LD%', ld.replaceAll('<', '\\u003c'))
+      return injectHead(html, portfolio).replaceAll('%THEME_COLOR%', THEMES.summer.colors.sand)
     },
     generateBundle() {
-      const base = portfolio.site.url.replace(/\/$/, '')
-      this.emitFile({
-        type: 'asset',
-        fileName: 'robots.txt',
-        source: `User-agent: *\nAllow: /\n${base ? `Sitemap: ${base}/sitemap.xml\n` : ''}`,
-      })
-      if (base) {
-        this.emitFile({
-          type: 'asset',
-          fileName: 'sitemap.xml',
-          source: `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${base}/</loc></url></urlset>\n`,
-        })
-      }
+      this.emitFile({ type: 'asset', fileName: 'robots.txt', source: buildRobots(portfolio) })
+      const map = buildSitemap(portfolio)
+      if (map) this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: map })
+      this.emitFile({ type: 'asset', fileName: 'csp.txt', source: buildCsp(portfolio) })
     },
   }
 }
@@ -41,5 +24,17 @@ function seoPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), seoPlugin()],
   build: { target: 'es2022', sourcemap: false },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8787',
+      '/uploads': 'http://localhost:8787',
+    },
+  },
+  preview: {
+    proxy: {
+      '/api': 'http://localhost:8787',
+      '/uploads': 'http://localhost:8787',
+    },
+  },
   test: { include: ['tests/**/*.test.ts'] },
 })

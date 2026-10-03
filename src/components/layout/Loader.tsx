@@ -13,7 +13,7 @@ function alreadySeen() {
 }
 
 /** Postmark stamp-down intro. About 1.4 seconds, once per session, skipped for reduced motion. */
-export function Loader({ name, skip }: { name: string; skip: boolean }) {
+export function Loader({ name, label, skip }: { name: string; label: string; skip: boolean }) {
   const [show, setShow] = useState(() => !skip && !alreadySeen())
   const [leaving, setLeaving] = useState(false)
 
@@ -41,7 +41,7 @@ export function Loader({ name, skip }: { name: string; skip: boolean }) {
         animate={{ scale: 1, rotate: -6, opacity: 1 }}
         transition={{ type: 'spring', stiffness: 260, damping: 11, mass: 0.9 }}
       >
-        <PostMark name={name} />
+        <PostMark name={name} label={label} />
         <span className="loader__name">{name}</span>
         <svg className="loader__lines" viewBox="0 0 300 60" aria-hidden>
           {[10, 24, 38, 52].map((y, i) => (

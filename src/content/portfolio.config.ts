@@ -1,12 +1,18 @@
 import type { Portfolio } from './types'
+import { DEFAULT_RANGES, emptyOverride } from '../themes/seasonManager'
+import { defaultSections } from './sections'
 
 /**
- * THE ONE FILE TO EDIT FIRST.
+ * STARTER CONTENT.
  *
- * Anything wrapped in square brackets, such as "[Add your biography]", is a visible
- * placeholder. Empty strings and null values are hidden automatically, so links,
- * images and statistics only appear once you supply real information.
- * Never add results, clients or qualifications that are not genuinely yours.
+ * These are the defaults the site uses until you publish from the admin (/admin). Once you publish,
+ * the admin's content takes over and this file is only the fallback and the starting point for a
+ * brand new install. You can edit it directly if you prefer working in code.
+ *
+ * Anything wrapped in square brackets, such as "[Add your biography]", is a visible placeholder.
+ * Empty strings and null values are hidden automatically, so links, images and statistics only
+ * appear once you supply real information. Never add results, clients or qualifications that are
+ * not genuinely yours.
  */
 export const portfolio: Portfolio = {
   profile: {
@@ -52,31 +58,30 @@ export const portfolio: Portfolio = {
     ],
     highlights: [],
   },
+  cv: { enabled: true, title: 'Curriculum vitae', version: '', filename: '' },
   site: {
     url: '',
-    title: 'Your Name | Social Media and Digital Marketing Portfolio',
-    description:
-      'Portfolio of a social media manager and digital marketer: strategy, content, campaigns and measured results.',
-    ogImage: '',
     locale: 'en-GB',
     currency: 'GBP',
   },
+  hero: {
+    label: '',
+    headline: '',
+    supporting: '',
+    intro: '',
+    layout: 'stamp-right',
+    alignment: 'left',
+    breakout: true,
+    animation: 'inherit',
+    ctas: [
+      { label: 'View selected work', target: 'work' },
+      { label: 'See results', target: 'results' },
+      { label: 'Get in touch', target: 'contact' },
+    ],
+    decorativeElements: true,
+    background: 'season',
+  },
   theme: {
-    colors: {
-      stone: '#A08F80',
-      green: '#055C2F',
-      red: '#B5262E',
-      sand: '#EED9B4',
-      ink: '#17323F',
-      sea: '#2A8DB0',
-      aqua: '#8FD3CF',
-      pink: '#F39CAB',
-      sage: '#93C383',
-      butter: '#F6DC8C',
-      peach: '#F4A77E',
-      sky: '#A9DCEB',
-      paper: '#FBF4E4',
-    },
     fonts: {
       display: "'Italiana', 'Didot', 'Bodoni 72', Georgia, serif",
       script: "'Pinyon Script', 'Snell Roundhand', cursive",
@@ -86,23 +91,36 @@ export const portfolio: Portfolio = {
     animationIntensity: 'full',
     bubbleCursor: true,
     stampNumeral: '25',
+    // creative: all decoration and motion. balanced: restrained. professional: editorial and calm.
+    professional: 'balanced',
   },
-  sections: {
-    showHero: true,
-    showRecruiterOverview: true,
-    showAbout: true,
-    showServices: true,
-    showWork: true,
-    showCaseStudies: true,
-    showTools: true,
-    showContentGallery: true,
-    showStrategy: true,
-    showWebsiteProjects: true,
-    showTestimonials: true,
-    // Off until you genuinely offer mentoring or training.
-    showMentoring: false,
-    showContact: true,
+  seasons: {
+    mode: 'auto',
+    ranges: DEFAULT_RANGES,
+    transition: 'fade',
+    overrides: {
+      spring: emptyOverride(),
+      summer: { ...emptyOverride(), intensity: 'expressive' },
+      autumn: emptyOverride(),
+      winter: emptyOverride(),
+    },
   },
+  sections: defaultSections(),
+  navigation: { mode: 'auto', items: [] },
+  seo: {
+    title: 'Your Name | Social Media and Digital Marketing Portfolio',
+    description:
+      'Portfolio of a social media manager and digital marketer: strategy, content, campaigns and measured results.',
+    keywords: '',
+    ogTitle: '',
+    ogDescription: '',
+    ogImage: '',
+    canonical: '',
+    robots: 'index',
+    structuredData: true,
+  },
+  analytics: { enabled: false, ga4: '', gtm: '', metaPixel: '', requireConsent: true, respectDoNotTrack: true },
+  footer: { tagline: '', copyright: '', showSocial: true, showNav: true, showFootprints: true },
   stats: [
     // Every statistic is optional. Leave value as null (or 0) to hide it.
     { key: 'projects', label: 'Projects delivered', value: null },
@@ -136,15 +154,18 @@ export const portfolio: Portfolio = {
       { min: 5000, max: null },
     ],
     enquiryTypes: [
-      'Recruitment and job opportunities',
+      "I'm contacting you about a job opportunity",
       'Freelance project',
       'Social media management',
       'Content creation',
       'Campaign or brand strategy',
       'Something else',
     ],
+    recruiterType: "I'm contacting you about a job opportunity",
     whatsappGreeting: 'Hello, I found your portfolio and would like to talk.',
     showBudget: true,
+    availableFor: ['Full-time roles'],
+    workModes: ['Hybrid', 'Remote'],
   },
   mentoring: {
     heading: 'Learn social media marketing with me',
@@ -161,16 +182,16 @@ export const portfolio: Portfolio = {
     intro:
       'This is an illustrative framework showing how I structure planning. It is not a client project and contains no results.',
     steps: [
-      { title: 'Audience research', color: '#A9DCEB', summary: 'Who they are, where they spend time and what they already trust.', questions: ['Who is the core audience?', 'Which platforms do they use daily?', 'What do they ask or complain about?'] },
-      { title: 'Competitor research', color: '#F6DC8C', summary: 'What the category sounds like and where the open space is.', questions: ['Who competes for attention?', 'Which formats earn engagement?', 'What is nobody saying?'] },
-      { title: 'Brand positioning', color: '#F39CAB', summary: 'One clear idea the audience can repeat.', questions: ['What do we stand for?', 'What proof do we have?', 'What tone fits?'] },
-      { title: 'Content pillars', color: '#93C383', summary: 'Three to five themes that keep output focused.', questions: ['Which themes serve the objective?', 'Which are educational, which are emotional?', 'What is the content mix?'] },
-      { title: 'Marketing objectives', color: '#F4A77E', summary: 'Goals tied to the business with a baseline and a date.', questions: ['What does success change commercially?', 'What is the baseline?', 'By when?'] },
-      { title: 'Campaign planning', color: '#8FD3CF', summary: 'Big idea, phases, creative routes and owners.', questions: ['What is the one idea?', 'What are the phases?', 'Who approves what?'] },
-      { title: 'Customer journey', color: '#EED9B4', summary: 'From first glance to enquiry, purchase or advocacy.', questions: ['Where do people discover us?', 'What nudges them forward?', 'Where do they drop out?'] },
-      { title: 'Channel selection', color: '#A9DCEB', summary: 'Fewer channels done well beat every channel done thinly.', questions: ['Where is the audience?', 'What can we sustain?', 'What role does each channel play?'] },
-      { title: 'Content calendar', color: '#F6DC8C', summary: 'A rhythm the team can actually keep.', questions: ['What is the weekly cadence?', 'What is planned versus reactive?', 'What is the approval flow?'] },
-      { title: 'Performance measurement', color: '#F39CAB', summary: 'Report against the baseline, learn, adjust.', questions: ['Which metrics match the objective?', 'What changed and why might that be?', 'What do we do next?'] },
+      { title: 'Audience research', color: 'sky', summary: 'Who they are, where they spend time and what they already trust.', questions: ['Who is the core audience?', 'Which platforms do they use daily?', 'What do they ask or complain about?'] },
+      { title: 'Competitor research', color: 'butter', summary: 'What the category sounds like and where the open space is.', questions: ['Who competes for attention?', 'Which formats earn engagement?', 'What is nobody saying?'] },
+      { title: 'Brand positioning', color: 'pink', summary: 'One clear idea the audience can repeat.', questions: ['What do we stand for?', 'What proof do we have?', 'What tone fits?'] },
+      { title: 'Content pillars', color: 'sage', summary: 'Three to five themes that keep output focused.', questions: ['Which themes serve the objective?', 'Which are educational, which are emotional?', 'What is the content mix?'] },
+      { title: 'Marketing objectives', color: 'peach', summary: 'Goals tied to the business with a baseline and a date.', questions: ['What does success change commercially?', 'What is the baseline?', 'By when?'] },
+      { title: 'Campaign planning', color: 'aqua', summary: 'Big idea, phases, creative routes and owners.', questions: ['What is the one idea?', 'What are the phases?', 'Who approves what?'] },
+      { title: 'Customer journey', color: 'sand', summary: 'From first glance to enquiry, purchase or advocacy.', questions: ['Where do people discover us?', 'What nudges them forward?', 'Where do they drop out?'] },
+      { title: 'Channel selection', color: 'sky', summary: 'Fewer channels done well beat every channel done thinly.', questions: ['Where is the audience?', 'What can we sustain?', 'What role does each channel play?'] },
+      { title: 'Content calendar', color: 'butter', summary: 'A rhythm the team can actually keep.', questions: ['What is the weekly cadence?', 'What is planned versus reactive?', 'What is the approval flow?'] },
+      { title: 'Performance measurement', color: 'pink', summary: 'Report against the baseline, learn, adjust.', questions: ['Which metrics match the objective?', 'What changed and why might that be?', 'What do we do next?'] },
     ],
   },
 }

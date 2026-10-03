@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { ChevronsDown, Smartphone } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
+import { useTheme } from '../../hooks/useTheme'
+import type { SectionConfig } from '../../content/types'
 import { useMotion } from '../../hooks/useMotion'
 import { useScrollVar } from '../../hooks/useScrollVar'
 import { useStageInteraction } from '../../hooks/useStageInteraction'
 import { HeroScene } from './HeroScene'
 import { TideCanvas } from './TideCanvas'
 
-export function Hero() {
+export function Hero({ config }: { config: SectionConfig }) {
   const { content } = useContent()
-  const { portfolio } = content
-  const { reduced, finePointer } = useMotion()
+  const { hero } = content.portfolio
+  const { finePointer, plan } = useMotion()
+  const { resolved } = useTheme()
+  const reduced = plan.reduced || !plan.breakout || !hero.breakout
+  const tideAllowed = plan.tide && !reduced
   const root = useRef<HTMLElement>(null)
   const stage = useRef<HTMLDivElement>(null)
   const [tapped, setTapped] = useState(false)
@@ -18,7 +23,7 @@ export function Hero() {
   const [canMotion, setCanMotion] = useState(false)
 
   useScrollVar(root, !reduced)
-  const { tideOn, tilt, ...handlers } = useStageInteraction(stage, { enabled: !reduced, radius: finePointer ? 190 : 120 })
+  const { tideOn, tilt, ...handlers } = useStageInteraction(stage, { enabled: plan.tilt && !plan.reduced, radius: finePointer ? 190 : 120 })
 
   useEffect(() => {
     setCanMotion(!reduced && !finePointer && typeof DeviceOrientationEvent !== 'undefined')
@@ -54,7 +59,7 @@ export function Hero() {
   }
 
   return (
-    <section ref={root} id="top" className={`hero ${reduced ? 'hero--static' : ''}`} aria-label="Introduction">
+    <section ref={root} id={config.id} className={`hero hero--${hero.layout} hero--align-${hero.alignment} ${reduced ? 'hero--static' : ''}`} aria-label="Introduction">
       <div
         ref={stage}
         className={`hero__stage ${tapped ? 'is-tapped' : ''}`}
@@ -62,14 +67,14 @@ export function Hero() {
         {...handlers}
       >
         <div className="hero__sun" aria-hidden />
-        <HeroScene portfolio={portfolio} />
-        {!reduced && (
+        <HeroScene />
+        {tideAllowed && (
           <div className={`tide ${tideOn ? 'is-on' : ''}`} aria-hidden inert>
             <div className="tide__clip">
               <div className="tide__bg" />
-              {finePointer && <TideCanvas active={tideOn} />}
+              {finePointer && <TideCanvas active={tideOn} mode={resolved.theme.tide} />}
               <div className="tide__moon" />
-              <HeroScene portfolio={portfolio} tide />
+              <HeroScene tide />
             </div>
             <div className="tide__ring" />
           </div>

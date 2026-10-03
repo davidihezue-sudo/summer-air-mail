@@ -2,7 +2,7 @@ import { motion } from 'framer-motion'
 import type { Metric } from '../../content/types'
 import { useMotion } from '../../hooks/useMotion'
 
-export function MetricBar({ metric, locale }: { metric: Metric; locale: string }) {
+export function MetricBar({ metric, locale, bare }: { metric: Metric; locale: string; bare?: boolean }) {
   const { reduced } = useMotion()
   const fmt = (n: number) => `${metric.prefix ?? ''}${n.toLocaleString(locale, { maximumFractionDigits: 1 })}${metric.unit ?? ''}`
   const max = Math.max(metric.baseline ?? 0, metric.result) || 1
@@ -21,15 +21,17 @@ export function MetricBar({ metric, locale }: { metric: Metric; locale: string }
   )
   return (
     <figure className="metric">
-      <figcaption className="metric__label">{metric.label}</figcaption>
+      {!bare && <figcaption className="metric__label">{metric.label}</figcaption>}
       {metric.baseline !== undefined && (
         <div className="metric__row"><span>Baseline</span>{bar(metric.baseline, 'is-base')}<strong>{fmt(metric.baseline)}</strong></div>
       )}
       <div className="metric__row"><span>Result</span>{bar(metric.result, 'is-result')}<strong>{fmt(metric.result)}</strong></div>
-      <p className="metric__meta">
-        {change !== null && <span className="metric__change">{change >= 0 ? '+' : ''}{change.toFixed(0)}% vs baseline. </span>}
-        Measured over {metric.period}.{metric.note ? ` ${metric.note}` : ''}
-      </p>
+      {!bare && (
+        <p className="metric__meta">
+          {change !== null && <span className="metric__change">{change >= 0 ? '+' : ''}{change.toFixed(0)}% vs baseline. </span>}
+          Measured over {metric.period}.{metric.note ? ` ${metric.note}` : ''}
+        </p>
+      )}
     </figure>
   )
 }

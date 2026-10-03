@@ -14,7 +14,9 @@
     "noEmit": true,
     "types": ["vite/client", "node"],
     "allowImportingTsExtensions": false,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "allowJs": true,
+    "checkJs": false
   },
-  "include": ["src", "tests", "vite.config.ts"]
+  "include": ["src", "tests", "shared", "vite.config.ts"]
 }

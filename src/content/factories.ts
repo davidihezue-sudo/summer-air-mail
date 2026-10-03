@@ -1,0 +1,92 @@
+import type {
+  AiSkill, Block, BlockType, CaseStudy, ContentItem, PlatformExpertise, ProcessStep, Project, ResultEntry,
+  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject,
+} from './types'
+
+export const uid = (prefix = 'id') => `${prefix}-${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-3)}`
+const img = () => ({ src: '', alt: '' })
+
+export const PROJECT_TYPES = [
+  'Social Media Campaign', 'Social Media Management', 'Brand Development', 'Content Creation',
+  'Reels / Short-Form Video', 'Digital Marketing Campaign', 'Paid Advertising', 'Influencer Campaign',
+  'Community Management', 'Email Marketing', 'Marketing Strategy', 'Analytics and Reporting',
+  'Website / Digital Project', 'AI Marketing', 'Content Strategy', 'Personal Branding', 'Other',
+]
+
+export const newCaseStudy = (): CaseStudy => ({
+  objective: '', challenge: '', objectives: [], audience: '', strategy: '', framework: [], execution: [],
+  creative: [], distribution: [], paidMedia: '', deliverables: [], metrics: [], confidentialResults: '',
+  contribution: { personal: [], team: [] }, lessons: [],
+})
+
+export const newProject = (): Project => ({
+  id: uid('project'), title: '', client: '', industry: '', category: 'Social Media Campaign', description: '',
+  year: String(new Date().getFullYear()), period: '', platforms: [], role: '', thumbnail: img(), media: [],
+  externalLink: '', featured: false, hidden: true, contentTypes: [], serviceIds: [], toolIds: [], aiSkillIds: [],
+  resultIds: [], contentIds: [], screenshotIds: [], relatedIds: [], blocks: [],
+})
+
+export const newService = (): Service => ({
+  id: uid('service'), name: '', category: 'Strategy', description: '', detail: '', object: undefined, icon: 'Sparkles',
+  color: 'sky', platforms: [], projectIds: [], hidden: true,
+})
+export const newTool = (): Tool => ({ id: uid('tool'), name: '', category: 'Social Media Management', confirmed: false, usage: '' })
+export const newTestimonial = (): Testimonial => ({
+  id: uid('testimonial'), name: '', title: '', company: '', quote: '', relationship: '', approved: false,
+})
+export const newContentItem = (kind: 'post' | 'video' = 'video'): ContentItem => ({
+  id: uid(kind), title: '', kind, format: kind === 'video' ? 'Reel' : 'Carousel', platform: 'instagram', explanation: '',
+  thumbnail: img(), video: '', duration: '', date: '', campaign: '', role: '', result: '', link: '', hidden: true,
+})
+export const newWebsite = (): WebsiteProject => ({
+  id: uid('site'), name: '', url: '', description: '', responsibilities: [], platform: '', screenshots: [], externalLink: '', hidden: true,
+})
+export const newSkillGroup = (): SkillGroup => ({ id: uid('skills'), name: '', skills: [] })
+export const newPlatform = (): PlatformExpertise => ({
+  id: uid('platform'), platform: 'instagram', level: '', services: [], contentTypes: [], campaigns: [], analytics: '',
+  advertising: '', profileUrl: '', projectIds: [], hidden: true,
+})
+export const newAiSkill = (): AiSkill => ({
+  id: uid('ai'), name: '', category: 'AI Content Creation', description: '', tool: '', level: '', projectId: '',
+  screenshot: null, video: '', link: '', outcome: '', hidden: true,
+})
+export const newResult = (): ResultEntry => ({
+  id: uid('result'), metric: '', start: null, end: null, prefix: '', unit: '', pctChange: null, period: '', platform: '',
+  campaign: '', projectId: '', context: '', notes: '', screenshot: null, chart: 'bar', series: [],
+  classification: 'verified', contribution: 'individual', anonymised: '', showValues: true, hidden: true,
+})
+export const newScreenshot = (): ScreenshotItem => ({
+  id: uid('shot'), image: img(), caption: '', category: '', projectId: '', compareWith: null, hidden: true,
+})
+export const newProcessStep = (): ProcessStep => ({ id: uid('step'), title: '', description: '', icon: 'Sparkles', color: 'sky', image: null })
+
+export const BLOCK_LABELS: Record<BlockType, string> = {
+  heading: 'Heading', paragraph: 'Paragraph', image: 'Image', gallery: 'Image gallery', video: 'Video', reel: 'Reel (vertical video)',
+  screenshot: 'Screenshot', link: 'Link', button: 'Button', quote: 'Quote', metric: 'Metric', chart: 'Chart',
+  beforeAfter: 'Before and after', embed: 'Embedded post or video', pdf: 'PDF document', download: 'Download',
+  timeline: 'Timeline', process: 'Process', framework: 'Strategy framework', skills: 'Skills used', platforms: 'Platforms used',
+}
+
+export function newBlock(type: BlockType): Block {
+  const base: Block = { id: uid('block'), type }
+  switch (type) {
+    case 'heading': return { ...base, text: '', level: 2 }
+    case 'paragraph': return { ...base, text: '' }
+    case 'image': case 'screenshot': return { ...base, image: img(), caption: '' }
+    case 'gallery': return { ...base, images: [], caption: '' }
+    case 'video': case 'reel': return { ...base, src: '', poster: '', title: '', caption: '' }
+    case 'link': return { ...base, url: '', label: '', description: '' }
+    case 'button': return { ...base, url: '', label: '' }
+    case 'quote': return { ...base, text: '', attribution: '' }
+    case 'metric': return { ...base, label: '', value: null, prefix: '', unit: '', period: '', note: '', classification: 'verified' }
+    case 'chart': return { ...base, chart: 'bar', title: '', unit: '', points: [], period: '', note: '' }
+    case 'beforeAfter': return { ...base, before: img(), after: img(), variant: 'before-after', caption: '' }
+    case 'embed': return { ...base, url: '', title: '', caption: '' }
+    case 'pdf': return { ...base, url: '', title: '', description: '' }
+    case 'download': return { ...base, url: '', title: '', filename: '', description: '' }
+    case 'timeline': return { ...base, entries: [] }
+    case 'process': return { ...base, entries: [] }
+    case 'framework': return { ...base, title: '', columns: [] }
+    case 'skills': case 'platforms': return { ...base, title: '', items: [] }
+  }
+}

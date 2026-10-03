@@ -1,16 +1,18 @@
+import type { SectionConfig } from '../../content/types'
 import { useContent } from '../../hooks/useContent'
 import { Section } from '../ui/Section'
 import { Reveal } from '../ui/Reveal'
+import { toneValue } from '../../utils/theme'
 
-export function Strategy() {
+export function Strategy({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const { strategy } = content.portfolio
   return (
-    <Section id="strategy" tone="var(--c-pink)" eyebrow="Campaign and brand strategy" title={strategy.heading} intro={strategy.intro} className="strategy">
+    <Section config={config} tone="var(--c-pink)" eyebrow="Campaign and brand strategy" title={strategy.heading} intro={strategy.intro} className="strategy">
       <p className="stamp-badge"><span>{strategy.label}</span></p>
       <ol className="board">
         {strategy.steps.map((s, i) => (
-          <li key={s.title} style={{ ['--note' as string]: s.color, ['--tilt' as string]: `${((i * 53) % 7) - 3}deg` }}>
+          <li key={s.title} style={{ ['--note' as string]: toneValue(s.color) || 'var(--c-butter)', ['--tilt' as string]: `${((i * 53) % 7) - 3}deg` }}>
             <Reveal>
               <details className="note">
                 <summary>

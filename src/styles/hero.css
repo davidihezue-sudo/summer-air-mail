@@ -4,12 +4,12 @@
   --stamp-h: min(38svh, 330px);
   --shift-x: 0px; --shift-y: 4svh; --grow: .35;
   position: sticky; top: 0; height: 100svh; overflow: hidden; touch-action: pan-y;
-  background: radial-gradient(120% 90% at 78% 30%, var(--c-butter) 0%, var(--c-sand) 55%, #e6c995 100%);
+  background: var(--hero-bg-image, none) center / cover, var(--hero-bg);
   user-select: none; -webkit-user-select: none;
 }
 .hero--static .hero__stage { position: relative; min-height: 100svh; height: auto; }
 .hero__stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, var(--c-sand) 0%, transparent 38%); opacity: calc(var(--p, 0) * 1.2); }
-.hero__sun { position: absolute; width: 60vmin; height: 60vmin; right: -10vmin; top: 8vmin; border-radius: 50%; background: radial-gradient(circle, var(--c-peach), transparent 68%); opacity: .55; }
+.hero__sun { position: absolute; width: 60vmin; height: 60vmin; right: -10vmin; top: 8vmin; border-radius: 50%; background: radial-gradient(circle, var(--sun), transparent 68%); opacity: .55; }
 @media (min-width: 900px) {
   .hero__stage { --stamp-h: min(68svh, 600px); --shift-x: -19vw; --shift-y: 0px; --grow: .3; }
 }

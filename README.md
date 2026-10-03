@@ -1,177 +1,246 @@
 # Summer Air Mail
 
-A premium, static portfolio website for a social media manager and digital marketer. Built with React, TypeScript and Vite. The concept is a summer editorial magazine meets a vintage airmail stamp: a 3D postage stamp hero, a "Night Tide" reveal, a beach towel of services, Polaroids on a rope, case studies with measured results and an honest enquiry form.
+A four-season social media and digital marketing portfolio with a built-in admin. The public site is art-directed (a 3D postage stamp hero, seasonal artwork, Polaroids, case studies with evidence). The admin at `/admin` lets the owner change almost everything without touching code.
 
-There is no backend. All content lives in a few TypeScript files, so everything can be edited without touching components.
+- **Four seasons plus Auto.** Spring, Summer (the original design, unchanged), Autumn, Winter. Auto follows the visitor's date, and you choose the start date of each season.
+- **Real admin.** Sign-in with a hashed password, private drafts, preview on desktop, tablet and mobile in any season, one-click publish, version history, media library.
+- **Proof of work.** Projects are built from content blocks, case studies are structured, results carry a start, an end, a period and a label saying who produced them.
+- **No invented content.** Nothing is shown unless the owner switches it on. There are no fake projects, clients, testimonials, tools or statistics.
 
-## Run it
+## Contents
+
+1. [Quick start](#quick-start)
+2. [Signing in to the admin](#signing-in-to-the-admin)
+3. [Using the admin](#using-the-admin)
+4. [Seasons](#seasons)
+5. [Professional intensity](#professional-intensity)
+6. [Deploying](#deploying)
+7. [How it is built](#how-it-is-built)
+8. [Security](#security)
+9. [Testing](#testing)
+10. [Known limits](#known-limits)
+
+---
+
+## Quick start
+
+You need Node.js 22 or newer.
 
 ```bash
 npm install
-npm run dev        # development server at http://localhost:5173
-npm run build      # typecheck + production build into dist/
-npm run preview    # serve the production build at http://localhost:4173
-npm test           # unit tests (content rules, links, validation, writing rules)
-npm run lint       # eslint
-npm run images     # convert public/images JPG/PNG to WebP
-npm run smoke      # browser end to end checks (needs dev + preview running, see below)
+
+# 1. Create your admin login (asks for a username and a password of at least 12 characters)
+npm run admin:setup
+
+# 2. Start the site and the admin together
+npm run dev:all
 ```
 
-Preview every section with clearly labelled sample data while developing: open `http://localhost:5173/?sample=1`. Sample data exists only in the dev server and is never included in a production build.
+Open <http://localhost:5173> for the site and <http://localhost:5173/admin> for the admin.
 
-## What shows up when
+Other commands:
 
-Sections only render when they have real content, so nothing is ever an empty placeholder.
-
-| Section | Appears when |
+| Command | What it does |
 | --- | --- |
-| Hero, About, Services, Strategy, Contact | On by default |
-| At a glance (recruiter overview) | `recruiter` lists have entries |
-| Work (Polaroids) | `src/content/projects.ts` has projects |
-| Case studies | at least one project has a `caseStudy` |
-| Tools | at least one tool has `confirmed: true` and a real `usage` |
-| Content gallery | `src/content/contentItems.ts` has items |
-| Websites | `src/content/websites.ts` has items |
-| Testimonials | at least one testimonial has `approved: true` |
-| Mentoring | `sections.showMentoring: true` and a real overview |
+| `npm run dev:all` | API server (port 8787) and Vite dev server (port 5173) together |
+| `npm run dev` | Vite only. The site works with the built-in starter content; the admin needs the API server |
+| `npm run dev:server` | API server only, restarting on changes |
+| `npm run build` | Type-check and build the production site into `dist/` |
+| `npm start` | Production server: serves `dist/` and the API on port 8787 |
+| `npm run check` | Type-check, lint, unit tests and build |
+| `npm test` | Unit and server tests |
+| `npm run images` | Convert JPG/PNG in `public/images` to WebP |
+| `npm run smoke` | Browser checks of the public site (needs `npm run build` and `npm run dev` running) |
+| `npm run smoke:admin` | Browser checks of the whole admin workflow (needs `npm run build`) |
+| `npm run a11y` | axe-core accessibility audit of the site and the admin (needs `npm run build` and `npm run dev`) |
+| `npm run admin:hash` | Prints `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` for hosts without a disk |
 
-Every section also has a switch in `portfolio.config.ts` under `sections` (for example `showWork: false`). Anything in `[square brackets]` is a visible placeholder. Empty strings and `null` values hide links, images and statistics automatically.
+Browser checks use the Chromium that Playwright installed. Point them at it with `CHROME=/path/to/chromium npm run smoke`.
 
-## Edit your content
+To preview every section with clearly labelled sample data while developing, open `http://localhost:5173/?sample=1`. Sample data exists only in the dev server and is never part of a production build.
 
-| I want to... | Edit |
+## Signing in to the admin
+
+The admin needs the Node server. It does not work on static-only hosting (Netlify static, GitHub Pages) because it saves your content and uploads on the server.
+
+1. Run `npm run admin:setup` on the machine that runs the site. Your password is hashed with scrypt and stored in `data/admin.json`. The plain password is never stored.
+2. Visit `/admin` and sign in.
+3. Wrong passwords are rate limited (5 per 15 minutes per address). Sessions last 8 hours.
+4. Change your password under **Advanced Settings**, or run `npm run admin:setup` again.
+
+If your host has no persistent disk for `admin.json`, run `npm run admin:hash` and set the two environment variables it prints.
+
+## Using the admin
+
+Edits save automatically as a **private draft**. Nothing is public until you press **Publish**. Use **Preview** (top bar) to see the draft as a visitor would, or **Preview & Publish** for desktop, tablet and mobile views in any season.
+
+| Admin page | What you manage |
 | --- | --- |
-| Change name, roles, bio, contact details, social links, CV, availability | `src/content/portfolio.config.ts` under `profile` |
-| Set spelling locale and currency | `site.locale` (`en-GB`, `en-CA`, `en-US`) and `site.currency` (`GBP`, `CAD`...) |
-| Add statistics | `stats` (value `null` or `0` is hidden). `yearsExperience` feeds a statistic automatically |
-| Set recruiter overview, education, certifications, employment | `recruiter` |
-| Change budget ranges and enquiry types | `contact` |
-| Edit, hide, reorder services | `src/content/services.ts` (`hidden: true` hides, array order is display order) |
-| Add projects and case studies | `src/content/projects.ts` |
-| Mark real tools | `src/content/tools.ts` (set `confirmed: true`, write a truthful `usage`) |
-| Add testimonials | `src/content/testimonials.ts` (only with permission, `approved: true`) |
-| Add reels, TikToks, carousels | `src/content/contentItems.ts` |
-| Add website projects | `src/content/websites.ts` |
-| Edit the strategy framework | `strategy` in `portfolio.config.ts` (keep the "Sample framework" label unless it is a real client plan) |
-| Turn mentoring on | `sections.showMentoring: true` and fill `mentoring` |
+| Dashboard | Counts, publishing status, current theme, and a list of what still needs attention |
+| Personal Profile | Name, title, roles, summary, location, contact details, photo, availability, language and currency |
+| About & Recruiter Overview | Biography, highlights, statistics (empty ones stay hidden), competencies, education, certifications, employment |
+| Hero | Headline, supporting line, label, buttons, layout, alignment, scroll effect, portrait cut-out |
+| Resume / CV | Upload your CV. The Download CV buttons appear only when a file is set and enabled |
+| Social Links, Contact | Links, email, WhatsApp, availability (full-time, contract, remote and so on), recruiter questions |
+| Appearance | Professional intensity, maximum animation, fonts |
+| Seasons | Mode, season start dates, transition, per-season colours, decorations, fonts, images and a live preview |
+| Sections & Visibility | Drag to reorder, switch on or off, rename, change headings, colours and images, duplicate, add text sections |
+| Navigation | Automatic or custom menu with your own labels, order and links |
+| Portfolio, Case Studies, Campaigns | Projects with images, videos, links, metrics, charts, before and after, documents and a full case study |
+| Social Media Content, Videos & Reels | Posts, carousels, reels and videos (upload, YouTube or Vimeo) |
+| Screenshots | Evidence gallery with zoom, captions, categories and before and after |
+| Analytics & Results | Metrics with start, end, period, platform, campaign, chart type and result label |
+| Websites & Digital Projects | Laptop mockups with screenshots |
+| Services, Skills, Platform Expertise | What you offer and know, described in words (never percentage bars) |
+| Tools & Platforms, AI & Automation | Only what you genuinely use |
+| Marketing Process, Strategy Framework | How you work |
+| Testimonials, Mentoring & Training | Shown only when approved or switched on |
+| Media Library | Every upload with alt text, caption, tags and project links |
+| SEO, Analytics Tracking, Footer, Advanced | Search and sharing, optional trackers, footer, password, backups |
 
-### Photographs and the hero stamp
+### How to...
 
-Put files in `public/images/` and reference them with a leading slash.
+**Add a project.** Portfolio > Add project. Fill in the basics, choose a cover image, switch on **Published**. Add content blocks to tell the story: headings, text, images, galleries, videos, reels, screenshots, links, quotes, metrics, charts, before and after, PDFs and downloads, timelines, frameworks, skills and platforms. A project can be one image and a link, or a long story.
 
-```ts
-heroCutout:  { src: '/images/portrait-cutout.webp', alt: 'Name smiling in a straw hat', width: 900, height: 1200 },
-heroFlowers: { src: '/images/sunflowers.webp',      alt: '', width: 420, height: 540 },
-profilePhoto:{ src: '/images/profile.webp',         alt: 'Name at a desk', width: 1000, height: 1250 },
-```
+**Write a case study.** Open a project and switch on **This project has a case study**. Fill in the sections you have: challenge, objectives, audience, strategy, execution, creative, distribution, paid media, results, your contribution and lessons. Empty sections are not shown. Always include the measurement period with results.
 
-- `heroCutout` is a transparent PNG or WebP of you. Your real photograph is used as supplied; no lookalike is ever generated. Until it is set, a clearly labelled placeholder silhouette shows.
-- `heroFlowers` is an optional transparent flower image. A built-in sunflower illustration is used if empty.
-- Always provide `width` and `height` to prevent layout shift.
-- Run `npm run images` to convert JPG/PNG to WebP (transparency kept, max 2000px wide), then reference the `.webp` files.
+**Add a result.** Analytics & Results > Add result. Enter the metric, the starting value, the ending value and the period. A percentage appears only if you enter it or if both start and end exist; the card says which. Label it **Verified**, **Team**, **Individual**, **Confidential** or **Illustrative**. For confidential numbers, write approved wording and switch off **Show the numbers**.
 
-### Adding a project
+**Add a video or reel.** Videos & Reels > Add video. Upload an MP4 or WebM, or paste a YouTube or Vimeo link. Nothing autoplays and nothing loads until a visitor presses play. Instagram and TikTok links open as link cards, because those sites cannot be safely embedded.
 
-```ts
-{
-  id: 'brand-launch',
-  title: 'Spring Launch Campaign',
-  client: 'Brand Name',
-  industry: 'Hospitality',
-  category: 'Campaigns',             // becomes a filter automatically
-  description: 'One honest sentence.',
-  year: '2025',
-  period: 'Mar to Jun 2025',
-  platforms: ['instagram', 'tiktok'],
-  role: 'Social media lead',
-  thumbnail: { src: '/images/projects/launch.webp', alt: 'Launch reel cover', width: 800, height: 800 },
-  media: [{ type: 'image', src: '/images/projects/launch-1.webp', alt: '...' },
-          { type: 'video', src: '/videos/launch.mp4', poster: '/images/projects/launch.webp', alt: '...' }],
-  externalLink: 'https://example.com',
-  caseStudy: { /* see below */ },
-}
-```
+**Hide client details in a screenshot.** Leave **Review images for sensitive information before uploading** ticked in the Media Library. Drag over names, numbers or faces and choose Pixelate or Black box. The detail is destroyed in the saved pixels, not just covered on screen. For files already uploaded, open the file and choose **Hide parts**.
 
-### Adding a case study
+**Reuse an image.** Upload once to the Media Library, then choose it from any image field. Nothing is uploaded twice. A file in use cannot be deleted.
 
-Add a `caseStudy` object to any project. Only the structure is required; every metric needs a measurement `period` and should include a `baseline` when you have one. Results are labelled as change during the period, not as proof of sole cause.
+**Reorder or hide sections.** Sections & Visibility. Drag, or use the arrows. A section that is on but has no content stays hidden and is marked "Waiting for content".
 
-```ts
-caseStudy: {
-  objective: 'What the client wanted.',
-  challenge: 'The situation.',
-  objectives: ['Increase enquiries from Instagram'],
-  strategy: 'The thinking.',
-  execution: ['Built a 12 week content calendar', 'Produced 24 reels'],
-  deliverables: ['Content calendar', 'Reel series'],
-  metrics: [{ label: 'Engagement rate', baseline: 2.1, result: 4.6, unit: '%', period: 'Jan to Jun 2025' }],
-  confidentialResults: 'Approved wording if numbers cannot be shared.',
-  contribution: { personal: ['Strategy and scripts'], team: ['Photography by the agency'] },
-  lessons: ['Short opening hooks beat long intros for this audience.'],
-}
-```
+**Change a heading, colour or image for one section.** Open the section row. Leave a field empty to use the default for the current season.
 
-### Colours, fonts, motion
+**Change the menu.** Navigation > Custom. Links to hidden sections are skipped automatically, so there are no broken links.
 
-`theme` in `portfolio.config.ts` controls the whole palette (written to CSS variables on load), the three font stacks, `borderStyle`, `animationIntensity` (`'full' | 'subtle' | 'off'`) and the optional `bubbleCursor`. Fonts (Italiana, Pinyon Script, Figtree) are self-hosted through Fontsource, so there are no third party font requests.
+**Change colours.** Seasons > pick a season > Colours. Readable text colours are worked out from your choices.
 
-### CV
+**Update the CV.** Resume / CV > choose the PDF. Every button updates.
 
-Copy your file to `public/documents/` and set `profile.cvFile: '/documents/your-cv.pdf'`. The Download CV buttons appear only when a file is configured.
+**Set SEO.** SEO > fill in the title, description and sharing image, and set your public website address. These are written into the HTML for search engines when you publish. Keep **Allow indexing** selected unless the site is private.
 
-### WhatsApp and email
+**Back up.** Preview & Publish > Download backup. Also back up the `data/` folder, which holds uploaded files.
 
-Set `profile.whatsapp` in international format (for example `'+447700900123'`) and `profile.email`. The form offers whichever are configured:
+**Go back to an earlier version.** Preview & Publish > Earlier versions > Restore to draft, then Publish.
 
-- Email opens the visitor's email app with a drafted, correctly encoded message.
-- WhatsApp opens `wa.me` with the message encoded.
+## Seasons
 
-Nothing is submitted to a server and the interface says so plainly. If neither is configured, a note explains how to enable the form.
+Open **Seasons** in the admin.
 
-## Behaviour notes
+- **Mode:** Auto, Spring, Summer, Autumn or Winter. Auto decides from the visitor's own date.
+- **Start dates:** each season starts on its date and lasts until the next one starts. Defaults are 20 March, 21 June, 22 September and 21 December. There is a Southern Hemisphere preset. Invalid or duplicate dates are flagged, and the site falls back to the defaults so it never has no season.
+- **Transition:** none, immediate, fade or crossfade (used when the season changes while a page is open, and in the preview).
+- **Per season:** colours, decorations (petals, leaves, snow, stars, frost, glow and so on), animation intensity, optional fonts, paper texture, a hero portrait, hero decorative image, hero background image and a decorative image.
 
-- **Loader:** about 1.4 seconds, once per session, skipped for reduced motion.
-- **Hero:** four layers (stamp background, frame, flowers, your cut-out) with tilt towards the pointer, idle float, moving light reflection, tap reaction, finger drag on touch, and a "Tilt with my phone" button that asks for device motion permission only when pressed. The hero breakout is driven by a single scroll listener writing one CSS variable.
-- **Night Tide:** circular reveal following the cursor; on touch devices it needs a held finger, and the canvas water is disabled on touch.
-- **Services towel:** objects can be dragged on desktop; on touch they are plain buttons so scrolling is never blocked. Every object is a keyboard-accessible button that opens a detail dialog.
-- **Accessibility:** native `<dialog>` modals, visible focus, skip link, reduced motion support, 44px touch targets, nothing essential depends on hover.
-- **Security:** no API keys, no `dangerouslySetInnerHTML`, link protocols are allow-listed, external links use `rel="noopener noreferrer"`, and `index.html` ships a Content Security Policy.
+Each season has its own palette, stamp artwork, hero lighting, section divider shape, services surface and objects, night-reveal effect and decorations. Summer keeps the original colours exactly.
 
-## Deploy
+The seasonal themes live in `src/themes/` (`spring.ts`, `summer.ts`, `autumn.ts`, `winter.ts`, `seasonManager.ts`). They change design tokens; the layout and typography stay the same.
+
+## Professional intensity
+
+Appearance > **Professional intensity** lets one portfolio serve different applications.
+
+| Setting | What changes |
+| --- | --- |
+| Creative | All decoration and motion, including the cursor trail |
+| Balanced (default) | Same personality, calmer motion, no cursor trail |
+| Professional | No particles, no night reveal, no floating, no swinging Polaroids, services as clean cards, plain section titles ("Selected work", "Services") |
+
+Motion is also capped by the **Maximum animation** setting, by each season's intensity, and by the visitor's own "reduce motion" preference, which always wins.
+
+## Deploying
+
+The site is a Node server that serves the built site, the API and the uploads. Deploy it anywhere that runs Node 22: Render, Railway, Fly.io, a VPS, or Docker.
 
 ```bash
+npm ci
 npm run build
+npm run admin:setup      # once, on the server
+NODE_ENV=production npm start
 ```
 
-Upload the `dist/` folder to any static host.
+**Persistent storage is essential.** Content, the admin login and uploads live in `DATA_DIR` (default `./data`). Mount a persistent disk there and back it up. On hosts with ephemeral disks your edits would be lost on every deploy.
 
-- **Netlify or Cloudflare Pages:** build command `npm run build`, publish directory `dist`. `public/_headers` sets security and cache headers.
-- **Vercel:** framework preset Vite. `vercel.json` sets headers.
-- **GitHub Pages:** works with the default root path. For a project subpath, set `base` in `vite.config.ts`.
+Environment variables are listed in `.env.example`. The ones you will usually set:
 
-Before launch set `site.url` (for example `'https://yourname.com'`) so the canonical URL, social previews, JSON-LD, `sitemap.xml` and `robots.txt` are correct, and add a 1200x630 image at `public/images/og.webp` with `site.ogImage: '/images/og.webp'`.
+| Variable | Purpose |
+| --- | --- |
+| `PORT` | Port to listen on (most hosts set it for you) |
+| `DATA_DIR` | Folder for `content.json`, `admin.json` and `uploads/` |
+| `TRUST_PROXY=1` | Behind a proxy or platform load balancer, so HTTPS and client addresses are detected |
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` | Admin login without a disk file. Make the hash with `npm run admin:hash` |
 
-## Browser checks
+HTTPS is required in production. The session cookie is `HttpOnly` and `SameSite=Strict`, and gets the `Secure` flag automatically over HTTPS.
 
-```bash
-npm run dev &
-npm run build && npm run preview &
-CHROME=/path/to/chromium npm run smoke
-```
+**Docker.** A `Dockerfile` is included (it was not built in the authoring environment, so test it first). Mount a volume at `/data`.
 
-The smoke test covers eight widths (320 to 1920) for horizontal overflow and console errors, hidden-section behaviour, navigation, dialogs, filters, gallery keyboard control, case studies, form validation, WhatsApp encoding, the mobile drawer and reduced motion.
+**Static-only hosting.** `dist/` also works on a static host and shows the starter content from `src/content`, but there is no admin and no persistence. `public/_headers` carries the security headers for Netlify and Cloudflare Pages.
 
-## Project structure
+Before you launch: set your public website address and sharing image under **SEO**, upload your CV, add your portrait cut-out, and press **Publish**.
+
+## How it is built
 
 ```
 src/
-  content/       portfolio.config.ts, projects.ts, services.ts, tools.ts, testimonials.ts, ...
-  components/    layout, hero, about, services, projects, case-studies, tools,
-                 content-gallery, strategy, websites, testimonials, mentoring, contact, footer, ui
-  hooks/         motion, media queries, scroll variable, stage interaction
-  styles/        base.css, hero.css, sections.css
-  utils/         text/links/validation, seo, theme, navigation
-public/          images, videos, documents, headers
-scripts/         optimize-images.mjs, smoke.mjs
-tests/           unit tests
+  admin/            Admin app: login, shell, form engine (fields.tsx), schema (schema.ts), pages, media library
+  components/       Public site sections (hero, about, services, projects, case-studies, results, skills, tools, ...)
+  content/          Types, starter content, selectors (visibility, navigation, filters), normalisation
+  hooks/            Content, theme and motion providers, scroll and pointer hooks
+  motion/           One place that decides how much motion is allowed
+  themes/           Spring, Summer, Autumn, Winter and the season manager
+  styles/           base.css, hero.css, sections.css, seasons.css
+  utils/            Links, validation, SEO helpers, analytics loader
+server/             Express API: auth, draft and publish store, media, validation, public view
+shared/             Head tags, robots, sitemap and Content-Security-Policy builders (used by build, server and browser)
+scripts/            Admin setup, image conversion, browser and accessibility checks
+tests/              Unit and server tests
 ```
+
+**Content flow.** Everything the site shows comes from one `SiteContent` object. In the browser it is the published copy (embedded in the page by the server), or the starter content in `src/content` if nothing is published. The admin edits a private draft held on the server. Publishing copies the draft to the published copy. Visitors only ever receive a filtered view: drafts, hidden items, unapproved testimonials, unconfirmed tools and hidden skills are removed on the server before the content is sent.
+
+**Admin form engine.** Every admin page is described by data in `src/admin/schema.ts` (field type, label, help). To add a field to a project, add one line there and one optional property in `src/content/types.ts`. Block types are in `src/admin/blocks.tsx` and `src/content/factories.ts`.
+
+**Storage.** Content is stored in one JSON file (`data/content.json`) with atomic writes, a backup copy and the last 20 published versions. That is reliable for one server and one editor. See [Known limits](#known-limits) for moving to a database.
+
+**Performance.** Lighthouse on the production build (throttled mobile / desktop): Performance 93 / 99, Accessibility 100 / 100, Best Practices 100 / 100, SEO 100 / 100. Responses are gzip compressed, sections below the first screen are code split, project views and the image viewer load on first use, fonts are self-hosted, uploaded photos are resized and converted to WebP, and videos load only when played.
+
+**Fonts.** Italiana, Pinyon Script and Figtree, self-hosted through Fontsource.
+
+## Security
+
+- **Authentication.** scrypt-hashed password, random server-side sessions, `HttpOnly` + `SameSite=Strict` cookie, login rate limiting, constant-time comparison. No password is ever stored in plain text, and no fake or client-only login exists.
+- **Request protection.** Every change needs a custom header that other websites cannot send, plus an origin check, on top of `SameSite=Strict`.
+- **Private data.** All admin routes require a session. Drafts and hidden items are never sent to visitors.
+- **Uploads.** Files are identified by content, not by name. JPG, PNG, WebP, GIF, MP4, WebM and PDF are accepted; SVG, HTML and everything else are refused. Photos are re-encoded (this removes location data). Uploads are served with `nosniff` and a sandboxing policy. Uploaded files are public to anyone who has the exact link; names are random.
+- **Content.** The server validates every save: size and depth limits, no `javascript:` links, no prototype pollution keys, unique ids. The browser renders text through React and a small safe formatter, never through raw HTML, and only allows `http`, `https`, `mailto` and `tel` links.
+- **Headers.** The server sends a Content-Security-Policy that allows trackers only if you have switched them on. `frame-src` allows only your own site (for the preview) and YouTube and Vimeo.
+- **Analytics.** Off by default. Only correctly formatted IDs are accepted. When consent is required, trackers load only after the visitor agrees, and Do Not Track and Global Privacy Control are respected.
+- **Secrets.** The browser code contains no keys or secrets. The contact form sends nothing to a server; it opens the visitor's email app or WhatsApp with a drafted message and says so.
+
+## Testing
+
+```bash
+npm run check                         # type-check, lint, unit and server tests, build
+npm run build && npm run smoke:admin  # the admin workflow in a real browser
+npm run dev                           # then, in another terminal:
+npm run smoke                         # public site: 8 widths, seasons, interactions, reduced motion
+npm run a11y                          # axe-core on the site (all seasons, desktop and mobile) and every admin page
+```
+
+Covered by tests: season detection on and around every boundary (including Southern Hemisphere dates and invalid dates), colour contrast of every season's palette, the motion plan, section ordering and visibility, empty states, navigation without broken links, SEO and CSP output, writing rules (no em dashes, no banned fonts, no fabricated defaults), password hashing, access control on every admin route, CSRF protection, lockout, draft and publish, private content filtering, upload safety, and the full admin workflow through publishing to the live site.
+
+## Known limits
+
+- **One server, one editor.** The JSON file store has no locking across several servers. If you need several editors or several servers, replace `server/store.mjs` and `server/media.mjs` with a database (PostgreSQL) and object storage (S3 compatible); the API and the front end do not change. A second tab saving over the first is detected and refused.
+- **One admin account.** There is one login, not a user system with roles.
+- **Sessions are in memory.** Restarting the server signs you out.
+- **Uploaded files are public by link.** They are not drafts. Do not upload anything that must stay confidential; use **Hide parts** on screenshots first.
+- **Instagram and TikTok are link cards, not embeds.** Their embed scripts cannot be loaded under a strict security policy. YouTube and Vimeo play in the page after a click.
+- **The Dockerfile has not been run** in the environment this was built in.
+- **Lighthouse and browser checks** were run in headless Chromium. Device motion tilt on a real phone and Safari rendering were not tested.
+- **Spelling variants** (UK, Canada, US) apply to the few built-in interface words and number and currency formats. Your own text is shown exactly as you write it.

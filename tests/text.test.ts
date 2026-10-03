@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import {
-  buildEnquiryMessage, formatBudget, hasValue, mailtoUrl, safeHref, validateEnquiry, visibleStats, whatsappUrl,
+  buildEnquiryMessage, cvLink, formatBudget, hasValue, mailtoUrl, parseVideo, safeHref, validateEnquiry, visibleStats, whatsappUrl,
 } from '../src/utils/text'
 import { portfolio } from '../src/content/portfolio.config'
 
@@ -37,7 +37,7 @@ describe('contact links', () => {
 })
 
 describe('enquiry form', () => {
-  const ok = { name: 'Sam', email: 'sam@example.com', company: '', enquiryType: 'Freelance project', service: '', budget: '', message: 'I would like to talk.' }
+  const ok = { name: 'Sam', email: 'sam@example.com', company: '', role: '', enquiryType: 'Freelance project', service: '', budget: '', message: 'I would like to talk.' }
   it('validates required fields', () => {
     expect(validateEnquiry(ok)).toEqual({})
     const errs = validateEnquiry({ ...ok, name: '', email: 'bad', message: 'hi', enquiryType: '' })
@@ -65,5 +65,26 @@ describe('statistics', () => {
     const p = { ...portfolio, profile: { ...portfolio.profile, yearsExperience: 4 }, stats: [{ key: 'a', label: 'A', value: 0 }, { key: 'b', label: 'B', value: 7 }] }
     const keys = visibleStats(p).map((s) => s.key)
     expect(keys).toEqual(['years', 'b'])
+  })
+})
+
+describe('cv link', () => {
+  it('only exists when enabled and a file is set', () => {
+    expect(cvLink(portfolio)).toBeNull()
+    const p = { ...portfolio, profile: { ...portfolio.profile, cvFile: '/documents/cv.pdf' }, cv: { ...portfolio.cv, filename: 'Jane Doe CV' } }
+    expect(cvLink(p)).toMatchObject({ href: '/documents/cv.pdf', filename: 'Jane Doe CV.pdf' })
+    expect(cvLink({ ...p, cv: { ...p.cv, enabled: false } })).toBeNull()
+  })
+})
+
+describe('video sources', () => {
+  it('classifies files, YouTube, Vimeo and other links', () => {
+    expect(parseVideo('/uploads/a.mp4')).toEqual({ kind: 'file', src: '/uploads/a.mp4' })
+    expect(parseVideo('https://youtu.be/dQw4w9WgXcQ')).toEqual({ kind: 'youtube', id: 'dQw4w9WgXcQ' })
+    expect(parseVideo('https://www.youtube.com/shorts/abcdefghijk')).toEqual({ kind: 'youtube', id: 'abcdefghijk' })
+    expect(parseVideo('https://vimeo.com/123456789')).toEqual({ kind: 'vimeo', id: '123456789' })
+    expect(parseVideo('https://www.tiktok.com/@x/video/1').kind).toBe('external')
+    expect(parseVideo('javascript:alert(1)').kind).toBe('none')
+    expect(parseVideo('').kind).toBe('none')
   })
 })

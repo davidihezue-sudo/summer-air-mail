@@ -1,22 +1,26 @@
+import type { SectionConfig } from '../../content/types'
 import { ArrowRight, Download } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { Section } from '../ui/Section'
 import { Reveal } from '../ui/Reveal'
 import { goTo } from '../../utils/nav'
-import { hasValue } from '../../utils/text'
+import { cvLink } from '../../utils/text'
 
-export function RecruiterOverview() {
-  const { content, visible } = useContent()
+export function RecruiterOverview({ config }: { config: SectionConfig }) {
+  const { content, has, idOf } = useContent()
   const { profile, recruiter } = content.portfolio
 
+  const cv = cvLink(content.portfolio)
   const paths: { id: string; label: string }[] = []
-  if (visible.work) paths.push({ id: 'work', label: 'View selected work' })
-  if (visible.caseStudies) paths.push({ id: 'case-studies', label: 'Read case studies' })
-  if (visible.services) paths.push({ id: 'services', label: 'Review skills' })
-  if (visible.contact) paths.push({ id: 'contact', label: 'Contact me' })
+  const add = (type: Parameters<typeof has>[0], label: string) => { const id = idOf(type); if (has(type) && id) paths.push({ id, label }) }
+  add('work', 'View selected work')
+  add('caseStudies', 'Read case studies')
+  add('results', 'See results')
+  add('services', 'Review skills')
+  add('contact', 'Contact me')
 
   return (
-    <Section id="overview" tone="var(--c-paper)" eyebrow="At a glance" title="The 60 second overview" className="overview" wave={false}>
+    <Section config={config} tone="var(--c-paper)" eyebrow="At a glance" title="The 60 second overview" className="overview" wave={false}>
       <div className="overview__grid">
         <Reveal className="overview__summary">
           <h3 className="h4">Professional summary</h3>
@@ -29,13 +33,11 @@ export function RecruiterOverview() {
           )}
           <div className="overview__paths">
             {paths.map((p) => (
-              <button key={p.id} type="button" className="btn btn--ghost" onClick={() => goTo(p.id, p.id === 'contact' ? 'enquiry-name' : undefined)}>
+              <button key={p.id} type="button" className="btn btn--ghost" onClick={() => goTo(p.id, p.id === idOf('contact') ? 'enquiry-name' : undefined)}>
                 {p.label} <ArrowRight size={16} aria-hidden />
               </button>
             ))}
-            {hasValue(profile.cvFile) && (
-              <a className="btn btn--solid" href={profile.cvFile} download><Download size={16} aria-hidden /> Download CV</a>
-            )}
+            {cv && <a className="btn btn--solid" href={cv.href} download={cv.filename}><Download size={16} aria-hidden /> {cv.label}</a>}
           </div>
         </Reveal>
 

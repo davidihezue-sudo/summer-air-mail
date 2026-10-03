@@ -1,9 +1,11 @@
+import type { SectionConfig } from '../../content/types'
 import { useEffect, useState } from 'react'
 import { ArrowUpRight } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { useMotion } from '../../hooks/useMotion'
 import { getWebsites } from '../../content/selectors'
 import { Section } from '../ui/Section'
+import { useTheme } from '../../hooks/useTheme'
 import { safeHref } from '../../utils/text'
 
 function useTyped(text: string, reduced: boolean) {
@@ -20,10 +22,11 @@ function useTyped(text: string, reduced: boolean) {
   return text.slice(0, n)
 }
 
-export function Websites() {
+export function Websites({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const { reduced } = useMotion()
   const sites = getWebsites(content)
+  const { copy } = useTheme()
   const [id, setId] = useState(sites[0]?.id)
   const [shot, setShot] = useState(0)
   const site = sites.find((s) => s.id === id) ?? sites[0]
@@ -39,7 +42,7 @@ export function Websites() {
 
   const current = site.screenshots[shot]
   return (
-    <Section id="websites" tone="var(--c-sage)" eyebrow="Websites and digital projects" title="On the laptop" className="websites">
+    <Section config={config} tone="var(--c-sage)" eyebrow="Websites and digital projects" title={copy.websitesTitle} className="websites">
       {sites.length > 1 && (
         <div className="filters" role="group" aria-label="Choose a website project">
           {sites.map((s) => <button key={s.id} type="button" className="chip" aria-pressed={s.id === site.id} onClick={() => setId(s.id)}>{s.name}</button>)}

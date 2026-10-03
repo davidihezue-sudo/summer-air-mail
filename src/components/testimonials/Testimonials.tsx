@@ -1,14 +1,17 @@
+import type { SectionConfig } from '../../content/types'
 import { useContent } from '../../hooks/useContent'
 import { getTestimonials } from '../../content/selectors'
 import { Section } from '../ui/Section'
+import { useTheme } from '../../hooks/useTheme'
 import { Reveal } from '../ui/Reveal'
 import { Img } from '../ui/Img'
 
-export function Testimonials() {
+export function Testimonials({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const items = getTestimonials(content)
+  const { copy } = useTheme()
   return (
-    <Section id="testimonials" tone="var(--c-paper)" eyebrow="Recommendations" title="Kind words, with permission" className="testimonials">
+    <Section config={config} tone="var(--c-paper)" eyebrow="Recommendations" title={copy.testimonialsTitle} className="testimonials">
       <ul className="quotes">
         {items.map((t) => (
           <li key={t.id}>

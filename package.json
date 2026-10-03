@@ -1,18 +1,26 @@
 {
   "name": "summer-air-mail",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "Summer Air Mail: a premium social media and digital marketing portfolio",
+  "description": "Summer Air Mail: a four-season social media and digital marketing portfolio with a built-in admin",
   "type": "module",
   "scripts": {
-    "dev": "vite",
-    "build": "tsc --noEmit && vite build",
-    "preview": "vite preview",
+    "dev": "vite --configLoader runner",
+    "build": "tsc --noEmit && vite build --configLoader runner",
+    "preview": "vite preview --configLoader runner",
     "typecheck": "tsc --noEmit",
-    "lint": "eslint src",
+    "lint": "eslint src server shared scripts",
     "test": "vitest run",
     "images": "node scripts/optimize-images.mjs",
-    "smoke": "node scripts/smoke.mjs"
+    "smoke": "node scripts/smoke.mjs",
+    "dev:server": "node --watch server/index.mjs",
+    "dev:all": "node scripts/dev-all.mjs",
+    "start": "node server/index.mjs",
+    "admin:setup": "node scripts/admin-setup.mjs",
+    "admin:hash": "node scripts/admin-setup.mjs --hash",
+    "smoke:admin": "node scripts/smoke-admin.mjs",
+    "a11y": "node scripts/a11y.mjs",
+    "check": "npm run typecheck && npm run lint && npm test && npm run build"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -20,6 +28,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
+    "axe-core": "^4.13.0",
     "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.13.0",
@@ -34,8 +43,11 @@
     "@fontsource-variable/figtree": "^5.3.0",
     "@fontsource/italiana": "^5.3.0",
     "@fontsource/pinyon-script": "^5.3.0",
+    "compression": "^1.8.2",
+    "express": "^5.2.1",
     "framer-motion": "^14.0.0",
     "lucide-react": "^1.51.0",
+    "multer": "^2.4.0",
     "react": "^19.3.0",
     "react-dom": "^19.3.0"
   }

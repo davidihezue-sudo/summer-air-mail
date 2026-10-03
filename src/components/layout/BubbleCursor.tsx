@@ -3,7 +3,7 @@ import { useEffect, useRef } from 'react'
 interface Bubble { x: number; y: number; r: number; vy: number; vx: number; life: number }
 
 /** Optional desktop bubble trail. Draws only while bubbles are alive. */
-export function BubbleCursor() {
+export function BubbleCursor({ stroke = '42,141,176', fill = '169,220,235' }: { stroke?: string; fill?: string }) {
   const ref = useRef<HTMLCanvasElement>(null)
   useEffect(() => {
     const canvas = ref.current
@@ -30,8 +30,8 @@ export function BubbleCursor() {
         }
         ctx.beginPath()
         ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2)
-        ctx.strokeStyle = `rgba(42,141,176,${b.life * 0.7})`
-        ctx.fillStyle = `rgba(169,220,235,${b.life * 0.25})`
+        ctx.strokeStyle = `rgba(${stroke},${b.life * 0.7})`
+        ctx.fillStyle = `rgba(${fill},${b.life * 0.25})`
         ctx.lineWidth = 1.2
         ctx.fill()
         ctx.stroke()
@@ -53,6 +53,6 @@ export function BubbleCursor() {
       window.removeEventListener('resize', resize)
       cancelAnimationFrame(frame)
     }
-  }, [])
+  }, [stroke, fill])
   return <canvas ref={ref} className="bubbles" aria-hidden />
 }

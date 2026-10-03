@@ -6,22 +6,21 @@ import '@fontsource-variable/figtree/wght.css'
 import './styles/base.css'
 import './styles/hero.css'
 import './styles/sections.css'
-import App from './App'
+import './styles/seasons.css'
+import Root from './Root'
 import { loadContent } from './content/bundle'
-import { ContentProvider } from './hooks/useContent'
-import { MotionProvider } from './hooks/useMotion'
-import { applyTheme } from './utils/theme'
 
 async function boot() {
-  const content = await loadContent()
-  applyTheme(content.portfolio.theme)
-  createRoot(document.getElementById('root')!).render(
+  const el = document.getElementById('root')!
+  if (location.pathname === '/admin' || location.pathname.startsWith('/admin/')) {
+    const { mountAdmin } = await import('./admin/mount')
+    mountAdmin(el)
+    return
+  }
+  const initial = await loadContent()
+  createRoot(el).render(
     <StrictMode>
-      <ContentProvider content={content}>
-        <MotionProvider intensity={content.portfolio.theme.animationIntensity}>
-          <App />
-        </MotionProvider>
-      </ContentProvider>
+      <Root initial={initial} />
     </StrictMode>,
   )
 }
