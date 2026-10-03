@@ -24,17 +24,8 @@ function seoPlugin(): Plugin {
 export default defineConfig({
   plugins: [react(), seoPlugin()],
   build: { target: 'es2022', sourcemap: false },
-  server: {
-    proxy: {
-      '/api': 'http://localhost:8787',
-      '/uploads': 'http://localhost:8787',
-    },
-  },
-  preview: {
-    proxy: {
-      '/api': 'http://localhost:8787',
-      '/uploads': 'http://localhost:8787',
-    },
-  },
+  // Object form on purpose: the string shorthand sets changeOrigin, which rewrites Host and breaks the admin origin check.
+  server: { proxy: { '/api': { target: 'http://127.0.0.1:8787', changeOrigin: false }, '/uploads': { target: 'http://127.0.0.1:8787', changeOrigin: false } } },
+  preview: { proxy: { '/api': { target: 'http://127.0.0.1:8787', changeOrigin: false }, '/uploads': { target: 'http://127.0.0.1:8787', changeOrigin: false } } },
   test: { include: ['tests/**/*.test.ts'] },
 })

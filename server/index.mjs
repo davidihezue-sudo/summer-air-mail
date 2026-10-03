@@ -74,8 +74,14 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
       if (req.headers['x-requested-with'] !== 'sam-admin') return res.status(403).json({ error: 'Missing request header.' })
       const origin = req.headers.origin
       if (origin) {
-        const allowed = [`http://${req.headers.host}`, `https://${req.headers.host}`, ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [])]
-        if (!allowed.includes(origin)) return res.status(403).json({ error: 'Cross-origin request blocked.' })
+        const hosts = [req.headers.host, req.headers['x-forwarded-host']].filter(Boolean)
+        const allowed = [...hosts.flatMap((h) => [`http://${h}`, `https://${h}`]), ...(env.ALLOWED_ORIGINS ? env.ALLOWED_ORIGINS.split(',') : [])]
+        // Local development only: the Vite dev server and the API run on different ports of the same machine.
+        let local = false
+        if (env.NODE_ENV !== 'production') {
+          try { local = ['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname) } catch { /* not a URL */ }
+        }
+        if (!local && !allowed.includes(origin)) return res.status(403).json({ error: 'Cross-origin request blocked. If you use a custom domain behind a proxy, set TRUST_PROXY=1 or ALLOWED_ORIGINS.' })
       }
     }
     next()

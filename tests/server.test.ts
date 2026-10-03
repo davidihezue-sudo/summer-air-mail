@@ -66,6 +66,10 @@ describe('access control', () => {
     expect(noHeader.status).toBe(403)
     const evil = await fetch(base + '/api/admin/login', { method: 'POST', headers: { ...H, origin: 'https://evil.example' }, body: '{}' })
     expect(evil.status).toBe(403)
+    // The dev proxy case: the browser is on another local port than the API.
+    const devProxy = await fetch(base + '/api/admin/login', { method: 'POST', headers: { ...H, origin: 'http://localhost:5173' }, body: '{}' })
+    expect(devProxy.status).toBe(401)
+    // In production only the real host is accepted, even from localhost origins.
   })
   it('rejects wrong credentials, then signs in with an HttpOnly strict cookie', async () => {
     const bad = await api('/api/admin/login', { method: 'POST', body: JSON.stringify({ username: 'owner', password: 'nope nope nope nope' }) }, false)
