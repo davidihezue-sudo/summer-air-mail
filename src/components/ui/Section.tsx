@@ -57,10 +57,13 @@ export function Section({ config, tone, eyebrow, title, intro, children, wave = 
   const id = config.id
 
   return (
-    <section id={id} className={`section ${dark ? 'section--dark' : ''} ${className}`} style={{ background: bg }} aria-labelledby={heading ? `${id}-title` : undefined}>
-      {wave && (
+    <section
+      id={id} className={`section ${dark ? 'section--dark' : ''} ${className}`} style={{ background: bg }} aria-labelledby={heading ? `${id}-title` : undefined}
+      data-spacing={config.spacing || undefined} data-pattern={config.pattern || undefined} data-width={config.width || undefined}
+    >
+      {wave && config.divider !== 'none' && (
         <div className="section__wave" style={{ color: bg }}>
-          <Divider shape={resolved.theme.divider} />
+          <Divider shape={config.divider || resolved.theme.divider} />
         </div>
       )}
       <div className="container">

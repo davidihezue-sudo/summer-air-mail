@@ -1,7 +1,7 @@
-import { mkdir, readFile, rename, rm, writeFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
+import { mkdir, rm, writeFile } from 'node:fs/promises'
 import { join, extname } from 'node:path'
 import { randomBytes } from 'node:crypto'
+import { asKv } from './kv.mjs'
 
 /** Identify a file by its content, never by its name or the browser supplied type. */
 export function sniff(buf) {
@@ -26,24 +26,18 @@ async function getSharp() {
   return sharpMod
 }
 
-export function createMedia(dir) {
+export function createMedia(dir, kvIn) {
+  const kv = asKv(kvIn ?? dir)
   const uploads = join(dir, 'uploads')
-  const registryFile = join(dir, 'media.json')
   let items = []
   let queue = Promise.resolve()
-  const persist = () => (queue = queue.then(async () => {
-    const tmp = `${registryFile}.tmp`
-    await writeFile(tmp, JSON.stringify(items))
-    await rename(tmp, registryFile)
-  }))
+  const persist = () => (queue = queue.then(() => kv.write('media.json', items)))
 
   return {
     uploads,
     async init() {
       await mkdir(uploads, { recursive: true })
-      if (existsSync(registryFile)) {
-        try { items = JSON.parse(await readFile(registryFile, 'utf8')) } catch { items = [] }
-      }
+      try { const v = await kv.read('media.json'); items = Array.isArray(v) ? v : [] } catch { items = [] }
     },
     list: () => items.slice().sort((a, b) => b.uploadedAt.localeCompare(a.uploadedAt)),
     async add(buf, originalName, fields = {}) {

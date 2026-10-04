@@ -124,3 +124,52 @@ export function buildCsp(p) {
     "frame-ancestors 'self'",
   ].join('; ')
 }
+
+const xml = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;' })[c])
+const visibleNotes = (c) => (Array.isArray(c?.notes) ? c.notes : []).filter((n) => n && n.hidden !== true && n.title && n.slug)
+
+/** RSS 2.0 feed of published notes. Empty string when there is nothing to publish or no site URL. */
+export function buildFeed(c) {
+  const p = c?.portfolio ?? {}
+  const base = baseUrl(p)
+  const notes = visibleNotes(c).sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 50)
+  if (!base || !notes.length) return ''
+  const items = notes.map((n) => {
+    const t = Date.parse(n.date)
+    return `<item><title>${xml(n.title)}</title><link>${xml(`${base}/notes/${n.slug}`)}</link><guid isPermaLink="true">${xml(`${base}/notes/${n.slug}`)}</guid>${Number.isNaN(t) ? '' : `<pubDate>${new Date(t).toUTCString()}</pubDate>`}<description>${xml(n.summary)}</description></item>`
+  }).join('')
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<rss version="2.0"><channel><title>${xml(clean(p.seo?.title) || clean(p.profile?.fullName))}</title><link>${xml(base)}/</link><description>${xml(clean(p.seo?.description))}</description>${items}</channel></rss>\n`
+}
+
+/** Sitemap with the home page, notes and the profile page. */
+export function buildFullSitemap(c) {
+  const p = c?.portfolio ?? {}
+  const base = baseUrl(p)
+  if (!base || p.seo?.robots === 'noindex') return ''
+  const urls = [`${base}/`, ...(p.profilePage?.enabled ? [`${base}/profile`] : []), ...visibleNotes(c).map((n) => `${base}/notes/${n.slug}`)]
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${xml(u)}</loc></url>`).join('')}</urlset>\n`
+}
+
+/** Head overrides for a shareable page: a note, a project, or the profile. Returns null when the path is the home page. */
+export function pageSeo(c, path) {
+  const p = c?.portfolio ?? {}
+  const base = baseUrl(p)
+  let m
+  if ((m = /^\/notes\/([^/]+)\/?$/.exec(path))) {
+    const n = visibleNotes(c).find((x) => x.slug === decodeURIComponent(m[1]))
+    if (!n) return { missing: true }
+    return { title: clean(n.seoTitle) || `${n.title} | ${clean(p.profile?.fullName)}`, description: clean(n.seoDescription) || clean(n.summary), image: n.cover?.src ?? '', canonical: base ? `${base}/notes/${n.slug}` : '' }
+  }
+  if ((m = /^\/work\/([^/]+)\/?$/.exec(path))) {
+    const x = (c.projects ?? []).find((q) => q.id === decodeURIComponent(m[1]) && q.hidden !== true)
+    if (!x) return { missing: true }
+    return { title: clean(x.seo?.title) || `${x.title} | ${clean(p.profile?.fullName)}`, description: clean(x.seo?.description) || clean(x.description).slice(0, 200), image: x.seo?.image || x.thumbnail?.src || '', canonical: base ? `${base}/work/${x.id}` : '' }
+  }
+  if (/^\/profile\/?$/.test(path)) return p.profilePage?.enabled === false ? { missing: true } : { title: clean(p.profilePage?.title) || `${clean(p.profile?.fullName)} | Profile`, description: clean(p.seo?.description), image: p.seo?.ogImage ?? '', canonical: base ? `${base}/profile` : '' }
+  return null
+}
+
+/** Apply pageSeo output to a portfolio-shaped object for injectHead. */
+export function withSeo(p, s) {
+  return { ...p, seo: { ...p.seo, title: s.title, ogTitle: s.title, description: s.description, ogDescription: s.description, ogImage: s.image || p.seo?.ogImage || '', canonical: s.canonical || '' } }
+}

@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useMemo, useRef, type ReactNode } from 'react'
+import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { MotionConfig } from 'framer-motion'
 import { useContent } from './useContent'
 import { useMediaQuery } from './useMediaQuery'
@@ -27,6 +27,9 @@ interface ThemeState {
   reduced: boolean
   finePointer: boolean
   copy: SeasonCopy
+  scheme: 'light' | 'dark'
+  /** Visitor switch. Only meaningful when the owner enables the toggle. */
+  setScheme: (s: 'light' | 'dark') => void
 }
 
 const Ctx = createContext<ThemeState | null>(null)
@@ -44,6 +47,16 @@ export function ThemeProvider({ preview, children }: { preview?: ThemePreview; c
   const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
   const season = preview?.season ?? resolveSeason(seasons)
   const professional = preview?.professional ?? theme.professional
+  const sysDark = useMediaQuery('(prefers-color-scheme: dark)')
+  const [visitor, setVisitor] = useState<'light' | 'dark' | ''>(() => {
+    try { const v = localStorage.getItem('sam-scheme'); return v === 'light' || v === 'dark' ? v : '' } catch { return '' }
+  })
+  const { design } = content.portfolio
+  const scheme: 'light' | 'dark' = visitor && design.colorToggle ? visitor : design.colorMode === 'system' ? (sysDark ? 'dark' : 'light') : design.colorMode
+  const setScheme = useCallback((v: 'light' | 'dark') => {
+    setVisitor(v)
+    try { localStorage.setItem('sam-scheme', v) } catch { /* private mode: lasts for this visit */ }
+  }, [])
 
   const state = useMemo<ThemeState>(() => {
     const resolved = resolveTheme(season, seasons)
@@ -59,12 +72,13 @@ export function ThemeProvider({ preview, children }: { preview?: ThemePreview; c
       season, resolved, plan, professional,
       reduced: plan.reduced, finePointer,
       copy: professional === 'professional' ? NEUTRAL : resolved.theme.copy,
+      scheme, setScheme,
     }
-  }, [season, seasons, hero.animation, theme.animationIntensity, professional, prefersReduced, finePointer, preview?.intensity])
+  }, [scheme, setScheme, season, seasons, hero.animation, theme.animationIntensity, professional, prefersReduced, finePointer, preview?.intensity])
 
   const first = useRef(true)
   useEffect(() => {
-    const apply = () => applyTheme(state.resolved, content.portfolio, state.plan)
+    const apply = () => applyTheme(state.resolved, content.portfolio, state.plan, state.scheme)
     if (first.current) {
       first.current = false
       apply()

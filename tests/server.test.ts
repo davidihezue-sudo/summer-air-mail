@@ -81,7 +81,7 @@ describe('access control', () => {
     expect(set).toMatch(/SameSite=Strict/i)
     cookie = set.split(';')[0]
     const s = await (await api('/api/admin/session')).json()
-    expect(s).toEqual({ configured: true, authenticated: true })
+    expect(s).toMatchObject({ configured: true, authenticated: true, role: 'owner' })
   })
 })
 

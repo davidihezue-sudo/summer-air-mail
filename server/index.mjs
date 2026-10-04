@@ -10,7 +10,13 @@ import { createAuth } from './auth.mjs'
 import { createMedia } from './media.mjs'
 import { validateContent } from './validate.mjs'
 import { publicView } from './publicView.mjs'
-import { buildCsp, buildRobots, buildSitemap, injectHead } from '../shared/head.mjs'
+import { createKv } from './kv.mjs'
+import { createEnquiries, createSubscribers, createInsights, createSnapshots, createSettings } from './records.mjs'
+import { createMailer } from './mailer.mjs'
+import { createBackups, backupStream } from './backup.mjs'
+import { createLimiter, parseContact } from './routes.mjs'
+import { s3FromEnv } from './s3.mjs'
+import { buildCsp, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
 
 function parseCookies(header = '') {
   const out = {}
@@ -23,14 +29,28 @@ function parseCookies(header = '') {
 
 const COOKIE = 'sam_session'
 
-/** @param {{ dataDir?: string, distDir?: string, env?: Record<string, string | undefined> }} [options] */
-export async function createApp({ dataDir, distDir, env = process.env } = {}) {
+/** @param {{ dataDir?: string, distDir?: string, env?: Record<string, string | undefined>, deps?: { transportFactory?: Function, fetchImpl?: Function } }} [options] */
+export async function createApp({ dataDir, distDir, env = process.env, deps = {} } = {}) {
   dataDir = resolve(dataDir ?? env.DATA_DIR ?? 'data')
   distDir = resolve(distDir ?? 'dist')
-  const store = createStore(dataDir)
-  const auth = createAuth({ dir: dataDir, env })
-  const media = createMedia(dataDir)
-  await Promise.all([store.init(), media.init()])
+  const kv = await createKv({ dataDir, env })
+  const snapshots = createSnapshots(kv)
+  const store = createStore(kv, { onSave: (before, after) => snapshots.record(before, after) })
+  const auth = createAuth({ kv, env })
+  const media = createMedia(dataDir, kv)
+  const enquiries = createEnquiries(kv)
+  const subscribers = createSubscribers(kv)
+  const insights = createInsights(kv)
+  const settings = createSettings(kv)
+  const mailer = createMailer(env, deps)
+  await Promise.all([store.init(), media.init(), snapshots.init(), enquiries.init(), subscribers.init(), insights.init(), settings.init()])
+  const backups = createBackups({ dataDir, kv, env, getSettings: settings.get, fetchImpl: deps.fetchImpl })
+  backups.schedule()
+  const pruneTimer = setInterval(() => {
+    void enquiries.prune(settings.get().enquiryRetentionDays)
+    void insights.prune(store.getPublished()?.content?.portfolio?.insights?.retentionDays ?? 365)
+  }, 6 * 3600 * 1000)
+  pruneTimer.unref?.()
 
   const app = express()
   app.disable('x-powered-by')
@@ -64,6 +84,87 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
     res.json({ content: publicView(pub?.content) ?? null, rev: pub?.rev ?? 0, publishedAt: pub?.publishedAt ?? null })
   })
 
+  /* ---------- public forms and tracking ---------- */
+  const publicJson = express.json({ limit: '32kb' })
+  const published = () => store.getPublished()?.content ?? null
+  const contactLimit = createLimiter({ max: 5, windowMs: 3600 * 1000 })
+  const subscribeLimit = createLimiter({ max: 5, windowMs: 3600 * 1000 })
+  const trackLimit = createLimiter({ max: 120, windowMs: 60 * 1000 })
+  const MIN_FILL_MS = 2500
+
+  app.post('/api/contact', publicJson, async (req, res) => {
+    const c = published()?.portfolio?.contact
+    if (!c || c.delivery === 'client') return res.status(404).json({ error: 'Not available.' })
+    if (!contactLimit(req.ip ?? 'x')) return res.status(429).json({ error: 'Too many messages from this connection. Please try again later.' })
+    const r = parseContact(req.body)
+    if (r.error) return res.status(400).json({ error: r.error })
+    if (r.honeypot) return res.json({ ok: true }) // look successful to bots, store nothing
+    if (r.elapsed < MIN_FILL_MS) return res.status(400).json({ error: 'Please take a moment and send again.' })
+    const item = await enquiries.add(r.value)
+    const st = settings.get()
+    if (st.notifyOnEnquiry) {
+      void mailer.notify({
+        to: st.notifyEmail, replyTo: r.value.email, subject: `New enquiry from ${r.value.name}`,
+        text: `${r.value.name} <${r.value.email}>\n${r.value.type}${r.value.budget ? ` | ${r.value.budget}` : ''}${r.value.company ? ` | ${r.value.company}` : ''}\n\n${r.value.message}`,
+      })
+    }
+    res.json({ ok: true, id: item.id })
+  })
+
+  app.post('/api/subscribe', publicJson, async (req, res) => {
+    const n = published()?.portfolio?.newsletter
+    if (!n?.enabled || n.mode !== 'collect') return res.status(404).json({ error: 'Not available.' })
+    if (!subscribeLimit(req.ip ?? 'x')) return res.status(429).json({ error: 'Too many attempts. Please try again later.' })
+    const b = req.body ?? {}
+    if (String(b.website ?? '').trim()) return res.json({ ok: true })
+    if (b.consent !== true) return res.status(400).json({ error: 'Please tick the consent box.' })
+    if (!/^[^\s@]{1,64}@[^\s@]{1,200}\.[^\s@]{2,}$/.test(String(b.email ?? '').trim())) return res.status(400).json({ error: 'Please enter a valid email address.' })
+    if ((Number(b.elapsed) || 0) < 1200) return res.status(400).json({ error: 'Please try again.' })
+    const r = await subscribers.add(b.email, n.consentText)
+    if (r.ok && settings.get().notifyOnSubscriber) void mailer.notify({ to: settings.get().notifyEmail, subject: 'New newsletter subscriber', text: String(b.email).slice(0, 254) })
+    res.json({ ok: true }) // the same answer for a repeat signup, so addresses cannot be probed
+  })
+
+  app.post('/api/track', publicJson, async (req, res) => {
+    const i = published()?.portfolio?.insights
+    res.status(204).end()
+    if (!i?.enabled || (i.respectDoNotTrack && req.headers.dnt === '1') || !trackLimit(req.ip ?? 'x')) return
+    const b = req.body ?? {}
+    await insights.record({ type: b.type, path: b.path, ref: b.ref, name: b.name, ip: req.ip, ua: req.headers['user-agent'] ?? '' })
+  })
+
+  /** A tailored application link. Only someone who knows the slug can fetch it; it is never in the public JSON. */
+  app.get('/api/application/:slug', (req, res) => {
+    const pubc = store.getPublished()?.content
+    const a = (pubc?.applications ?? []).find((x) => x.slug === req.params.slug)
+    const expired = a?.expiresAt && Date.parse(a.expiresAt) + 864e5 < Date.now()
+    res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })
+    if (!a || a.enabled === false || expired) return res.status(404).json({ error: 'This link is not available.' })
+    res.json({ application: { ...a, look: (pubc?.looks ?? []).find((l) => l.id === a.lookId) ?? null } })
+  })
+
+  /** Short links resolve on the server, so they work in social bios and print. */
+  app.get('/go/:slug', (req, res) => {
+    const c = published()
+    const l = (c?.shortLinks ?? []).find((x) => x.slug === req.params.slug && x.enabled !== false)
+    if (!l) return res.status(404).type('text').send('Link not found.')
+    const { type, value } = l.target ?? {}
+    const to = type === 'url' ? (/^https?:\/\//i.test(value) ? value : '/')
+      : type === 'section' ? `/#${encodeURIComponent(value)}`
+      : type === 'project' ? `/work/${encodeURIComponent(value)}`
+      : type === 'note' ? `/notes/${encodeURIComponent(value)}`
+      : type === 'application' ? `/for/${encodeURIComponent(value)}`
+      : type === 'profile' ? '/profile' : '/'
+    void insights.record({ type: 'share', name: `/go/${l.slug}`, ip: req.ip, ua: req.headers['user-agent'] ?? '' }).catch(() => {})
+    res.set('Cache-Control', 'no-store').redirect(302, to)
+  })
+
+  app.get('/feed.xml', (_req, res) => {
+    const xml = buildFeed(published())
+    if (xml) res.type('application/rss+xml').send(xml)
+    else res.status(404).type('text').send('No feed.')
+  })
+
   /* ---------- admin API ---------- */
   const admin = express.Router()
   admin.use(express.json({ limit: '4mb' }))
@@ -88,10 +189,25 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
   })
 
   const tokenOf = (req) => parseCookies(req.headers.cookie)[COOKIE]
-  const requireAuth = (req, res, next) => (auth.check(tokenOf(req)) ? next() : res.status(401).json({ error: 'Please sign in.' }))
+  const requireAuth = (req, res, next) => {
+    const me = auth.check(tokenOf(req))
+    if (!me) return res.status(401).json({ error: 'Please sign in.' })
+    req.me = me
+    next()
+  }
+  /** owner: everything. editor: content, media and inbox; publishing only if the owner allows it. viewer: read only. */
+  const can = (me, action) => {
+    if (me.role === 'owner') return true
+    if (me.role === 'viewer') return action === 'read'
+    if (action === 'publish') return settings.get().editorsCanPublish
+    return action === 'read' || action === 'edit'
+  }
+  const need = (action) => (req, res, next) => (can(req.me, action) ? next() : res.status(403).json({ error: 'Your role does not allow that.' }))
+  const ownerOnly = (req, res, next) => (req.me.role === 'owner' ? next() : res.status(403).json({ error: 'Only the owner can do that.' }))
 
   admin.get('/session', async (req, res) => {
-    res.json({ configured: await auth.configured(), authenticated: auth.check(tokenOf(req)) })
+    const me = auth.check(tokenOf(req))
+    res.json({ configured: await auth.configured(), authenticated: !!me, username: me?.username ?? '', role: me?.role ?? '', canPublish: me ? can(me, 'publish') : false, storage: kv.kind })
   })
 
   admin.post('/login', async (req, res) => {
@@ -106,7 +222,7 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
       return res.status(401).json({ error: 'Incorrect username or password.' })
     }
     res.cookie(COOKIE, r.token, { httpOnly: true, sameSite: 'strict', secure: secureCookie(req), maxAge: r.maxAge * 1000, path: '/' })
-    res.json({ ok: true })
+    res.json({ ok: true, role: r.role })
   })
 
   admin.post('/logout', (req, res) => {
@@ -116,6 +232,8 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
   })
 
   admin.use(requireAuth)
+  // Anything that changes data needs at least the editor role (or owner). Routes tighten this below.
+  admin.use((req, res, next) => (req.method === 'GET' || req.method === 'HEAD' || req.path === '/password' || can(req.me, 'edit') ? next() : res.status(403).json({ error: 'Your role is read only.' })))
 
   admin.get('/draft', (_req, res) => {
     const d = store.getDraft()
@@ -130,7 +248,7 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
     res.json({ rev: r.rev, ...store.status() })
   })
 
-  admin.post('/publish', async (_req, res) => {
+  admin.post('/publish', need('publish'), async (_req, res) => {
     const p = await store.publish()
     if (!p) return res.status(400).json({ error: 'Nothing to publish yet. Save the draft first.' })
     res.json({ publishedAt: p.publishedAt, ...store.status() })
@@ -148,7 +266,7 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
     res.json({ draft: d.content, rev: d.rev, ...store.status() })
   })
 
-  admin.post('/import', async (req, res) => {
+  admin.post('/import', need('edit'), async (req, res) => {
     const v = validateContent(req.body?.content)
     if (!v.ok) return res.status(400).json({ error: v.error })
     const d = await store.importDraft(v.content)
@@ -156,7 +274,7 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
   })
 
   admin.post('/password', async (req, res) => {
-    const r = await auth.changePassword(String(req.body?.current ?? ''), String(req.body?.next ?? ''))
+    const r = await auth.changePassword(String(req.body?.current ?? ''), String(req.body?.next ?? ''), req.me.username)
     if (!r.ok) return res.status(400).json({ error: r.error })
     res.clearCookie(COOKIE, { path: '/' })
     res.json({ ok: true })
@@ -188,6 +306,67 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
     else res.status(r.status).json({ error: r.error })
   })
 
+  /* ---------- inbox, subscribers, insights ---------- */
+  admin.get('/enquiries', (_req, res) => res.json({ items: enquiries.list(), unread: enquiries.unread() }))
+  admin.get('/enquiries.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="enquiries.csv"').send(enquiries.csv()))
+  admin.patch('/enquiries/:id', async (req, res) => ((await enquiries.mark(req.params.id, req.body?.read)) ? res.json({ ok: true, unread: enquiries.unread() }) : res.status(404).json({ error: 'Not found.' })))
+  admin.delete('/enquiries/:id', async (req, res) => ((await enquiries.remove(req.params.id)) ? res.json({ ok: true }) : res.status(404).json({ error: 'Not found.' })))
+  admin.get('/subscribers', (_req, res) => res.json({ items: subscribers.list() }))
+  admin.get('/subscribers.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="subscribers.csv"').send(subscribers.csv()))
+  admin.delete('/subscribers/:id', async (req, res) => ((await subscribers.remove(req.params.id)) ? res.json({ ok: true }) : res.status(404).json({ error: 'Not found.' })))
+  admin.get('/insights', (req, res) => res.json(insights.summary(Math.max(7, Math.min(365, Number(req.query.range) || 30)))))
+
+  /* ---------- undo for a single item ---------- */
+  admin.get('/history/item/:collection/:id', (req, res) => res.json({ versions: snapshots.list(req.params.collection, req.params.id) }))
+  admin.post('/history/item/:collection/:id/restore', async (req, res) => {
+    const snap = snapshots.get(req.params.collection, req.params.id, Number(req.body?.index))
+    const d = store.getDraft()
+    if (!snap || !d || !Array.isArray(d.content[req.params.collection])) return res.status(404).json({ error: 'That version no longer exists.' })
+    const content = structuredClone(d.content)
+    const i = content[req.params.collection].findIndex((x) => x.id === req.params.id)
+    if (i < 0) content[req.params.collection].push(snap)
+    else content[req.params.collection][i] = snap
+    const r = await store.saveDraft(content)
+    res.json({ draft: content, rev: r.rev, ...store.status() })
+  })
+
+  /* ---------- owner: users, settings, backups ---------- */
+  admin.get('/users', ownerOnly, async (_req, res) => res.json({ users: await auth.listUsers() }))
+  admin.post('/users', ownerOnly, async (req, res) => {
+    const r = await auth.addUser(req.body?.username, req.body?.password, req.body?.role)
+    return r.ok ? res.json({ users: await auth.listUsers() }) : res.status(400).json({ error: r.error })
+  })
+  admin.patch('/users/:username', ownerOnly, async (req, res) => {
+    const r = await auth.updateUser(req.params.username, { role: req.body?.role, password: req.body?.password })
+    return r.ok ? res.json({ users: await auth.listUsers() }) : res.status(400).json({ error: r.error })
+  })
+  admin.delete('/users/:username', ownerOnly, async (req, res) => {
+    const r = await auth.removeUser(req.params.username)
+    return r.ok ? res.json({ users: await auth.listUsers() }) : res.status(400).json({ error: r.error })
+  })
+  const envInfo = () => ({ emailConfigured: mailer.emailConfigured, webhookConfigured: mailer.webhookConfigured, s3Configured: !!s3FromEnv(env), storage: kv.kind })
+  admin.get('/settings', ownerOnly, (_req, res) => res.json({ settings: settings.get(), env: envInfo() }))
+  admin.put('/settings', ownerOnly, async (req, res) => {
+    const next = await settings.set(req.body?.settings ?? {})
+    backups.schedule()
+    res.json({ settings: next, env: envInfo() })
+  })
+  admin.post('/settings/test-alert', ownerOnly, async (_req, res) => {
+    const r = await mailer.notify({ to: settings.get().notifyEmail, subject: 'Test alert from your portfolio', text: 'If you can read this, alerts are working.' })
+    res.json(r)
+  })
+  admin.get('/backups', ownerOnly, async (_req, res) => res.json({ backups: await backups.list(), status: backups.status() }))
+  admin.post('/backups/run', ownerOnly, async (_req, res) => res.json({ result: await backups.run(), backups: await backups.list() }))
+  admin.get('/backups/download', ownerOnly, (_req, res) => {
+    res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="portfolio-backup-${new Date().toISOString().slice(0, 10)}.zip"` })
+    backupStream(dataDir, kv).on('error', () => res.destroy()).pipe(res)
+  })
+  admin.get('/backups/file/:name', ownerOnly, (req, res) => {
+    const p = backups.path(req.params.name)
+    if (!p || !existsSync(p)) return res.status(404).json({ error: 'Not found.' })
+    res.download(p)
+  })
+
   admin.use((_req, res) => res.status(404).json({ error: 'Not found.' }))
   app.use('/api/admin', admin)
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found.' }))
@@ -208,7 +387,7 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
   })
   app.get('/sitemap.xml', async (_req, res) => {
     const p = portfolioNow()
-    const xml = p ? buildSitemap(p) : existsSync(join(distDir, 'sitemap.xml')) ? await readFile(join(distDir, 'sitemap.xml'), 'utf8') : ''
+    const xml = p ? buildFullSitemap(store.getPublished().content) : existsSync(join(distDir, 'sitemap.xml')) ? await readFile(join(distDir, 'sitemap.xml'), 'utf8') : ''
     if (xml) res.type('application/xml').send(xml)
     else res.status(404).end()
   })
@@ -220,20 +399,38 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
     }))
     app.get(/^(?!\/(api|uploads)\/).*/, async (req, res) => {
       try {
-        const p = portfolioNow()
-        let html = p ? injectHead(await template(), p) : await template()
-        // Ship the published content inside the page so the site can render without a second request.
-        const isAdminPath = req.path === '/admin' || req.path.startsWith('/admin/')
         const pub = store.getPublished()
-        if (pub && !isAdminPath) {
+        const c = pub?.content ?? null
+        const p = c?.portfolio ?? null
+        const isAdmin = req.path === '/admin' || req.path.startsWith('/admin/')
+        const owner = !!auth.check(parseCookies(req.headers.cookie)[COOKIE])
+        let status = 200
+        let headP = p
+        const noindex = []
+        if (p && !isAdmin) {
+          const seo = pageSeo(c, req.path)
+          if (seo?.missing) status = 404
+          else if (seo) headP = withSeo(p, seo)
+          const m = /^\/for\/([^/]+)\/?$/.exec(req.path)
+          if (m) {
+            noindex.push('application')
+            const a = (c.applications ?? []).find((x) => x.slug === decodeURIComponent(m[1]))
+            if (!a || a.enabled === false || (a.expiresAt && Date.parse(a.expiresAt) + 864e5 < Date.now())) status = 404
+          } else if (req.path !== '/' && !seo && !/^\/(go|feed\.xml)/.test(req.path)) status = 404
+          if (p.maintenance?.enabled && !owner && p.maintenance.status503) status = 503
+        }
+        let html = headP ? injectHead(await template(), headP) : await template()
+        if (noindex.length) html = html.replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex, nofollow" />')
+        if (owner) html = html.replace('</head>', '<meta name="sam-owner" content="1" /></head>')
+        // Ship the published content inside the page so the site can render without a second request.
+        if (pub && !isAdmin) {
           const json = JSON.stringify(publicView(pub.content)).replace(/</g, '\\u003c').replace(/\u2028|\u2029/g, '')
           html = html.replace('</head>', `<script id="sam-content" type="application/json">${json}</script></head>`)
         }
-        const isAdmin = req.path === '/admin' || req.path.startsWith('/admin/')
         res.set('Content-Security-Policy', p ? buildCsp(p) : await fallbackCsp())
-        if (isAdmin) res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })
+        if (isAdmin || noindex.length) res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })
         else res.set('Cache-Control', 'no-cache')
-        res.type('html').send(html)
+        res.status(status).type('html').send(html)
       } catch {
         res.status(500).send('Site is not built. Run npm run build.')
       }
@@ -249,7 +446,7 @@ export async function createApp({ dataDir, distDir, env = process.env } = {}) {
     res.status(500).json({ error: 'Something went wrong.' })
   })
 
-  return { app, store, auth, media, dataDir }
+  return { app, store, auth, media, dataDir, kv, enquiries, subscribers, insights, settings, backups, snapshots, close: async () => { backups.stop(); clearInterval(pruneTimer); await kv.close() } }
 }
 
 export async function start(env = process.env) {

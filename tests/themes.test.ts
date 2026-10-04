@@ -142,3 +142,19 @@ describe('cursor effect', () => {
     expect(isShapeStyle('bubbles')).toBe(false)
   })
 })
+
+import { darkPalette } from '../src/themes/seasonManager'
+describe('dark mode palettes', () => {
+  for (const season of SEASON_ORDER) {
+    it(`${season}: text stays readable on every dark surface`, () => {
+      const t = THEMES[season]
+      const d = darkPalette(t.colors)
+      const surfaces = [d.colors.paper, d.colors.sand, d.colors.sea, d.colors.aqua, d.colors.pink, d.colors.sage, d.colors.butter, d.colors.peach, d.colors.sky]
+      for (const s of surfaces) expect(contrast(d.colors.ink, s), `${season} ink on ${s}`).toBeGreaterThanOrEqual(4.5)
+      for (const k of ['redText', 'greenText', 'seaText'] as const) expect(contrast(d.derived[k], d.colors.paper), `${season} ${k}`).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(d.colors.ink, d.derived.seaDeep)).toBeGreaterThanOrEqual(4.5)
+      expect(contrast(d.onDeep, d.deep)).toBeGreaterThanOrEqual(7)
+      expect(contrast('#ffffff', t.colors.red)).toBeGreaterThanOrEqual(4.5)
+    })
+  }
+})

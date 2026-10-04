@@ -5,6 +5,10 @@ import { Download, Mail, MessageCircle } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { getServices } from '../../content/selectors'
 import { Section } from '../ui/Section'
+import { BookingButton } from '../layout/BookingButton'
+import { track } from '../../utils/track'
+import { useT } from '../../i18n/useT'
+import { isPreviewMode } from '../../utils/route'
 import { Reveal } from '../ui/Reveal'
 import { Img } from '../ui/Img'
 import { PortraitPlaceholder } from '../ui/art'
@@ -23,7 +27,14 @@ export function Contact({ config }: { config: SectionConfig }) {
   const services = getServices(content)
   const hasEmail = !!mailtoUrl(profile.email, 's', 'b')
   const hasWa = !!whatsappUrl(profile.whatsapp, 'x')
-  const [method, setMethod] = useState<'email' | 'whatsapp'>(hasEmail ? 'email' : 'whatsapp')
+  const serverOk = contact.delivery !== 'client' && !isPreviewMode()
+  const showClient = contact.delivery !== 'server' || !serverOk
+  const [method, setMethod] = useState<'send' | 'email' | 'whatsapp'>(serverOk ? 'send' : hasEmail ? 'email' : 'whatsapp')
+  const [honey, setHoney] = useState('')
+  const [started] = useState(() => Date.now())
+  const [busy, setBusy] = useState(false)
+  const [sent, setSent] = useState(false)
+  const { t } = useT()
   const [values, setValues] = useState<EnquiryValues>(EMPTY)
   const [errors, setErrors] = useState<EnquiryErrors>({})
   const [status, setStatus] = useState('')
@@ -31,9 +42,9 @@ export function Contact({ config }: { config: SectionConfig }) {
   const recruiter = values.enquiryType === contact.recruiterType
   const signature = hasValue(profile.signature) ? profile.signature : profile.preferredName
   const set = (k: keyof EnquiryValues) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => setValues((v) => ({ ...v, [k]: e.target.value }))
-  const canSend = hasEmail || hasWa
+  const canSend = serverOk || hasEmail || hasWa
 
-  const submit = (e: FormEvent) => {
+  const submit = async (e: FormEvent) => {
     e.preventDefault()
     const errs = validateEnquiry(values)
     setErrors(errs)
@@ -44,6 +55,26 @@ export function Contact({ config }: { config: SectionConfig }) {
       return
     }
     const body = buildEnquiryMessage(values, profile.preferredName)
+    if (method === 'send') {
+      setBusy(true)
+      setStatus(t('contact.sending'))
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST', headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ name: values.name, email: values.email, company: values.company, type: values.enquiryType, budget: values.budget, message: body, website: honey, elapsed: Date.now() - started }),
+        })
+        if (!res.ok) throw new Error(String((await res.json().catch(() => ({}))).error ?? ''))
+        track('contact', values.enquiryType)
+        setSent(true)
+        setValues(EMPTY)
+        setStatus('')
+      } catch (err) {
+        const msg = err instanceof Error && err.message ? err.message : ''
+        const url = mailtoUrl(profile.email, `${values.enquiryType}: ${values.name.trim()}`, body)
+        if (url && !msg) { setStatus(`${t('contact.error')}`); window.location.href = url } else setStatus(msg || t('contact.error'))
+      } finally { setBusy(false) }
+      return
+    }
     if (method === 'whatsapp') {
       const url = whatsappUrl(profile.whatsapp, body)
       if (!url) return setStatus('WhatsApp is not set up for this site.')
@@ -79,20 +110,27 @@ export function Contact({ config }: { config: SectionConfig }) {
           <SocialRow social={profile.social} />
           <div className="contact__ctas">
             <button type="button" className="btn btn--solid btn--shine" onClick={() => document.getElementById('enquiry-name')?.focus()}>Let&rsquo;s talk about your next project.</button>
-            {cv && <a className="btn btn--ghost" href={cv.href} download={cv.filename}><Download size={18} aria-hidden /> Download my CV</a>}
+            {cv && <a className="btn btn--ghost" href={cv.href} download={cv.filename} onClick={() => track('download', 'CV')}><Download size={18} aria-hidden /> Download my CV</a>}
+            <BookingButton place="contact" />
           </div>
         </Reveal>
 
         <Reveal delay={0.1}>
           {canSend ? (
+            sent ? (
+              <div className="form form--done" role="status"><p className="h4">{contact.successMessage}</p><button type="button" className="btn btn--ghost" onClick={() => setSent(false)}>Send another</button></div>
+            ) : (
             <form className="form" onSubmit={submit} noValidate aria-describedby="form-explain">
               <fieldset className="form__method">
                 <legend>How would you like to reach me?</legend>
-                {hasEmail && <label><input type="radio" name="method" checked={method === 'email'} onChange={() => setMethod('email')} /> Email</label>}
-                {hasWa && <label><input type="radio" name="method" checked={method === 'whatsapp'} onChange={() => setMethod('whatsapp')} /> WhatsApp</label>}
+                {serverOk && <label><input type="radio" name="method" checked={method === 'send'} onChange={() => setMethod('send')} /> Send here</label>}
+                {showClient && hasEmail && <label><input type="radio" name="method" checked={method === 'email'} onChange={() => setMethod('email')} /> Email</label>}
+                {showClient && hasWa && <label><input type="radio" name="method" checked={method === 'whatsapp'} onChange={() => setMethod('whatsapp')} /> WhatsApp</label>}
               </fieldset>
               <p id="form-explain" className="fineprint">
-                This form does not send anything to a server. Pressing the button opens your {method === 'email' ? 'email app' : 'WhatsApp'} with a drafted message. You then press send yourself. I do not store what you type here.
+                {method === 'send'
+                  ? 'Your message goes straight to my inbox and I will reply by email. I keep it only to answer you.'
+                  : `This option does not send anything to a server. Pressing the button opens your ${method === 'email' ? 'email app' : 'WhatsApp'} with a drafted message. You then press send yourself. I do not store what you type here.`}
               </p>
 
               <Field {...field('name', 'Full name', true)}><input id="enquiry-name" autoComplete="name" value={values.name} onChange={set('name')} /></Field>
@@ -124,9 +162,11 @@ export function Contact({ config }: { config: SectionConfig }) {
                 </Field>
               )}
               <Field {...field('message', 'Message', true)}><textarea id="enquiry-message" rows={5} maxLength={3000} value={values.message} onChange={set('message')} /></Field>
-              <button type="submit" className="btn btn--solid btn--shine">{method === 'email' ? 'Draft my email' : 'Open WhatsApp'}</button>
+              <input className="hp" tabIndex={-1} autoComplete="off" aria-hidden="true" name="website" value={honey} onChange={(e) => setHoney(e.target.value)} />
+              <button type="submit" disabled={busy} className="btn btn--solid btn--shine">{method === 'send' ? t('contact.send') : method === 'email' ? 'Draft my email' : 'Open WhatsApp'}</button>
               <p role="status" className="form__status">{status}</p>
             </form>
+            )
           ) : (
             <div className="form form--empty">
               <p className="prose">Contact details have not been added yet. Add an email address or WhatsApp number in <code>src/content/portfolio.config.ts</code> to enable the enquiry form.</p>

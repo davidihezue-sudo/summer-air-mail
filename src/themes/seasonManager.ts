@@ -67,7 +67,7 @@ export interface ResolvedTheme {
   theme: SeasonTheme
   colors: ThemeColors
   /** Colours derived for readable text. See deriveTokens. */
-  derived: { redText: string; seaDeep: string; greenText: string }
+  derived: { redText: string; seaDeep: string; seaText: string; greenText: string }
   decorations: string[]
   intensity: Level
   texture: boolean
@@ -108,6 +108,34 @@ export function deriveTokens(c: ThemeColors) {
     redText: mixHex(c.red, c.ink, 0.58),
     seaDeep: mixHex(c.sea, c.ink, 0.62),
     greenText: mixHex(c.green, c.ink, 0.8),
+    seaText: mixHex(c.sea, c.ink, 0.62),
+  }
+}
+
+/** A dark palette derived from any season's palette (including owner overrides), so every season has a dark mode. */
+export function darkPalette(c: ThemeColors) {
+  const black = '#000000'
+  const white = '#ffffff'
+  const dim = (hex: string) => mixHex(hex, black, 0.42)
+  const ink = mixHex(c.paper, white, 0.85)
+  const colors: ThemeColors = {
+    ...c,
+    paper: mixHex(c.ink, black, 0.62),
+    sand: mixHex(c.ink, black, 0.8),
+    ink,
+    sea: dim(c.sea), aqua: dim(c.aqua), pink: dim(c.pink), sage: dim(c.sage), butter: dim(c.butter), peach: dim(c.peach), sky: dim(c.sky),
+  }
+  return {
+    colors,
+    derived: {
+      redText: mixHex(c.red, white, 0.45),
+      seaDeep: mixHex(c.sea, black, 0.42),
+      seaText: mixHex(c.sea, white, 0.4),
+      greenText: mixHex(c.sage, white, 0.5),
+    },
+    /** Dark bands (footer, case studies, tools): a deeper surface with the light text colour. */
+    deep: mixHex(c.ink, black, 0.45),
+    onDeep: ink,
   }
 }
 

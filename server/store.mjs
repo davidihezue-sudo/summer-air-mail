@@ -1,7 +1,5 @@
-import { mkdir, readFile, rename, writeFile, copyFile } from 'node:fs/promises'
-import { existsSync } from 'node:fs'
-import { join } from 'node:path'
 import { randomBytes } from 'node:crypto'
+import { asKv } from './kv.mjs'
 
 const MAX_HISTORY = 20
 
@@ -10,31 +8,19 @@ const MAX_HISTORY = 20
  * published versions for rollback. Suitable for one server instance with a persistent disk.
  * For several instances or heavy editing, replace this module with a database (see README).
  */
-export function createStore(dir) {
-  const file = join(dir, 'content.json')
+export function createStore(dirOrKv, { onSave } = {}) {
+  const kv = asKv(dirOrKv)
   let state = { version: 1, draft: null, published: null, history: [] }
   let queue = Promise.resolve()
 
   async function init() {
-    await mkdir(dir, { recursive: true })
-    if (existsSync(file)) {
-      try {
-        const parsed = JSON.parse(await readFile(file, 'utf8'))
-        state = { version: 1, draft: null, published: null, history: [], ...parsed }
-      } catch (e) {
-        // Never silently overwrite a file we cannot read.
-        throw new Error(`content.json is unreadable (${e.message}). Restore data/content.json.bak or fix the file.`, { cause: e })
-      }
-    }
+    await kv.init()
+    const parsed = await kv.read('content.json') // throws on a damaged file instead of overwriting it
+    if (parsed) state = { version: 1, draft: null, published: null, history: [], ...parsed }
   }
 
   function persist() {
-    queue = queue.then(async () => {
-      const tmp = `${file}.${randomBytes(4).toString('hex')}.tmp`
-      await writeFile(tmp, JSON.stringify(state), { mode: 0o600 })
-      if (existsSync(file)) await copyFile(file, `${file}.bak`).catch(() => {})
-      await rename(tmp, file)
-    })
+    queue = queue.then(() => kv.write('content.json', state, { backup: true }))
     return queue
   }
 
@@ -54,8 +40,10 @@ export function createStore(dir) {
     async saveDraft(content, baseRev) {
       const current = state.draft?.rev ?? 0
       if (baseRev !== undefined && baseRev !== current) return { conflict: true, rev: current }
+      const before = state.draft?.content ?? null
       state.draft = { rev: current + 1, updatedAt: new Date().toISOString(), content }
       await persist()
+      if (onSave) await onSave(before, content)
       return { conflict: false, rev: state.draft.rev }
     },
     async publish() {

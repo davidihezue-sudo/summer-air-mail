@@ -55,7 +55,7 @@
 
 .hero__hint { position: absolute; left: 50%; bottom: 1.2rem; translate: -50% 0; display: grid; justify-items: center; font-size: .72rem; letter-spacing: .25em; text-transform: uppercase; font-weight: 700; opacity: calc(1 - var(--p, 0) * 6); animation: nudge 2s ease-in-out infinite; }
 @keyframes nudge { 50% { transform: translateY(6px); } }
-.hero__motion { position: absolute; right: var(--gutter); bottom: 1rem; font-size: .8rem; min-height: 44px; background: rgb(251 244 228 / .85); z-index: 4; }
+.hero__motion { position: absolute; right: var(--gutter); bottom: 1rem; font-size: .8rem; min-height: 44px; background: color-mix(in srgb, var(--c-paper) 85%, transparent); z-index: 4; }
 
 /* Night Tide */
 .tide { position: absolute; inset: 0; pointer-events: none; z-index: 5; }

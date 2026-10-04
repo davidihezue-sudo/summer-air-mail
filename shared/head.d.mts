@@ -6,3 +6,7 @@ export function injectHead(html: string, p: any): string
 export function buildRobots(p: any): string
 export function buildSitemap(p: any): string
 export function buildCsp(p: any): string
+export function buildFeed(content: unknown): string
+export function buildFullSitemap(content: unknown): string
+export function pageSeo(content: unknown, path: string): null | { missing: true } | { missing?: false; title: string; description: string; image: string; canonical: string }
+export function withSeo(portfolio: any, seo: { title: string; description: string; image: string; canonical: string }): any // eslint-disable-line @typescript-eslint/no-explicit-any

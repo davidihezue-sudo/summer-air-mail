@@ -5,10 +5,16 @@ import { useActiveSection } from '../../hooks/useActiveSection'
 import { goTo } from '../../utils/nav'
 import { cvLink, hasValue } from '../../utils/text'
 import { Modal } from '../ui/Modal'
+import { BookingButton } from './BookingButton'
+import { SchemeToggle } from './SchemeToggle'
+import { LangSwitcher } from './LangSwitcher'
+import { useT } from '../../i18n/useT'
+import { track } from '../../utils/track'
 
 export function Header() {
   const { content, nav, idOf } = useContent()
   const { profile } = content.portfolio
+  const { t } = useT()
   const cv = cvLink(content.portfolio)
   const active = useActiveSection(nav.filter((n) => !n.external).map((n) => n.target))
   const [scrolled, setScrolled] = useState(false)
@@ -50,14 +56,19 @@ export function Header() {
                 </a>
               ),
             )}
-            {cv && <a className="navlink navlink--cv" href={cv.href} download={cv.filename}>CV</a>}
+            {cv && <a className="navlink navlink--cv" href={cv.href} download={cv.filename} onClick={() => track('download', 'CV')}>{t('cv.nav')}</a>}
           </nav>
-          <button type="button" className="header__burger" onClick={() => setOpen(true)} aria-label="Open menu" aria-haspopup="dialog">
-            <Menu aria-hidden />
-          </button>
+          <div className="header__tools">
+            <BookingButton place="header" className="btn btn--solid header__book" />
+            <LangSwitcher />
+            <SchemeToggle />
+            <button type="button" className="header__burger" onClick={() => setOpen(true)} aria-label={t('menu.open')} aria-haspopup="dialog">
+              <Menu aria-hidden />
+            </button>
+          </div>
         </div>
       </header>
-      <Modal open={open} onClose={() => setOpen(false)} label="Menu" className="drawer">
+      <Modal open={open} onClose={() => setOpen(false)} label={t('menu.title')} className="drawer">
         <nav className="drawer__nav" aria-label="Mobile">
           <p className="script drawer__name">{signature}</p>
           {nav.map((i) =>
@@ -67,7 +78,8 @@ export function Header() {
               <a key={i.id} href={`#${i.target}`} onClick={go(i.target)} className="drawer__link">{i.label}</a>
             ),
           )}
-          {cv && <a className="btn btn--solid" href={cv.href} download={cv.filename}>Download CV</a>}
+          {cv && <a className="btn btn--solid" href={cv.href} download={cv.filename}>{t('cv.download')}</a>}
+          <BookingButton place="header" className="btn btn--ghost" />
         </nav>
       </Modal>
     </>

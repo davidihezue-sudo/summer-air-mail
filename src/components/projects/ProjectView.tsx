@@ -12,6 +12,8 @@ import { ContentCard } from '../content-gallery/ContentGallery'
 import { ScreenshotGrid } from '../screenshots/Screenshots'
 import { Img } from '../ui/Img'
 import { hasValue, safeHref } from '../../utils/text'
+import { ShareButton } from '../layout/ShareButton'
+import { workUrl } from '../../utils/route'
 
 interface Props {
   project: Project | null
@@ -118,6 +120,9 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
           {hasValue(project.period) && <div><dt>Period</dt><dd>{project.period}</dd></div>}
         </dl>
         <PlatformIcons platforms={project.platforms} />
+        <div className="project__actions">
+          <ShareButton path={workUrl(project.id)} title={project.title} />
+        </div>
         {link && (
           <div className="project__actions">
             <a className="btn btn--ghost" href={link} target="_blank" rel="noopener noreferrer">View project <ArrowUpRight size={16} aria-hidden /><span className="sr-only"> (opens in a new tab)</span></a>

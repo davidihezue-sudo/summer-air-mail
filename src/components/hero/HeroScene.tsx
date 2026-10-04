@@ -1,3 +1,5 @@
+import { BookingButton } from '../layout/BookingButton'
+import { track } from '../../utils/track'
 import { useId } from 'react'
 import { useContent } from '../../hooks/useContent'
 import { useTheme } from '../../hooks/useTheme'
@@ -55,7 +57,8 @@ export function HeroScene({ tide }: { tide?: boolean }) {
                 </a>
               ),
             )}
-            {cv && (tide ? <span className="btn btn--ghost">{cv.label}</span> : <a className="btn btn--ghost" href={cv.href} download={cv.filename}>{cv.label}</a>)}
+            {cv && (tide ? <span className="btn btn--ghost">{cv.label}</span> : <a className="btn btn--ghost" href={cv.href} download={cv.filename} onClick={() => track('download', 'CV')}>{cv.label}</a>)}
+            {!tide && <BookingButton place="hero" />}
           </div>
         )}
       </div>

@@ -1,5 +1,7 @@
-import { Suspense, createContext, lazy, useContext, useMemo, useState, type ReactNode } from 'react'
+import { Suspense, createContext, lazy, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useContent } from '../../hooks/useContent'
+import { navigate, parseRoute, isPreviewMode, workUrl } from '../../utils/route'
+import { track } from '../../utils/track'
 import { getProjects } from '../../content/selectors'
 import type { ViewerImage } from '../ui/ImageViewer'
 
@@ -24,13 +26,27 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<{ id: string; focusCase: boolean } | null>(null)
   const [images, setImages] = useState<{ list: ViewerImage[]; index: number }>({ list: [], index: -1 })
 
+  // Opening a project gives it its own address (/work/<id>) so it can be shared and the back button works.
+  useEffect(() => {
+    const sync = () => {
+      const r = parseRoute(location.pathname)
+      if (r.kind === 'work' && getProjects(content).some((p) => p.id === r.id)) setState((s) => (s?.id === r.id ? s : { id: r.id, focusCase: false }))
+      else if (r.kind === 'home') setState(null)
+    }
+    sync()
+    window.addEventListener('popstate', sync)
+    return () => window.removeEventListener('popstate', sync)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const api = useMemo<ViewerApi>(
     () => ({
-      openProject: (id) => setState({ id, focusCase: false }),
-      openCase: (id) => setState({ id, focusCase: true }),
+      openProject: (id) => { track('project', projects.find((p) => p.id === id)?.title ?? id); setState({ id, focusCase: false }); if (!isPreviewMode()) history.pushState(null, '', workUrl(id)) },
+      openCase: (id) => { track('project', projects.find((p) => p.id === id)?.title ?? id); setState({ id, focusCase: true }); if (!isPreviewMode()) history.pushState(null, '', workUrl(id)) },
       openImages: (list, index = 0) => setImages({ list, index }),
     }),
-    [],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [content],
   )
   const project = state ? projects.find((p) => p.id === state.id) ?? null : null
 
@@ -38,7 +54,7 @@ export function ViewerProvider({ children }: { children: ReactNode }) {
     <ViewerContext.Provider value={api}>
       {children}
       <Suspense fallback={null}>
-        {project && <ProjectView project={project} focusCase={!!state?.focusCase} onClose={() => setState(null)} onOpen={api.openProject} />}
+        {project && <ProjectView project={project} focusCase={!!state?.focusCase} onClose={() => { setState(null); if (!isPreviewMode() && parseRoute(location.pathname).kind === 'work') navigate('/') }} onOpen={api.openProject} />}
         {images.list.length > 0 && <ImageViewer images={images.list} index={images.index} onIndex={(i) => setImages((s) => ({ ...s, index: i }))} onClose={() => setImages({ list: [], index: -1 })} />}
       </Suspense>
     </ViewerContext.Provider>

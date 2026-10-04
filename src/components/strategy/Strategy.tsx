@@ -4,11 +4,13 @@ import type { SectionConfig } from '../../content/types'
 import { useContent } from '../../hooks/useContent'
 import { Section } from '../ui/Section'
 import { Reveal } from '../ui/Reveal'
+import { useT } from '../../i18n/useT'
 import { toneValue } from '../../utils/theme'
 
 export function Strategy({ config }: { config: SectionConfig }) {
   const { content } = useContent()
   const { strategy } = content.portfolio
+  const { t } = useT()
   const board = useRef<HTMLOListElement>(null)
   const [allOpen, setAllOpen] = useState(false)
   const toggleAll = () => {
@@ -22,7 +24,7 @@ export function Strategy({ config }: { config: SectionConfig }) {
       {(strategy.hint || strategy.showToggleAll) && (
         <div className="board-hint">
           {strategy.hint && <p className="board-hint__t"><ChevronDown size={16} aria-hidden="true" /> {strategy.hint}</p>}
-          {strategy.showToggleAll && <button type="button" className="chip" onClick={toggleAll}>{allOpen ? 'Close all' : 'Open all'}</button>}
+          {strategy.showToggleAll && <button type="button" className="chip" onClick={toggleAll}>{allOpen ? t('note.closeAll') : t('note.openAll')}</button>}
         </div>
       )}
       <ol className="board" ref={board}>
@@ -34,7 +36,7 @@ export function Strategy({ config }: { config: SectionConfig }) {
                   <span className="note__n">{String(i + 1).padStart(2, '0')}</span>
                   <span className="note__t">{s.title}</span>
                   <span className="note__s">{s.summary}</span>
-                  <span className="note__more"><span className="note__open">Tap to open</span><span className="note__shut">Tap to close</span><ChevronDown size={16} aria-hidden="true" /></span>
+                  <span className="note__more"><span className="note__open">{t('note.open')}</span><span className="note__shut">{t('note.close')}</span><ChevronDown size={16} aria-hidden="true" /></span>
                 </summary>
                 <ul>{s.questions.map((q) => <li key={q}>{q}</li>)}</ul>
               </details>

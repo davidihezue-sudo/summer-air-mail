@@ -7,6 +7,8 @@ import { Header } from './components/layout/Header'
 import { ScrollProgress } from './components/layout/ScrollProgress'
 import { CursorFx, TouchRipple } from './components/layout/CursorFx'
 import { cursorAllowed } from './motion/cursor'
+import { Banner } from './components/layout/Banner'
+import { useT } from './i18n/useT'
 import { Decor } from './components/layout/Decor'
 import { Hero } from './components/hero/Hero'
 import { RecruiterOverview } from './components/about/RecruiterOverview'
@@ -52,13 +54,15 @@ export default function App() {
   const { content, sections } = useContent()
   const { plan, resolved, finePointer, reduced } = useTheme()
   const { profile, theme } = content.portfolio
-  const { cursor } = content.portfolio
+  const { cursor, design } = content.portfolio
+  const { t } = useT()
   const fx = cursorAllowed(cursor, { professional: theme.professional, global: theme.animationIntensity, prefersReduced: reduced, finePointer })
 
   return (
     <ViewerProvider>
       <Loader name={profile.preferredName} label={resolved.theme.postLabel} skip={plan.reduced} />
-      <a className="skip" href="#main">Skip to content</a>
+      <a className="skip" href="#main">{t('skip')}</a>
+      <Banner />
       <Header />
       <Decor />
       <main id="main">
@@ -73,7 +77,7 @@ export default function App() {
         })}
       </main>
       <Footer />
-      <ScrollProgress />
+      {design.readingProgress && <ScrollProgress />}
       {fx && <CursorFx settings={cursor} rgb={resolved.theme.cursor.stroke} season={resolved.season} imageSrc={cursor.image?.src} />}
       {cursor.touchRipple && !reduced && !finePointer && <TouchRipple rgb={resolved.theme.cursor.stroke} />}
     </ViewerProvider>
