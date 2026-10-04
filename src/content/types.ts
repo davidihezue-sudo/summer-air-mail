@@ -235,6 +235,10 @@ export interface PlatformExpertise {
   advertising?: string
   profileUrl?: string
   projectIds?: string[]
+  /** Your own logo for this platform. Blank uses the built-in mark. */
+  logo?: string
+  /** Logo tile colour, as a hex colour. Blank uses the platform's own colour. */
+  color?: string
   hidden?: boolean
 }
 

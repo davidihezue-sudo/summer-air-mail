@@ -59,7 +59,8 @@
 .polaroid__cat { font-size: .8rem; opacity: .75; }
 .polaroid__desc { font-size: .9rem; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
 .platform-icons { display: flex; gap: .5rem; margin: .4rem 0; }
-.platform-icons li { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 50%; border: 1.5px solid currentColor; }
+.platform-icons li { display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--surface, #fff); color: var(--c-ink); border: 1px solid color-mix(in srgb, var(--c-ink) 18%, transparent); }
+.platform-icons svg { width: 18px; height: 18px; }
 
 /* Project dialog */
 .project { display: grid; }
@@ -473,3 +474,4 @@ html[dir='rtl'] .timeline__dot { left: auto; right: calc(-1.6rem - 7px); }
 [data-cards='flat'] :is(.result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric, .related button, .toolcard) { box-shadow: none; }
 [data-cards='outlined'] :is(.result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric) { box-shadow: none; background: transparent; border: var(--bw, 1.5px) solid var(--c-ink); }
 [data-cards='glass'] :is(.result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric) { background: color-mix(in srgb, var(--surface, #fff) 62%, transparent); backdrop-filter: blur(10px); border: 1px solid color-mix(in srgb, var(--c-ink) 18%, transparent); }
+.polaroid .platform-icons li { background: #fff; color: #17323f; }

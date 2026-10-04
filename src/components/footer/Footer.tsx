@@ -40,12 +40,12 @@ export function Footer() {
           <div className="footer__social">
             {socials.map((s) => (
               <a key={s.key} href={s.href} target="_blank" rel="noopener noreferrer" aria-label={`${s.label} (opens in a new tab)`}>
-                <BrandIcon name={s.key} />
+                <BrandIcon name={s.key} tone="current" />
               </a>
             ))}
             {wa && (
               <a href={wa} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp (opens in a new tab)">
-                <BrandIcon name="whatsapp" />
+                <BrandIcon name="whatsapp" tone="current" />
               </a>
             )}
           </div>

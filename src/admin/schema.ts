@@ -6,7 +6,7 @@ import {
   newService, newSkillGroup, newTestimonial, newTool, newWebsite, newCaseStudy,
 } from '../content/factories'
 import { FONT_CHOICES } from '../themes/seasonManager'
-import { BRAND_CHOICES, brandDataUri, brandFor } from '../content/brands'
+import { BRAND_CHOICES, brandDataUri, brandFor, platformAsTool } from '../content/brands'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const PLATFORMS: Opt[] = ['instagram', 'tiktok', 'facebook', 'linkedin', 'youtube', 'pinterest', 'x', 'threads', 'snapchat', 'web']
@@ -179,7 +179,7 @@ export const ENTITIES: Record<string, EntityDef> = {
     thumbOf: (t) => brandDataUri(brandFor(t)), shown: (t) => !!t.confirmed, setShown: (t, v) => { t.confirmed = v }, shownLabels: ['In use', 'Not shown'],
     fields: [
       { kind: 'text', key: 'name', label: 'Tool name' }, { kind: 'select', key: 'category', label: 'Category', options: TOOL_CATEGORIES },
-      { kind: 'bool', key: 'confirmed', label: 'I use this tool' }, { kind: 'textarea', key: 'usage', label: 'How I use it', help: 'Be specific. It is shown on the tool card for everyone to read.' },
+      { kind: 'bool', key: 'confirmed', label: 'I use this tool', help: 'Switch this on to show the tool on your site.' }, { kind: 'textarea', key: 'usage', label: 'How I use it (optional)', help: 'Be specific. It is shown on the tool card for everyone to read. Leave it empty to show just the logo and name.' },
       { kind: 'url', key: 'link', label: 'Link to the tool (optional)' },
       { kind: 'group', label: 'Logo', open: true, help: 'Most well known tools get their logo automatically from the name. Pick one below, upload the official logo, or paste a link to one.', fields: [
         { kind: 'select', key: 'logoSlug', label: 'Built-in logo', options: [{ value: '', label: 'Automatic (match the name)' }, ...BRAND_CHOICES] },
@@ -239,12 +239,13 @@ export const ENTITIES: Record<string, EntityDef> = {
   platforms: {
     id: 'platforms', title: 'Platform Expertise', singular: 'platform', collection: 'platforms', make: newPlatform,
     intro: 'Describe real experience on each platform in words. No percentage bars.',
-    titleOf: (p) => p.platform, subtitleOf: (p) => p.level || 'No level set', ...hiddenToggle, shownLabels: ['Shown', 'Hidden'],
+    titleOf: (p) => platformAsTool(p).name, subtitleOf: (p) => p.level || 'No level set', thumbOf: (p) => brandDataUri(brandFor(platformAsTool(p))), ...hiddenToggle, shownLabels: ['Shown', 'Hidden'],
     fields: [
       { kind: 'select', key: 'platform', label: 'Platform', options: PLATFORMS, custom: true }, { kind: 'select', key: 'level', label: 'Experience level', options: LEVELS },
       { kind: 'strings', key: 'services', label: 'Services performed' }, { kind: 'strings', key: 'contentTypes', label: 'Content types' }, { kind: 'strings', key: 'campaigns', label: 'Campaigns' },
       { kind: 'textarea', key: 'analytics', label: 'Analytics experience' }, { kind: 'textarea', key: 'advertising', label: 'Advertising experience' },
       { kind: 'url', key: 'profileUrl', label: 'Profile link' }, { kind: 'refs', key: 'projectIds', label: 'Portfolio projects', from: 'projects' },
+      { kind: 'group', label: 'Logo', open: false, help: 'The platform logo shows automatically. Upload your own or change its colour here.', fields: [{ kind: 'file', key: 'logo', label: 'Your own logo', accept: 'image' }, { kind: 'tone', key: 'color', label: 'Logo colour', help: 'Choose "Custom colour" to set a hex colour.' }] },
     ],
   },
   ai: {

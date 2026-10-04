@@ -4,7 +4,9 @@ import { getPlatforms, getProjects } from '../../content/selectors'
 import type { SectionConfig } from '../../content/types'
 import { Section } from '../ui/Section'
 import { Reveal } from '../ui/Reveal'
-import { BrandIcon, platformLabel } from '../ui/Icons'
+import { platformLabel } from '../ui/Icons'
+import { ToolLogo } from '../ui/ToolLogo'
+import { platformAsTool } from '../../content/brands'
 import { safeHref, hasValue } from '../../utils/text'
 import { useViewer } from '../projects/Viewer'
 
@@ -22,7 +24,7 @@ export function Platforms({ config }: { config: SectionConfig }) {
           return (
             <Reveal key={p.id} className="platform">
               <header className="platform__head">
-                <span className="platform__icon"><BrandIcon name={p.platform} size={26} /></span>
+                <ToolLogo tool={platformAsTool(p)} size="md" />
                 <div>
                   <h3 className="h5">{platformLabel(p.platform)}</h3>
                   {p.level && <p className="platform__level">{p.level}</p>}

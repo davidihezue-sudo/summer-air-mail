@@ -11,15 +11,16 @@ export function getProjects(c: ContentBundle): Project[] {
 export const getProjectTypes = (c: ContentBundle) => [...new Set(getProjects(c).map((p) => p.category).filter(Boolean))]
 export const getCaseStudyProjects = (c: ContentBundle) => getProjects(c).filter((p) => p.caseStudy)
 export const getServices = (c: ContentBundle) => c.services.filter((s) => !s.hidden && hasValue(s.name))
-export const getTools = (c: ContentBundle) => c.tools.filter((t) => t.confirmed && hasValue(t.usage))
+/** A tool shows once you tick "I use this tool". The how-I-use-it line is optional and only shown when it is real text. */
+export const getTools = (c: ContentBundle) => c.tools.filter((t) => t.confirmed && hasValue(t.name))
 export const getTestimonials = (c: ContentBundle) =>
   c.testimonials.filter((t) => t.approved && hasValue(t.quote)).slice().sort(byOrder)
 export const getContentItems = (c: ContentBundle) => c.contentItems.filter((i) => !i.hidden && hasValue(i.title))
 export const getWebsites = (c: ContentBundle) => c.websites.filter((w) => !w.hidden && hasValue(w.name))
 export const getSkillGroups = (c: ContentBundle) =>
   c.skills.filter((g) => !g.hidden).map((g) => ({ ...g, skills: g.skills.filter((s) => s.visible && hasValue(s.name)) })).filter((g) => g.skills.length)
-export const getPlatforms = (c: ContentBundle) =>
-  c.platforms.filter((p) => !p.hidden && (p.level || p.services.length || p.contentTypes.length || p.campaigns.length || hasValue(p.analytics) || hasValue(p.advertising)))
+/** A platform shows once it is switched on. The details under it are optional. */
+export const getPlatforms = (c: ContentBundle) => c.platforms.filter((p) => !p.hidden)
 export const getAiSkills = (c: ContentBundle) => c.aiSkills.filter((a) => !a.hidden && hasValue(a.name))
 export const getResults = (c: ContentBundle) =>
   c.results.filter((r) => !r.hidden && hasValue(r.metric) && (typeof r.end === 'number' || r.series?.length || hasValue(r.anonymised)))

@@ -44,7 +44,7 @@ export function brandFor(t: Pick<Tool, 'name' | 'logo' | 'logoUrl' | 'logoSlug' 
     const [title, hex, path] = BRAND_LOGOS[slug]
     return { kind: 'svg', slug, title, color: color || hex, path }
   }
-  return { kind: 'mono', text: initials(t.name), color: color || KNOWN_COLORS[key] || '#2A8DB0' }
+  return { kind: 'mono', text: key === 'linkedin' ? 'in' : initials(t.name), color: color || KNOWN_COLORS[key] || '#2A8DB0' }
 }
 
 export const BRAND_CHOICES = Object.entries(BRAND_LOGOS).map(([slug, v]) => ({ value: slug, label: v[0] })).sort((a, b) => a.label.localeCompare(b.label))
@@ -57,4 +57,12 @@ export function brandDataUri(b: Brand, mono = false): string {
     ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path fill="${fg}" d="${b.path}"/></svg>`
     : `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48"><rect width="48" height="48" rx="10" fill="${b.color}"/><text x="24" y="31" text-anchor="middle" font-family="sans-serif" font-weight="700" font-size="20" fill="#fff">${b.text.replace(/[<&]/g, '')}</text></svg>`
   return `data:image/svg+xml,${encodeURIComponent(svg)}`
+}
+
+const PLATFORM_NAMES: Record<string, string> = { x: 'X', tiktok: 'TikTok', youtube: 'YouTube', linkedin: 'LinkedIn', whatsapp: 'WhatsApp' }
+
+/** A platform treated like a tool for logo purposes, so both share one mark and one tile style. */
+export function platformAsTool(p: { platform: string; logo?: string; color?: string }): Pick<Tool, 'name' | 'logo' | 'logoSlug' | 'color'> {
+  const name = PLATFORM_NAMES[p.platform.toLowerCase()] ?? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
+  return { name, logo: p.logo, color: p.color, logoSlug: BRAND_LOGOS[p.platform.toLowerCase()] ? p.platform.toLowerCase() : undefined }
 }

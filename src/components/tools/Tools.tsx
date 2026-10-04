@@ -42,7 +42,7 @@ function Ring({ tool }: { tool: Tool }) {
             <span className="ring__water" aria-hidden />
             {ui.showLogos && <ToolLogo tool={tool} size="lg" mono={ui.logoStyle === 'mono'} />}
           </span>
-          <span className="ring__face ring__face--back"><span>{tool.usage}</span></span>
+          <span className="ring__face ring__face--back"><span>{hasValue(tool.usage) ? tool.usage : tool.name}</span></span>
         </span>
       </button>
       <span className="ringitem__name"><Name tool={tool} /></span>

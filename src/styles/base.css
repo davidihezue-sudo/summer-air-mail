@@ -220,3 +220,4 @@ html[dir='rtl'] .banner { padding: .35rem 1rem .35rem 3rem; } html[dir='rtl'] .b
 [data-scheme='dark'] :is(.drawer__name, .loader__name, .hero-roles__line--1, .stat__num, .case__h span, .heart, .contact__sig, .field__error) { color: var(--c-red-text); }
 [data-scheme='dark'] :is(.vcard__result, .hero-roles__line--2) { color: var(--c-green-text); }
 main { overflow-x: clip; }
+[data-scheme='dark'] svg[data-darkbrand] path { fill: currentColor; }

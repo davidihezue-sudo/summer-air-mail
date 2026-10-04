@@ -46,3 +46,22 @@ describe('hero orb', () => {
     expect(satellites(NaN)).toHaveLength(0)
   })
 })
+
+import { getTools, getPlatforms } from '../src/content/selectors'
+import { platformAsTool } from '../src/content/brands'
+import { baseContent } from '../src/content/bundle'
+describe('switched on means visible', () => {
+  it('shows a tool as soon as it is switched on, even with no usage text yet', () => {
+    const c = { ...baseContent, tools: [{ id: 'a', name: 'Figma', category: 'Design' as const, confirmed: true, usage: '[How you use it]' }, { id: 'b', name: 'Canva', category: 'Design' as const, confirmed: false, usage: 'Real text' }] }
+    expect(getTools(c).map((t) => t.id)).toEqual(['a'])
+  })
+  it('shows a platform as soon as it is switched on', () => {
+    const c = { ...baseContent, platforms: baseContent.platforms.map((p, i) => (i === 0 ? { ...p, hidden: false } : p)) }
+    expect(getPlatforms(c)).toHaveLength(1)
+  })
+  it('gives platforms a logo, with an "in" tile for LinkedIn', () => {
+    expect(brandFor(platformAsTool({ platform: 'instagram' })).kind).toBe('svg')
+    expect(brandFor(platformAsTool({ platform: 'tiktok' })).kind).toBe('svg')
+    expect(brandFor(platformAsTool({ platform: 'linkedin' }))).toMatchObject({ kind: 'mono', text: 'in', color: '#0A66C2' })
+  })
+})
