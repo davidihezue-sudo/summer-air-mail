@@ -24,7 +24,8 @@
     "smoke:v3": "node scripts/smoke-v3.mjs",
     "a11y": "node scripts/a11y.mjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
-    "dev:phone": "node scripts/dev-all.mjs --host"
+    "dev:phone": "node scripts/dev-all.mjs --host",
+    "go": "node scripts/go.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

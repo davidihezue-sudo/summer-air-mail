@@ -27,6 +27,8 @@ A four-season social media and digital marketing portfolio with a built-in admin
 
 ## Quick start
 
+**Everyday use, one command:** `npm run go` gets the latest code from GitHub, installs anything new, and starts the site so your phone (on the same Wi-Fi) can open it too. It prints the phone addresses. Use it every time.
+
 You need Node.js 22 or newer.
 
 ```bash
