@@ -86,34 +86,50 @@ const SECTION_LAYOUT = 'Applies to sections that offer more than one arrangement
 void SECTION_LAYOUT
 
 Object.assign(PAGES, {
-  toolsDisplay: {
-    title: 'Tools Display', intro: 'How the tools you use appear on the site. Everything shows without clicking. Turn individual tools on under Tools & Platforms.',
-    blocks: [{ base: 'portfolio.toolsUi', fields: [
-      { kind: 'select', key: 'layout', label: 'Layout', options: [{ value: 'cards', label: 'Cards: logo, name, category and how you use it' }, { value: 'compact', label: 'Compact: small logo chips' }, { value: 'rings', label: 'Rings: flip to read (the original look)' }] },
-      { kind: 'bool', key: 'showLogos', label: 'Show logos' },
-      { kind: 'select', key: 'logoSize', label: 'Logo size', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Large' }] },
-      { kind: 'select', key: 'logoStyle', label: 'Logo colour', options: [{ value: 'color', label: 'Brand colours' }, { value: 'mono', label: 'One colour (matches the site)' }] },
-      { kind: 'bool', key: 'showUsage', label: 'Show how I use each tool' }, { kind: 'bool', key: 'showCategory', label: 'Show the category on each card' },
-      { kind: 'bool', key: 'group', label: 'Group by category' },
+  extras: {
+    title: 'Extras', intro: 'Small touches that make the site nicer to use. Each one can be switched off.',
+    blocks: [{ base: 'portfolio.extras', fields: [
+      { kind: 'bool', key: 'availabilityBadge', label: 'Availability badge in the header', help: 'A softly pulsing green dot and your availability message from Personal Profile. Desktop only.' },
+      { kind: 'bool', key: 'projectNav', label: 'Previous and Next buttons inside a project' },
+      { kind: 'bool', key: 'backToTop', label: 'Back to top button' },
+      { kind: 'bool', key: 'copyEmail', label: 'Copy button beside your email address' },
+      { kind: 'bool', key: 'clientStrip', label: 'Strip of brands I have worked with', help: 'Built from the client names on your published projects, so it only ever shows real work. Needs at least two clients.' },
+      { kind: 'bool', key: 'readingTime', label: 'Minutes to read on notes' },
     ] }],
   },
-  design: {
-    title: 'Design', intro: 'Shape, spacing and finish for the whole site. Colours come from the season; dark mode is below.',
+  mediaDisplay: {
+    title: 'Pictures & Screenshots', intro: 'Posts, stories, reels and screenshots come in different shapes. These settings decide how they are shown. The default shows every picture whole, in its own shape, so nothing is trimmed.',
+    blocks: [{ base: 'portfolio.media', fields: [
+      { kind: 'select', key: 'cardShape', label: 'Shape of portfolio cards', options: [{ value: 'auto', label: 'Follow each picture (nothing is trimmed)' }, { value: 'square', label: 'Square (1:1)' }, { value: 'portrait', label: 'Instagram portrait (4:5)' }, { value: 'story', label: 'Story, Reel and TikTok (9:16)' }, { value: 'tall', label: 'Pinterest (2:3)' }, { value: 'landscape', label: 'YouTube (16:9)' }, { value: 'wide', label: 'Facebook and LinkedIn link (1.91:1)' }], help: 'You can also set the shape for one project in its own settings.' },
+      { kind: 'select', key: 'cardFit', label: 'When a picture is not the frame\'s shape', options: [{ value: 'smart', label: 'Smart: trim only a sliver, otherwise show it whole' }, { value: 'contain', label: 'Always show the whole picture' }, { value: 'cover', label: 'Fill the frame and trim the edges' }] },
+      { kind: 'select', key: 'fill', label: 'What fills the space around a picture', options: [{ value: 'blur', label: 'A soft blurred copy of the picture' }, { value: 'tone', label: 'A plain colour' }, { value: 'none', label: 'Nothing' }] },
+      { kind: 'select', key: 'screenshots', label: 'Screenshots section layout', options: [{ value: 'masonry', label: 'Masonry: tall and wide screenshots fit together' }, { value: 'grid', label: 'Even grid' }] },
+    ] }],
+  },
+  toolsDisplay: {
+    title: 'Tools Display', intro: 'How the tools you use appear on the site. Everything shows without clicking. Turn individual tools on under Tools & Platforms.',
     blocks: [
-      { title: 'Shape and feel', base: 'portfolio.design', fields: [
-        { kind: 'select', key: 'radius', label: 'Corner roundness', options: [{ value: 'sharp', label: 'Sharp' }, { value: 'soft', label: 'Soft' }, { value: 'round', label: 'Very round' }] },
-        { kind: 'select', key: 'buttons', label: 'Button shape', options: [{ value: 'pill', label: 'Pill' }, { value: 'rounded', label: 'Rounded' }, { value: 'square', label: 'Square' }] },
-        { kind: 'select', key: 'density', label: 'Spacing', options: [{ value: 'compact', label: 'Compact' }, { value: 'comfortable', label: 'Comfortable' }, { value: 'spacious', label: 'Spacious' }] },
-        { kind: 'range', key: 'fontScale', label: 'Text size', min: 0.85, max: 1.3, step: 0.05, help: '1 is normal. Visitors can still zoom.' },
-        { kind: 'select', key: 'shadow', label: 'Shadows', options: [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'strong', label: 'Strong' }] },
-        { kind: 'select', key: 'borderWeight', label: 'Outline weight', options: [{ value: 'thin', label: 'Thin' }, { value: 'normal', label: 'Normal' }, { value: 'bold', label: 'Bold' }] },
-        { kind: 'select', key: 'headingCase', label: 'Headings', options: [{ value: 'normal', label: 'As written' }, { value: 'upper', label: 'Capitals' }] },
-        { kind: 'select', key: 'cards', label: 'Cards', options: [{ value: 'soft', label: 'Soft shadow' }, { value: 'flat', label: 'Flat' }, { value: 'outlined', label: 'Outlined' }, { value: 'glass', label: 'Frosted glass' }] },
-        { kind: 'bool', key: 'dialogAnimation', label: 'Animate pop-ups' }, { kind: 'bool', key: 'readingProgress', label: 'Show the scroll progress surfer' },
+      { title: 'Layout', base: 'portfolio.toolsUi', fields: [
+        { kind: 'select', key: 'layout', label: 'Layout', options: [
+          { value: 'cards', label: 'Cards: logo, name, category and how you use it' },
+          { value: 'wall', label: 'Logo wall: just the logos (names on hover, or shown under each)' },
+          { value: 'list', label: 'List: tidy rows with the description beside each logo' },
+          { value: 'compact', label: 'Compact: small cards' },
+          { value: 'marquee', label: 'Scrolling strip: logos drift past slowly' },
+          { value: 'rings', label: 'Rings: flip to read (the original look)' },
+        ] },
+        { kind: 'bool', key: 'tabs', label: 'Category tabs with counts', help: 'Visitors pick a category. Off shows everything, grouped or in one list.' },
+        { kind: 'bool', key: 'group', label: 'Group by category when there are no tabs' },
       ] },
-      { title: 'Light and dark', base: 'portfolio.design', fields: [
-        { kind: 'select', key: 'colorMode', label: 'Colour mode', options: [{ value: 'light', label: 'Always light' }, { value: 'dark', label: 'Always dark' }, { value: 'system', label: 'Follow the visitor device' }], help: 'Every season has a dark version made from its own colours.' },
-        { kind: 'bool', key: 'colorToggle', label: 'Show a light and dark switch to visitors' },
+      { title: 'What shows', base: 'portfolio.toolsUi', fields: [
+        { kind: 'bool', key: 'showLogos', label: 'Logos' }, { kind: 'bool', key: 'showNames', label: 'Names under the logos (logo wall)' },
+        { kind: 'bool', key: 'showUsage', label: 'How I use each tool (the description)' }, { kind: 'bool', key: 'showCategory', label: 'Category on each card' },
+      ] },
+      { title: 'Look', base: 'portfolio.toolsUi', fields: [
+        { kind: 'select', key: 'logoSize', label: 'Logo size', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Large' }] },
+        { kind: 'select', key: 'logoStyle', label: 'Logo colours', options: [{ value: 'color', label: 'Brand colours' }, { value: 'mono', label: 'One colour (matches the site)' }] },
+        { kind: 'select', key: 'tile', label: 'What the logo sits on', options: [{ value: 'white', label: 'A white tile' }, { value: 'glass', label: 'Frosted glass' }, { value: 'bare', label: 'Nothing (logo only)' }] },
+        { kind: 'bool', key: 'glow', label: 'Glow in the brand colour on hover' },
       ] },
     ],
   },

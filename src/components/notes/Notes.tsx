@@ -5,6 +5,7 @@ import { Reveal } from '../ui/Reveal'
 import { Img } from '../ui/Img'
 import { hasValue } from '../../utils/text'
 import { navigate } from '../../utils/route'
+import { readingMinutes } from '../../utils/text'
 import { useT } from '../../i18n/useT'
 
 export function Notes({ config }: { config: SectionConfig }) {
@@ -18,7 +19,7 @@ export function Notes({ config }: { config: SectionConfig }) {
           <li key={n.id}>
             <Reveal delay={i * 0.04} className="notecard">
               {n.cover?.src && <Img image={n.cover} className="notecard__img" />}
-              <p className="muted">{n.date}</p>
+              <p className="muted">{n.date}{content.portfolio.extras.readingTime && ` · ${readingMinutes(n.body)} min read`}</p>
               <h3 className="h5"><a href={`/notes/${n.slug}`} onClick={(e) => { e.preventDefault(); navigate(`/notes/${n.slug}`) }}>{n.title}</a></h3>
               {n.summary && <p>{n.summary}</p>}
             </Reveal>

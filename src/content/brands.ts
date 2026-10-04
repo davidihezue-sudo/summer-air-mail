@@ -66,3 +66,11 @@ export function platformAsTool(p: { platform: string; logo?: string; color?: str
   const name = PLATFORM_NAMES[p.platform.toLowerCase()] ?? p.platform.charAt(0).toUpperCase() + p.platform.slice(1)
   return { name, logo: p.logo, color: p.color, logoSlug: BRAND_LOGOS[p.platform.toLowerCase()] ? p.platform.toLowerCase() : undefined }
 }
+
+/** The colour to accent a tool with: its logo colour, or the site's sea blue. */
+export function brandColor(t: Pick<Tool, 'name' | 'logo' | 'logoUrl' | 'logoSlug' | 'color'>): string {
+  const b = brandFor(t)
+  if (b.kind === 'image') return t.color && HEX.test(t.color) ? t.color : '#2A8DB0'
+  // Near black brands would vanish on the dark section, so they get the site colour.
+  return parseInt(b.color.slice(1), 16) < 0x404040 ? '#2A8DB0' : b.color
+}

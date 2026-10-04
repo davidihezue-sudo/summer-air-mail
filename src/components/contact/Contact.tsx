@@ -104,7 +104,7 @@ export function Contact({ config }: { config: SectionConfig }) {
             </div>
           )}
           <ul className="contact__links">
-            {hasEmail && <li><a href={`mailto:${profile.email}`}><Mail size={18} aria-hidden /> {profile.email}</a></li>}
+            {hasEmail && <li><a href={`mailto:${profile.email}`}><Mail size={18} aria-hidden /> {profile.email}</a>{portfolio.extras.copyEmail && <CopyButton text={profile.email} />}</li>}
             {hasWa && <li><a href={whatsappUrl(profile.whatsapp, contact.whatsappGreeting)} target="_blank" rel="noopener noreferrer"><MessageCircle size={18} aria-hidden /> WhatsApp<span className="sr-only"> (opens in a new tab)</span></a></li>}
           </ul>
           <SocialRow social={profile.social} />
@@ -175,6 +175,15 @@ export function Contact({ config }: { config: SectionConfig }) {
         </Reveal>
       </div>
     </Section>
+  )
+}
+
+function CopyButton({ text }: { text: string }) {
+  const [done, setDone] = useState(false)
+  return (
+    <button type="button" className="copybtn" onClick={async () => { try { await navigator.clipboard.writeText(text); setDone(true); window.setTimeout(() => setDone(false), 2000) } catch { /* clipboard blocked */ } }}>
+      {done ? 'Copied' : 'Copy'}<span className="sr-only"> email address</span>
+    </button>
   )
 }
 

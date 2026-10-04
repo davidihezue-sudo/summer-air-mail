@@ -112,7 +112,9 @@ export const portfolio: Portfolio = {
     radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal',
     headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true, cards: 'soft',
   },
-  toolsUi: { layout: 'cards', showLogos: true, showUsage: true, showCategory: true, logoSize: 'md', logoStyle: 'color', group: true },
+  extras: { backToTop: true, availabilityBadge: true, projectNav: true, copyEmail: true, clientStrip: false, readingTime: true },
+  media: { cardFit: 'smart', fill: 'blur', cardShape: 'auto', screenshots: 'masonry' },
+  toolsUi: { layout: 'cards', showLogos: true, showNames: true, showUsage: true, showCategory: true, logoSize: 'md', logoStyle: 'color', tile: 'white', tabs: true, group: true, glow: true },
   cursor: {
     enabled: true, style: 'bubbles', size: 28, color: '', opacity: 0.85, smoothing: 0.35, trail: 20,
     blend: 'normal', scope: 'page', hideNativeCursor: false, growOnLinks: true, emoji: '', image: null,

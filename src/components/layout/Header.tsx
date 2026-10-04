@@ -7,6 +7,7 @@ import { cvLink, hasValue } from '../../utils/text'
 import { Modal } from '../ui/Modal'
 import { BookingButton } from './BookingButton'
 import { SchemeToggle } from './SchemeToggle'
+import { AvailabilityBadge } from './AvailabilityBadge'
 import { LangSwitcher } from './LangSwitcher'
 import { useT } from '../../i18n/useT'
 import { track } from '../../utils/track'
@@ -59,6 +60,7 @@ export function Header() {
             {cv && <a className="navlink navlink--cv" href={cv.href} download={cv.filename} onClick={() => track('download', 'CV')}>{t('cv.nav')}</a>}
           </nav>
           <div className="header__tools">
+            <AvailabilityBadge />
             <BookingButton place="header" className="btn btn--solid header__book" />
             <LangSwitcher />
             <SchemeToggle />

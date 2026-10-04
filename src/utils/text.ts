@@ -160,3 +160,6 @@ export function spelling(locale: string) {
 export function slug(s: string): string {
   return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '')
 }
+
+/** Whole minutes to read a text at about 220 words a minute. Never less than 1. */
+export const readingMinutes = (text: string) => Math.max(1, Math.round((text.trim().split(/\s+/).filter(Boolean).length || 0) / 220))

@@ -38,7 +38,7 @@ const NAV: { group: string; items: { id: string; label: string; icon: typeof Use
   ] },
   { group: 'Look and layout', items: [
     { id: 'appearance', label: 'Appearance', icon: Palette }, { id: 'cursor', label: 'Cursor effect', icon: MousePointer2 }, { id: 'seasons', label: 'Seasons', icon: Calendar }, { id: 'sections', label: 'Sections & Visibility', icon: ListChecks },
-    { id: 'design', label: 'Design', icon: Brush }, { id: 'looks', label: 'Saved Looks', icon: Bookmark },
+    { id: 'design', label: 'Design', icon: Brush }, { id: 'extras', label: 'Extras', icon: Wand2 }, { id: 'looks', label: 'Saved Looks', icon: Bookmark },
     { id: 'navigation', label: 'Navigation', icon: Compass }, { id: 'footer', label: 'Footer', icon: Footprints },
   ] },
   { group: 'Reach and engagement', items: [
@@ -57,7 +57,7 @@ const NAV: { group: string; items: { id: string; label: string; icon: typeof Use
   ] },
   { group: 'Portfolio', items: [
     { id: 'projects', label: 'Portfolio', icon: Briefcase }, { id: 'caseStudies', label: 'Case Studies', icon: BookOpen }, { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
-    { id: 'posts', label: 'Social Media Content', icon: Camera }, { id: 'videos', label: 'Videos & Reels', icon: Film }, { id: 'screenshots', label: 'Screenshots', icon: Clapperboard },
+    { id: 'posts', label: 'Social Media Content', icon: Camera }, { id: 'videos', label: 'Videos & Reels', icon: Film }, { id: 'screenshots', label: 'Screenshots', icon: Clapperboard }, { id: 'mediaDisplay', label: 'Pictures & Screenshots', icon: ImageIcon },
     { id: 'results', label: 'Analytics & Results', icon: BarChart3 }, { id: 'websites', label: 'Websites & Digital Projects', icon: Laptop },
   ] },
   { group: 'Capabilities', items: [

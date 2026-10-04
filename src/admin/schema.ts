@@ -54,6 +54,7 @@ export const PROJECT_FIELDS: Field[] = [
   {
     kind: 'group', label: 'Basics', fields: [
       { kind: 'text', key: 'title', label: 'Project title' }, { kind: 'text', key: 'client', label: 'Client or brand' },
+      { kind: 'select', key: 'cardFormat', label: 'Card picture shape (this project)', options: [{ value: '', label: 'Use the site setting' }, { value: 'square', label: 'Square (1:1)' }, { value: 'portrait', label: 'Instagram portrait (4:5)' }, { value: 'story', label: 'Story, Reel and TikTok (9:16)' }, { value: 'tall', label: 'Pinterest (2:3)' }, { value: 'landscape', label: 'YouTube (16:9)' }, { value: 'wide', label: 'Facebook and LinkedIn link (1.91:1)' }] },
       { kind: 'text', key: 'badge', label: 'Card label (for example New, Award winner)', help: 'Replaces the Featured label on the card when filled in.', maxLength: 24 }, { kind: 'tone', key: 'accent', label: 'Card accent colour', help: 'Colours the label and the bottom edge of this card.' },
       { kind: 'text', key: 'industry', label: 'Industry' },
       { kind: 'select', key: 'category', label: 'Project type', options: (c: SiteContent) => [...new Set([...PROJECT_TYPES, ...c.categories, ...c.projects.map((p) => p.category).filter(Boolean)])], custom: true, help: 'Visitors can filter by this. Add your own type if none fit.' },

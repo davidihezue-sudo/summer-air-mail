@@ -7,13 +7,15 @@ import { useTheme } from '../../hooks/useTheme'
 import { buildFacets, filterProjects, getProjects, type FacetKey } from '../../content/selectors'
 import type { SectionConfig } from '../../content/types'
 import { Section } from '../ui/Section'
-import { Img } from '../ui/Img'
 import { PlatformIcons } from './PlatformChips'
+import { FitImage } from '../ui/FitImage'
+import { forcedRatio, guessRatio } from '../../utils/media'
 import { platformLabel } from '../ui/Icons'
 import { useViewer } from './Viewer'
 
 export function Work({ config }: { config: SectionConfig }) {
   const { content } = useContent()
+  const mediaUi = content.portfolio.media
   const { copy } = useTheme()
   const projects = useMemo(() => getProjects(content).filter((p) => !config.filterCategory || p.category === config.filterCategory), [content, config.filterCategory])
   const facets = useMemo(() => buildFacets(projects, content), [projects, content])
@@ -60,7 +62,7 @@ export function Work({ config }: { config: SectionConfig }) {
           <li key={p.id} className="polaroid-wrap" style={{ ['--i' as string]: i, ...(toneValue(p.accent) ? { ['--accent' as string]: toneValue(p.accent) } : {}) }}>
             <button type="button" className="polaroid" onClick={() => openProject(p.id)} aria-label={`Open project: ${p.title}, ${p.client}`}>
               <span className="polaroid__pin" aria-hidden />
-              <span className="polaroid__photo">{p.thumbnail?.src ? <Img image={p.thumbnail} sizes="(min-width: 900px) 25vw, 70vw" /> : <span className="polaroid__blank" />}</span>
+              <span className="polaroid__photo">{p.thumbnail?.src ? <FitImage image={p.thumbnail} ratio={forcedRatio(p, mediaUi)} fallbackRatio={guessRatio(p.platforms)} fit={mediaUi.cardFit} fill={mediaUi.fill} sizes="(min-width: 900px) 25vw, 70vw" /> : <span className="polaroid__blank" />}</span>
               <span className="polaroid__meta">
                 {(hasValue(p.badge) || p.featured) && <span className="polaroid__flag">{hasValue(p.badge) ? p.badge : 'Featured'}</span>}
                 <span className="polaroid__brand">{p.client}</span>

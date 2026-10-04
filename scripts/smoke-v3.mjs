@@ -36,6 +36,9 @@ c.portfolio.i18n = { enabled: true, defaultLabel: 'English', switcher: true, lan
 c.tools = [{ id: 'tl1', name: 'Figma', category: 'Design', confirmed: true, usage: 'Smoke usage line.' }, { id: 'tl2', name: 'Canva', category: 'Design', confirmed: true, usage: 'Second usage line.' }]
 c.portfolio.cursor = { ...c.portfolio.cursor, enabled: true, style: 'ring', showIn: 'professional' }
 c.projects = [{ id: 'p1', title: 'Smoke project', client: 'Brand', industry: 'x', category: 'Brand Development', description: 'A description long enough to be a real description of the work done.', year: '2025', period: '', platforms: [], role: 'Lead', thumbnail: { src: '', alt: '' }, media: [], externalLink: '', featured: true, hidden: false, contentTypes: [], serviceIds: [], toolIds: [], aiSkillIds: [], resultIds: [], contentIds: [], screenshotIds: [], relatedIds: [], blocks: [] }]
+const tall = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1170" height="2532"><rect width="1170" height="2532" fill="#F39CAB"/><text x="50" y="200" font-size="120">PHONE SCREENSHOT</text></svg>')}`
+c.projects.push({ ...c.projects[0], id: 'p2', title: 'Tall screenshot project', platforms: ['instagram'], thumbnail: { src: tall, alt: 'A phone screenshot', width: 1170, height: 2532 } })
+c.portfolio.extras = { ...c.portfolio.extras, clientStrip: true, backToTop: true }
 c.notes = [{ id: 'n1', slug: 'hello-note', title: 'Hello note', date: '2026-01-01', summary: 'Sum', body: 'Body text here.', cover: null, tags: [], seoTitle: '', seoDescription: '', hidden: false }]
 c.applications = [{ id: 'a1', slug: 'acme-1234', label: 'Acme', company: 'Acme', role: 'SMM', enabled: true, expiresAt: '', hero: { label: '', headline: 'Hello Acme team', supporting: '', intro: '' }, greeting: { enabled: true, text: 'Prepared for Acme' }, featuredProjectIds: [], onlyFeatured: false, highlightSkills: [], hideSectionIds: [], lookId: '', professional: '', season: '', cvFile: '', cvFilename: '' }]
 c.testimonials = [1, 2].map((i) => ({ id: `t${i}`, name: `Person ${i}`, title: 'T', company: 'C', quote: `Quote ${i}`, relationship: 'r', approved: true }))
@@ -74,6 +77,14 @@ const open = async (path, w = 1280, h = 800, opts = {}) => {
   await page.selectOption('.langsel select', 'fr')
   await page.waitForTimeout(300)
   check(await page.evaluate(() => document.documentElement.lang) === 'fr', 'language switch sets the page language')
+  await page.evaluate(() => document.getElementById('work')?.scrollIntoView())
+  await page.waitForTimeout(600)
+  const tallCard = page.locator('.polaroid-wrap', { hasText: 'Tall screenshot project' }).locator('.fit')
+  check(await tallCard.locator('img.fit__img').getAttribute('data-fit') === 'contain', 'a tall phone screenshot is shown whole, not trimmed')
+  check(await tallCard.locator('img.fit__bg').count() === 1, 'the space around it is filled with a soft blurred copy')
+  const box = await tallCard.boundingBox()
+  check(box && box.height / box.width > 1.5, `the card follows the screenshot's tall shape (${box && (box.height / box.width).toFixed(2)})`)
+  check(await page.locator('.totop').count() === 1, 'back to top button appears after scrolling')
   await page.evaluate(() => document.getElementById('tools')?.scrollIntoView())
   await page.waitForTimeout(500)
   check(await page.locator('.toolcard').count() === 2, 'tools show as cards without clicking')

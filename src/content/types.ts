@@ -146,8 +146,35 @@ export interface CaseStudy {
   highlight?: { metricIndex: number | null; headline: string }
 }
 
+export interface Extras {
+  /** A round button that takes visitors back to the top after they scroll. */
+  backToTop: boolean
+  /** A small pulsing dot and your availability message in the header. */
+  availabilityBadge: boolean
+  /** Previous and next buttons inside a project. */
+  projectNav: boolean
+  /** A copy button beside your email address. */
+  copyEmail: boolean
+  /** A strip of the brands you have worked with, taken from your published projects. */
+  clientStrip: boolean
+  /** Minutes to read, on notes. */
+  readingTime: boolean
+}
+
+export interface MediaSettings {
+  /** smart: trim only when the picture is almost the right shape. contain: always show all of it. cover: always fill the frame. */
+  cardFit: 'smart' | 'contain' | 'cover'
+  /** What fills the gaps around a picture that does not match its frame. */
+  fill: 'blur' | 'tone' | 'none'
+  /** auto follows each picture. The others force one shape on every card. */
+  cardShape: 'auto' | 'square' | 'portrait' | 'story' | 'tall' | 'landscape' | 'wide'
+  screenshots: 'masonry' | 'grid'
+}
+
 export interface Project {
   id: string
+  /** Overrides the site's card shape for this project. */
+  cardFormat?: '' | 'square' | 'portrait' | 'story' | 'tall' | 'landscape' | 'wide'
   /** A short label on the card, for example "New" or "Award winner". Replaces "Featured" when set. */
   badge?: string
   /** A palette name or hex colour used for this card's accent. */
@@ -270,13 +297,21 @@ export interface Tool {
 }
 
 export interface ToolsUi {
-  layout: 'cards' | 'rings' | 'compact'
+  /** cards: logo, name, category and how it is used. wall: logos only. list: tidy rows. compact: small chips. marquee: a slow scrolling strip. rings: the original flip rings. */
+  layout: 'cards' | 'wall' | 'list' | 'compact' | 'marquee' | 'rings'
   showLogos: boolean
+  showNames: boolean
   showUsage: boolean
   showCategory: boolean
   logoSize: 'sm' | 'md' | 'lg'
   logoStyle: 'color' | 'mono'
+  /** What the logo sits on. */
+  tile: 'white' | 'glass' | 'bare'
+  /** Category tabs instead of one long page. */
+  tabs: boolean
   group: boolean
+  /** A glow in the tool's brand colour on hover. */
+  glow: boolean
 }
 
 export type AiCategory =
@@ -743,6 +778,8 @@ export interface Portfolio {
   }
   seasons: SeasonSettings
   design: DesignSettings
+  extras: Extras
+  media: MediaSettings
   toolsUi: ToolsUi
   cursor: CursorSettings
   announcement: Announcement

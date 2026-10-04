@@ -5,18 +5,20 @@ import { useTheme } from '../../hooks/useTheme'
 import { getContentItems } from '../../content/selectors'
 import type { ContentItem, SectionConfig } from '../../content/types'
 import { Section } from '../ui/Section'
-import { Img } from '../ui/Img'
 import { VideoPlayer } from '../ui/VideoPlayer'
+import { FitImage } from '../ui/FitImage'
+import { guessRatio } from '../../utils/media'
 import { platformLabel } from '../ui/Icons'
 import { hasValue, parseVideo, safeHref } from '../../utils/text'
 
 export function ContentCard({ item }: { item: ContentItem }) {
+  const mediaUi = useContent().content.portfolio.media
   const isVideo = parseVideo(item.video).kind !== 'none'
   const link = safeHref(item.link)
   return (
     <li className="vcard">
-      <div className="vcard__media">
-        {isVideo ? <VideoPlayer src={item.video} poster={item.thumbnail?.src} title={item.title} vertical /> : item.thumbnail?.src ? <Img image={item.thumbnail} sizes="(min-width: 900px) 22vw, 60vw" /> : null}
+      <div className={`vcard__media ${isVideo ? 'vcard__media--video' : 'vcard__media--image'}`}>
+        {isVideo ? <VideoPlayer src={item.video} poster={item.thumbnail?.src} title={item.title} vertical /> : item.thumbnail?.src ? <FitImage image={item.thumbnail} fallbackRatio={guessRatio([item.platform])} fit={mediaUi.cardFit} fill={mediaUi.fill} sizes="(min-width: 900px) 22vw, 60vw" /> : null}
         <span className="vcard__tag">{item.format}</span>
       </div>
       <div className="vcard__body">

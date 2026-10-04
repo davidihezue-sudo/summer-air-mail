@@ -65,6 +65,8 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
   const reels = getContentItems(content).filter((c) => project.contentIds?.includes(c.id))
   const shots = getScreenshots(content).filter((s) => project.screenshotIds?.includes(s.id) || s.projectId === project.id)
   const related = relatedProjects(project, getProjects(content))
+  const siblings = getProjects(content)
+  const pos = siblings.findIndex((x) => x.id === project.id)
 
   return (
     <div className="project" ref={root}>
@@ -122,6 +124,12 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
         <PlatformIcons platforms={project.platforms} />
         <div className="project__actions">
           <ShareButton path={workUrl(project.id)} title={project.title} />
+          {content.portfolio.extras.projectNav && siblings.length > 1 && (
+            <>
+              <button type="button" className="btn btn--ghost sharebtn" onClick={() => onOpen(siblings[(pos - 1 + siblings.length) % siblings.length].id)}><ChevronLeft size={16} aria-hidden /> Previous project</button>
+              <button type="button" className="btn btn--ghost sharebtn" onClick={() => onOpen(siblings[(pos + 1) % siblings.length].id)}>Next project <ChevronRight size={16} aria-hidden /></button>
+            </>
+          )}
         </div>
         {link && (
           <div className="project__actions">

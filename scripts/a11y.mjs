@@ -58,7 +58,7 @@ if (process.env.SKIP_ADMIN !== '1') {
     await page.fill('input[type=password]', 'correct horse battery staple')
     await page.click('button:has-text("Sign in")')
     await page.waitForSelector('h1:has-text("Dashboard")')
-    for (const p of ['dashboard', 'profile', 'hero', 'seasons', 'sections', 'navigation', 'projects', 'services', 'results', 'media', 'publish', 'seo', 'advanced', 'cursor', 'design', 'looks', 'languages', 'inbox', 'subscribers', 'insights', 'qualityScore', 'bulk', 'altText', 'team', 'server', 'applications', 'notes', 'announcement', 'engage', 'profilePage', 'maintenance', 'quality']) {
+    for (const p of ['dashboard', 'profile', 'hero', 'seasons', 'sections', 'navigation', 'projects', 'services', 'results', 'media', 'publish', 'seo', 'advanced', 'cursor', 'design', 'looks', 'languages', 'inbox', 'subscribers', 'insights', 'qualityScore', 'bulk', 'altText', 'team', 'server', 'applications', 'notes', 'announcement', 'engage', 'profilePage', 'maintenance', 'quality', 'extras', 'mediaDisplay', 'toolsDisplay', 'tools', 'platforms']) {
       await page.goto(`${base}/admin#/${p}`)
       await page.waitForTimeout(p === 'seasons' || p === 'publish' ? 2200 : 500)
       await audit(page, `admin ${p} ${tag}`)

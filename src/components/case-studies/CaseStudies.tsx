@@ -4,7 +4,7 @@ import type { SectionConfig } from '../../content/types'
 import { getCaseStudyProjects } from '../../content/selectors'
 import { Section } from '../ui/Section'
 import { Reveal } from '../ui/Reveal'
-import { Img } from '../ui/Img'
+import { FitImage } from '../ui/FitImage'
 import { useViewer } from '../projects/Viewer'
 import { hasValue } from '../../utils/text'
 
@@ -18,7 +18,7 @@ export function CaseStudies({ config }: { config: SectionConfig }) {
       <div className="cases__list">
         {projects.map((p, i) => (
           <Reveal key={p.id} className={`casecard ${i % 2 ? 'casecard--flip' : ''}`}>
-            <div className="casecard__img"><Img image={p.thumbnail} sizes="(min-width: 900px) 40vw, 90vw" /></div>
+            <div className="casecard__img"><FitImage image={p.thumbnail} ratio={4 / 3} fit={content.portfolio.media.cardFit} fill={content.portfolio.media.fill} sizes="(min-width: 900px) 40vw, 90vw" /></div>
             <div className="casecard__body">
               <p className="eyebrow">{p.client} · {p.industry}</p>
               <h3 className="h3">{p.title}</h3>

@@ -8,6 +8,8 @@ import { ScrollProgress } from './components/layout/ScrollProgress'
 import { CursorFx, TouchRipple } from './components/layout/CursorFx'
 import { cursorAllowed } from './motion/cursor'
 import { Banner } from './components/layout/Banner'
+import { BackToTop } from './components/layout/BackToTop'
+import { ClientStrip } from './components/layout/ClientStrip'
 import { useT } from './i18n/useT'
 import { Decor } from './components/layout/Decor'
 import { Hero } from './components/hero/Hero'
@@ -72,12 +74,14 @@ export default function App() {
           return (
             <Suspense key={config.id} fallback={null}>
               <Component config={config} />
+              {config.type === 'hero' && <ClientStrip />}
             </Suspense>
           )
         })}
       </main>
       <Footer />
       {design.readingProgress && <ScrollProgress />}
+      <BackToTop />
       {fx && <CursorFx settings={cursor} rgb={resolved.theme.cursor.stroke} season={resolved.season} imageSrc={cursor.image?.src} />}
       {cursor.touchRipple && !reduced && !finePointer && <TouchRipple rgb={resolved.theme.cursor.stroke} />}
     </ViewerProvider>
