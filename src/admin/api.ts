@@ -61,12 +61,34 @@ export const api = {
   importContent: (content: unknown) => request<{ draft: SiteContent; rev: number } & Status>('/import', { method: 'POST', body: JSON.stringify({ content }) }),
   changePassword: (current: string, next: string) => request<{ ok: true }>('/password', { method: 'POST', body: JSON.stringify({ current, next }) }),
   media: () => request<{ media: MediaAsset[] }>('/media'),
-  upload: (file: Blob, name: string, alt = '') => {
-    const f = new FormData()
-    f.append('file', file, name)
-    if (alt) f.append('alt', alt)
-    return request<{ asset: MediaAsset }>('/media', { method: 'POST', body: f })
-  },
+  /** Uploads a file with progress. Videos come back as a job that is shrunk in the background; this waits for it. */
+  upload: (file: Blob, name: string, alt = '', onStatus: (text: string) => void = () => {}) =>
+    new Promise<{ asset: MediaAsset; note?: string }>((resolve, reject) => {
+      const f = new FormData()
+      f.append('file', file, name)
+      if (alt) f.append('alt', alt)
+      const xhr = new XMLHttpRequest()
+      xhr.open('POST', '/api/admin/media')
+      xhr.setRequestHeader('x-requested-with', 'sam-admin')
+      xhr.upload.onprogress = (e) => { if (e.lengthComputable) onStatus(`Uploading ${name}: ${Math.round((e.loaded / e.total) * 100)}%`) }
+      xhr.onerror = () => reject(new ApiError(0, 'Cannot reach the server. Is it running?'))
+      xhr.onload = async () => {
+        let data: { asset?: MediaAsset; job?: { id: string }; error?: string } = {}
+        try { data = JSON.parse(xhr.responseText) } catch { /* not JSON */ }
+        if (xhr.status === 200 && data.asset) return resolve({ asset: data.asset })
+        if (xhr.status !== 202 || !data.job) return reject(new ApiError(xhr.status, data.error ?? `Upload failed (${xhr.status}).`))
+        try {
+          for (;;) {
+            const { job } = await request<{ job: { status: string; progress: number; asset: MediaAsset | null; error: string; note: string } }>(`/media/jobs/${data.job.id}`)
+            if (job.status === 'done' && job.asset) return resolve({ asset: job.asset, note: job.note })
+            if (job.status === 'error') return reject(new ApiError(422, job.error || 'Could not process that video.'))
+            onStatus(`Shrinking ${name} for the web: ${Math.round(job.progress * 100)}%`)
+            await new Promise((ok) => setTimeout(ok, 1200))
+          }
+        } catch (e) { reject(e) }
+      }
+      xhr.send(f)
+    }),
   updateMedia: (id: string, patch: Partial<Pick<MediaAsset, 'alt' | 'caption' | 'tags' | 'projectIds'>>) =>
     request<{ asset: MediaAsset }>(`/media/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   deleteMedia: (id: string) => request<{ ok: true }>(`/media/${id}`, { method: 'DELETE' }),

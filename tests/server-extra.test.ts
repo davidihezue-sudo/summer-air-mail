@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readdirSync } from 'node:fs'
+import { mkdtempSync, mkdirSync, writeFileSync, rmSync, existsSync, readdirSync, readFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import type { AddressInfo } from 'node:net'
 import type { Server } from 'node:http'
 import { createApp } from '../server/index.mjs'
 import { sign } from '../server/s3.mjs'
+import { spawnSync } from 'node:child_process'
+import { findFfmpeg } from '../server/video.mjs'
+import { sniff } from '../server/media.mjs'
 import { createInsights, toCsv } from '../server/records.mjs'
 import { parseContact, createLimiter } from '../server/routes.mjs'
 import { buildFeed, pageSeo } from '../shared/head.mjs'
@@ -125,6 +128,57 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     expect((await api('/api/admin/publish', { method: 'POST', body: '{}' })).status).toBe(200)
   }, 30000)
   afterAll(async () => { server.close(); await ctl.close(); rmSync(dir, { recursive: true, force: true }) })
+
+  it('shrinks a very large video, keeps a small one, and makes cover images', async () => {
+    if (dbUrl) return
+    const ff = await findFfmpeg()
+    expect(ff, 'ffmpeg should be installed with npm install').toBeTruthy()
+    const make = (name: string, size: string, secs: number) => {
+      const f = join(dir, name)
+      spawnSync(ff as string, ['-y', '-f', 'lavfi', '-i', `testsrc2=size=${size}:rate=24:duration=${secs}`, '-f', 'lavfi', '-i', `sine=frequency=440:duration=${secs}`, '-c:v', 'libx264', '-preset', 'ultrafast', '-crf', '18', '-pix_fmt', 'yuv420p', '-shortest', f])
+      return f
+    }
+    const send = async (file: string, label: string) => {
+      const form = new FormData()
+      form.append('file', new Blob([readFileSync(file)]), label)
+      const r = await fetch(base + '/api/admin/media', { method: 'POST', headers: { 'x-requested-with': 'sam-admin', cookie }, body: form })
+      expect(r.status).toBe(202)
+      const { job } = await r.json()
+      for (let i = 0; i < 120; i++) {
+        const j = (await (await api(`/api/admin/media/jobs/${job.id}`)).json()).job
+        if (j.status !== 'processing') return j
+        await new Promise((ok) => setTimeout(ok, 500))
+      }
+      throw new Error('video job did not finish')
+    }
+    const big = make('big.mp4', '3840x2160', 3)
+    const j = await send(big, 'Holiday Reel.MP4')
+    expect(j.status, j.error).toBe('done')
+    expect(j.asset.width).toBe(1080)
+    expect(j.asset.size).toBeLessThan(readFileSync(big).length)
+    expect(j.asset.poster).toMatch(/^\/uploads\/.+-poster\.webp$/)
+    const served = await fetch(base + j.asset.url)
+    expect(served.status).toBe(200)
+    expect(served.headers.get('content-type')).toContain('video/mp4')
+    const small = make('small.mp4', '320x240', 1)
+    const k = await send(small, 'tiny.mp4')
+    expect(k.status, k.error).toBe('done')
+    expect(k.note).toContain('Kept')
+    expect(k.asset.width).toBe(320)
+    const lib = (await (await api('/api/admin/media')).json()).media
+    expect(lib.filter((m: { tags: string[] }) => m.tags.includes('video cover'))).toHaveLength(2)
+  }, 60000)
+
+  it('recognises common video containers and refuses disguised files', () => {
+    const b = (s: string, at = 0) => { const x = Buffer.alloc(32); x.write(s, at, 'latin1'); return x }
+    const ftyp = (brand: string) => { const x = Buffer.alloc(32); x.write('ftyp', 4, 'latin1'); x.write(brand, 8, 'latin1'); return x }
+    expect(sniff(ftyp('isom'))?.ext).toBe('mp4')
+    expect(sniff(ftyp('qt  '))?.ext).toBe('mov')
+    expect(sniff(ftyp('heic'))).toBeNull()
+    const avi = b('RIFF'); avi.write('AVI ', 8, 'latin1')
+    expect(sniff(avi)?.ext).toBe('avi')
+    expect(sniff(b('<svg xmlns="http://www.w3.org/2000/svg"></svg>'))).toBeNull()
+  })
 
   it('reports storage and role in the session', async () => {
     const s = await (await api('/api/admin/session')).json()

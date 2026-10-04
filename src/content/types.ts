@@ -868,6 +868,8 @@ export interface MediaAsset {
   size: number
   width?: number
   height?: number
+  /** For videos: the cover image made automatically. */
+  poster?: string
   alt: string
   caption: string
   tags: string[]

@@ -67,8 +67,9 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
           name = file.name.replace(/\.[a-z0-9]+$/i, '') + '.png'
         }
         setBusy(`Uploading ${name}`)
-        const { asset } = await api.upload(blob, name)
+        const { asset, note } = await api.upload(blob, name, '', setBusy)
         setMedia((m) => [asset, ...m])
+        if (asset.type === 'video') { void refreshMedia(); if (note) setError(`${file.name}: ${note}`) }
       } catch (e) {
         setError(`${file.name}: ${(e as ApiError).message}`)
       }
@@ -103,7 +104,7 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
           <option value="any">All files</option><option value="image">Images</option><option value="video">Videos</option><option value="pdf">PDFs</option>
         </select>
         <button type="button" className="abtn abtn--primary" onClick={() => input.current?.click()}><Upload size={16} aria-hidden /> Upload</button>
-        <input ref={input} type="file" hidden multiple accept={accept === 'image' ? 'image/*' : accept === 'video' ? 'video/mp4,video/webm' : accept === 'pdf' ? 'application/pdf' : 'image/*,video/mp4,video/webm,application/pdf'} onChange={(e) => { if (e.target.files) void uploadFiles(e.target.files); e.target.value = '' }} />
+        <input ref={input} type="file" hidden multiple accept={accept === 'image' ? 'image/*' : accept === 'video' ? 'video/*' : accept === 'pdf' ? 'application/pdf' : 'image/*,video/*,application/pdf'} onChange={(e) => { if (e.target.files) void uploadFiles(e.target.files); e.target.value = '' }} />
       </div>
       <label className="acheck"><input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} /> Review images for sensitive information before uploading (blur or cover names, numbers and faces)</label>
       <div
@@ -111,7 +112,7 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => { e.preventDefault(); if (e.dataTransfer.files.length) void uploadFiles(e.dataTransfer.files) }}
       >
-        Drop files here. Photos are resized, converted to WebP and stripped of location data. PDFs and videos are stored as they are.
+        Drop files here. Photos are resized, converted to WebP and stripped of location data. Large videos (MP4, MOV, WebM, MKV, AVI, up to 2 GB) are shrunk automatically to a web friendly 1080p MP4 and given a cover image. PDFs are stored as they are.
       </div>
       {busy && <p role="status" className="ahelp">{busy}</p>}
       {error && <p role="alert" className="aerror">{error}</p>}
@@ -120,7 +121,7 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
           {list.map((a) => (
             <li key={a.id}>
               <button type="button" className={`amedia__item ${selected.includes(a.id) || detail?.id === a.id ? 'is-selected' : ''}`} onClick={() => toggle(a)} aria-pressed={selected.includes(a.id)} aria-label={`${a.filename}${a.alt ? `: ${a.alt}` : ''}`}>
-                {a.type === 'image' ? <img src={a.url} alt="" loading="lazy" /> : <span className="amedia__icon">{a.type === 'video' ? <Film size={32} aria-hidden /> : <FileText size={32} aria-hidden />}</span>}
+                {a.type === 'image' || a.poster ? <img src={a.type === 'image' ? a.url : a.poster} alt="" loading="lazy" /> : <span className="amedia__icon">{a.type === 'video' ? <Film size={32} aria-hidden /> : <FileText size={32} aria-hidden />}</span>}
                 <span className="amedia__name">{a.filename}</span>
                 <span className="amedia__meta">{a.type} · {fmtSize(a.size)}</span>
               </button>
@@ -174,7 +175,7 @@ function Detail({ asset, onClose, onUse, onRedact, onDelete, onSaved }: { asset:
     <aside className="amedia__detail" aria-label="File details">
       <button type="button" className="abtn abtn--ghost" onClick={onClose}>Close details</button>
       {asset.type === 'image' && <img src={asset.url} alt={asset.alt} />}
-      {asset.type === 'video' && <video src={asset.url} controls preload="metadata" />}
+      {asset.type === 'video' && <video src={asset.url} poster={asset.poster} controls preload="metadata" />}
       <p className="amedia__meta">{asset.filename}<br />{asset.type} · {fmtSize(asset.size)}{asset.width ? ` · ${asset.width}x${asset.height}` : ''}<br />Uploaded {new Date(asset.uploadedAt).toLocaleDateString()}{usedIn ? ' · In use' : ''}</p>
       <label className="afield"><span>Alt text (describe the image for people who cannot see it)</span><textarea rows={2} value={alt} onChange={(e) => setAlt(e.target.value)} /></label>
       <label className="afield"><span>Caption</span><input value={caption} onChange={(e) => setCaption(e.target.value)} /></label>

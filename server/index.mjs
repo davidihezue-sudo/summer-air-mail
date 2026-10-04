@@ -293,18 +293,29 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
 
   /* ---------- media library ---------- */
   const maxMb = Number(env.MAX_UPLOAD_MB ?? 60)
-  const upload = multer({ storage: multer.memoryStorage(), limits: { fileSize: maxMb * 1024 * 1024, files: 1, fields: 8 } })
+  const maxVideoMb = Number(env.MAX_VIDEO_MB ?? 2000)
+  const upload = multer({
+    storage: multer.diskStorage({ destination: (_req, _f, cb) => cb(null, media.tmpDir), filename: (_req, _f, cb) => cb(null, `up-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`) }),
+    limits: { fileSize: maxVideoMb * 1024 * 1024, files: 1, fields: 8 },
+  })
   admin.get('/media', (_req, res) => res.json({ media: media.list() }))
   admin.post('/media', (req, res) => {
     upload.single('file')(req, res, async (err) => {
-      if (err) return res.status(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ error: err.code === 'LIMIT_FILE_SIZE' ? `That file is larger than ${maxMb} MB.` : 'Upload failed.' })
+      if (err) return res.status(err.code === 'LIMIT_FILE_SIZE' ? 413 : 400).json({ error: err.code === 'LIMIT_FILE_SIZE' ? `That file is larger than ${maxVideoMb} MB.` : 'Upload failed.' })
       if (!req.file) return res.status(400).json({ error: 'Choose a file to upload.' })
       try {
-        res.json({ asset: await media.add(req.file.buffer, req.file.originalname, req.body) })
+        const r = await media.addFromDisk(req.file.path, req.file.originalname, req.body, { maxPlainBytes: maxMb * 1024 * 1024 })
+        if (r.job) res.status(202).json(r)
+        else res.json(r)
       } catch (e) {
         res.status(e.status ?? 500).json({ error: e.status ? e.message : 'Could not process that file.' })
       }
     })
+  })
+  admin.get('/media/jobs/:id', (req, res) => {
+    const j = media.job(req.params.id)
+    if (j) res.json({ job: j })
+    else res.status(404).json({ error: 'Not found.' })
   })
   admin.patch('/media/:id', async (req, res) => {
     const a = await media.update(req.params.id, req.body ?? {})
@@ -470,6 +481,8 @@ export async function start(env = process.env) {
     console.warn('\nNo admin account yet. Create one with:  npm run admin:setup\n')
   }
   const server = app.listen(port, host, () => console.log(`Portfolio server on http://${host}:${port}  (data: ${dataDir})`))
+  server.requestTimeout = 0 // big video uploads on a slow connection must not be cut off
+  server.headersTimeout = 60000
   const stop = () => server.close(() => process.exit(0))
   process.on('SIGTERM', stop)
   process.on('SIGINT', stop)
