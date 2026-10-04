@@ -85,7 +85,7 @@ export function Hero({ config }: { config: SectionConfig }) {
         </div>
         {canMotion && !motionOn && (
           <button type="button" className="hero__motion btn btn--ghost" onClick={(e) => { e.stopPropagation(); void enableMotion() }}>
-            <Smartphone size={16} aria-hidden /> Tilt with my phone
+            <Smartphone size={18} aria-hidden /> <span>Tilt with my phone</span>
           </button>
         )}
       </div>

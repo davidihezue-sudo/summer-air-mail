@@ -228,6 +228,16 @@ try {
     const over = await mp.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)
     check(over <= 0, `mobile admin: no horizontal overflow on ${p} (${over})`)
   }
+  await mp.goto(`${BASE}/admin#/services`); await mp.waitForTimeout(600)
+  const barH = await mp.locator('.atop').evaluate((e) => e.getBoundingClientRect().height)
+  check(barH <= 70, `mobile admin: slim top bar (${Math.round(barH)}px)`)
+  check(await mp.locator('.atop').getByRole('button', { name: 'Publish', exact: true }).isVisible() && !(await mp.locator('.atop__secondary').first().isVisible()), 'mobile admin: Publish stays in the bar, secondary actions move to the menu')
+  const small = await mp.locator('.arow-item__actions .aicon').evaluateAll((els) => els.slice(0, 12).filter((e) => { const r = e.getBoundingClientRect(); return r.width < 43.5 || r.height < 43.5 }).length)
+  check(small === 0, `mobile admin: row buttons are at least 44px (${small} too small)`)
+  const fonts = await mp.evaluate(() => [...document.querySelectorAll('.admin input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=color]), .admin select')].filter((e) => e.offsetParent && parseFloat(getComputedStyle(e).fontSize) < 16).length)
+  check(fonts === 0, `mobile admin: inputs are 16px so iPhones do not zoom (${fonts} smaller)`)
+  await mp.getByRole('button', { name: 'Open menu' }).click()
+  check(await mp.getByRole('button', { name: 'Sign out' }).last().isVisible(), 'mobile admin: Sign out is in the menu')
   await mp.screenshot({ path: `${SHOTS}/e2e-mobile-admin.png` })
   await m.close()
 

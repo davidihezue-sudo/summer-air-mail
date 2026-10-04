@@ -32,7 +32,7 @@ export function SeasonsPage() {
   const s = content.portfolio.seasons
   const current = resolveSeason(s)
   const [tab, setTab] = useState<SeasonName>(current)
-  const [viewport, setViewport] = useState<Viewport>('desktop')
+  const [viewport, setViewport] = useState<Viewport>(() => (window.innerWidth < 700 ? 'mobile' : 'desktop'))
   const usable = rangesAreUsable(s.ranges)
   const resolved = resolveTheme(tab, s)
   const base = `portfolio.seasons.overrides.${tab}`

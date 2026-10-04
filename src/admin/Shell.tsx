@@ -91,6 +91,11 @@ export function Shell() {
             </div>
           ))}
         </nav>
+        <div className="aside__actions">
+          <a className="abtn" href="/?preview=draft" target="_blank" rel="noopener noreferrer"><ExternalLink size={14} aria-hidden /> Preview the draft<span className="sr-only"> (opens in a new tab)</span></a>
+          <a className="abtn" href="/" target="_blank" rel="noopener noreferrer">View live site<span className="sr-only"> (opens in a new tab)</span></a>
+          <button type="button" className="abtn" onClick={() => void logout()}><LogOut size={14} aria-hidden /> Sign out</button>
+        </div>
       </aside>
       {open && <button type="button" className="aside__scrim" aria-label="Close menu" onClick={() => setOpen(false)} />}
 
@@ -102,11 +107,11 @@ export function Shell() {
             {status?.unpublished || !status?.publishedAt ? <Badge tone="warn">{status?.publishedAt ? 'Unpublished changes' : 'Not published yet'}</Badge> : <Badge tone="good">Live site is up to date</Badge>}
           </div>
           <div className="atop__actions">
-            <a className="abtn" href="/?preview=draft" target="_blank" rel="noopener noreferrer"><ExternalLink size={14} aria-hidden /> Preview<span className="sr-only"> (opens in a new tab)</span></a>
+            <a className="abtn atop__secondary" href="/?preview=draft" target="_blank" rel="noopener noreferrer"><ExternalLink size={14} aria-hidden /> Preview<span className="sr-only"> (opens in a new tab)</span></a>
             <button type="button" className="abtn abtn--primary" disabled={busy || save === 'saving'} onClick={async () => { setBusy(true); const ok = await publish(); setBusy(false); setToast(ok ? 'Published. Your live site is updated.' : 'Could not publish. See the message at the top of the page.') }}>
               <Rocket size={14} aria-hidden /> {busy ? 'Publishing' : 'Publish'}
             </button>
-            <button type="button" className="abtn" onClick={() => void logout()}><LogOut size={14} aria-hidden /> Sign out</button>
+            <button type="button" className="abtn atop__secondary" onClick={() => void logout()}><LogOut size={14} aria-hidden /> Sign out</button>
           </div>
         </header>
         {(error || conflict) && (

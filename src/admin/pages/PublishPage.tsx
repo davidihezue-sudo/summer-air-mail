@@ -10,7 +10,7 @@ import type { ProfessionalIntensity, SeasonName } from '../../content/types'
 
 export function PublishPage() {
   const { content, status, publish, discard, replace, saveNow, save } = useAdmin()
-  const [viewport, setViewport] = useState<Viewport>('desktop')
+  const [viewport, setViewport] = useState<Viewport>(() => (window.innerWidth < 700 ? 'mobile' : 'desktop'))
   const [season, setSeason] = useState<SeasonName | 'live'>('live')
   const [pro, setPro] = useState<ProfessionalIntensity | 'live'>('live')
   const [history, setHistory] = useState<{ id: string; publishedAt: string }[]>([])

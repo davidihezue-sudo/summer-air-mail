@@ -167,6 +167,17 @@ for (const [iso, expected] of [['2026-01-15', 'winter'], ['2026-04-10', 'spring'
   await page.click('.drawer__link >> text=About'); await page.waitForTimeout(1500)
   check(await page.locator('dialog[open]').count() === 0, 'drawer closes on selection')
   check(await page.evaluate(() => document.getElementById('about').getBoundingClientRect().top < 150), 'drawer link scrolls to the section')
+  await page.evaluate(() => window.scrollTo({ top: 0, behavior: 'instant' })); await page.waitForTimeout(300)
+  const box = (sel) => page.locator(sel).first().evaluate((e) => { const r = e.getBoundingClientRect(); return { l: r.left, t: r.top, r: r.right, b: r.bottom } })
+  const ctas = await page.locator('.hero-ctas .btn').evaluateAll((els) => els.map((e) => { const r = e.getBoundingClientRect(); return { b: r.bottom, h: r.height } }))
+  check(ctas.length > 0 && ctas.every((c) => c.b <= 844 && c.h >= 40), 'phone hero: every button is on screen and tall enough to tap')
+  if (await page.locator('.hero__motion').count()) {
+    const m = await box('.hero__motion'); const c = await box('.hero-ctas')
+    check(!(m.l < c.r && m.r > c.l && m.t < c.b && m.b > c.t), 'phone hero: the tilt button does not overlap the buttons')
+  }
+  check(!(await page.locator('.hero__hint').isVisible()), 'phone hero: scroll hint hidden so it cannot collide with buttons')
+  const tiny = await page.evaluate(() => [...document.querySelectorAll('a, button, select, input:not([type=hidden])')].filter((e) => { const r = e.getBoundingClientRect(); const v = r.width > 0 && r.height > 0 && getComputedStyle(e).visibility !== 'hidden' && !e.closest('[aria-hidden=true], .sr-only, dialog:not([open])'); return v && r.top < 3000 && (r.height < 30 || r.width < 30) && !e.classList.contains('skip') }).map((e) => (e.className || e.tagName) + ' ' + Math.round(e.getBoundingClientRect().width) + 'x' + Math.round(e.getBoundingClientRect().height)).slice(0, 5))
+  check(tiny.length === 0, `phone: no tiny tap targets near the top (${tiny.join(', ')})`)
   await ctx.close()
 }
 

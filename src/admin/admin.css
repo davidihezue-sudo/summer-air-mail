@@ -198,3 +198,64 @@
   .acard { padding: .9rem; }
 }
 @media (prefers-reduced-motion: reduce) { .admin * { transition-duration: .001ms !important; animation-duration: .001ms !important; } }
+
+/* ===== Phone and touch ===== */
+.aside__actions { display: none; }
+.aswitch__btn::after { content: ''; position: absolute; inset: -10px -4px; }
+@media (pointer: coarse) {
+  .aicon { width: 44px; height: 44px; min-width: 44px; }
+  .abtn { min-height: 44px; }
+  .achip { min-height: 44px; }
+  .acheck input, .achip input { width: 22px; height: 22px; }
+  .aside a { min-height: 46px; }
+}
+@media (max-width: 960px) {
+  /* 16px stops iOS from zooming into a field when it is focused */
+  .admin input:not([type='checkbox']):not([type='radio']):not([type='color']):not([type='file']):not([type='range']), .admin select, .admin textarea { font-size: 16px; }
+  .aside { display: flex; flex-direction: column; }
+  .aside nav { flex: 1; }
+  .aside__actions { display: grid; gap: .5rem; padding: 1rem .6rem 0; border-top: 1px solid rgb(255 255 255 / .15); }
+  .aside__actions .abtn { background: rgb(255 255 255 / .08); color: #fff; border-color: rgb(255 255 255 / .25); justify-content: flex-start; }
+  .aside__actions .abtn:hover:not(:disabled) { background: rgb(255 255 255 / .16); }
+}
+@media (max-width: 600px) {
+  /* One slim bar: menu, status, Publish. Preview and Sign out live in the menu. */
+  .atop { flex-wrap: nowrap; gap: .5rem; padding: .4rem .6rem; }
+  .atop__status { flex-wrap: nowrap; overflow: hidden; min-width: 0; }
+  .atop__status .abadge:nth-child(2) { display: none; }
+  .atop__secondary { display: none; }
+  .atop__actions { flex: none; }
+  .apagehead h1 { font-size: 1.35rem; }
+  .apagehead .ahelp { font-size: .9rem; }
+  .apagehead__actions .abtn { width: 100%; }
+  .acard { padding: .85rem .8rem; border-radius: 10px; }
+
+  /* Sections list: name on its own line, controls tucked underneath */
+  .alist--sections .alist__head { gap: .1rem .35rem; }
+  .alist--sections .alist__title { flex: 1 1 100%; min-width: 0; }
+  .alist--sections .asec-state { margin-left: .5rem; }
+  .alist--sections .aswitch { margin-right: auto; }
+  .alist .alist__title .ahelp { display: none; }
+
+  /* Item lists: bigger tap rows, actions on their own line */
+  .arow-item { padding: .7rem 0; }
+  .arow-item__main { flex-basis: 100%; }
+  .arow-item__actions { margin-left: -.4rem; width: 100%; justify-content: flex-start; }
+  .atoolbar input { max-width: none; flex-basis: 100%; }
+  .atoolbar select { flex: 1; }
+
+  /* Seasons: two across, short */
+  .amodes { grid-template-columns: 1fr 1fr; gap: .5rem; }
+  .amode { padding: .7rem; }
+  .amode .ahelp { display: none; }
+  .amode[aria-checked='true'] .ahelp, .amode:first-child .ahelp { display: block; font-size: .78rem; }
+  .arange { padding: .5rem .6rem; }
+  .acolors { grid-template-columns: 1fr 1fr; }
+
+  .adialog__actions .abtn { flex: 1; }
+  .amedia__grid { grid-template-columns: repeat(2, 1fr); }
+  .alist__body { padding: .4rem .7rem .8rem; }
+  .agroup > summary { padding: .6rem .8rem; }
+  .agroup__body { padding: .2rem .8rem .8rem; }
+  .atoast { bottom: .8rem; }
+}

@@ -73,3 +73,18 @@
 .scene--tide .scene__closing { color: #eaf4ff; text-shadow: 0 0 20px rgb(169 220 235 / .9); }
 @media (hover: none) { .tide__bg { background: linear-gradient(#10294a, #0b1d33); } }
 @media (prefers-reduced-motion: reduce) { .stamp-float, .hero__hint, .tide__moon { animation: none; } }
+
+/* ===== Phone hero: everything visible at once, nothing overlapping ===== */
+@media (max-width: 899px) {
+  .scene { padding-bottom: 1rem; gap: .6rem; }
+  .hero__hint { display: none; }
+  .hero-ctas { gap: .5rem; }
+  .hero-ctas .btn { font-size: .85rem; padding: .45rem .95rem; }
+  /* The motion button becomes a small round icon beside the stamp, away from the buttons. */
+  .hero__motion { right: .6rem; bottom: auto; top: calc(var(--header-h) + var(--stamp-h) * .55); width: 48px; height: 48px; min-height: 48px; padding: 0; border-radius: 50%; justify-content: center; }
+  .hero__motion span { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+}
+@media (max-width: 899px) and (max-height: 700px) {
+  .hero-roles { font-size: clamp(1.7rem, 9vw, 2.6rem); }
+  .hero-intro { font-size: .95rem; }
+}
