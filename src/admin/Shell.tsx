@@ -1,9 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
-import {
-  BarChart3, Bot, Briefcase, Calendar, Clapperboard, Compass, ExternalLink, FileText, Film, Globe, Image as ImageIcon, LayoutDashboard, Layers,
-  LayoutList, Link2, ListChecks, LogOut, Megaphone, Menu, MessageSquareQuote, Palette, PenTool, Rocket, Search, Settings, Share2, Sparkles, Target, User, Wrench, X,
-  Laptop, Mail, Camera, MousePointer2, Brush, Megaphone as Horn, Languages, Inbox, Users, BarChart, ShieldCheck, FileDown, Files, Link as LinkIcon, Route, NotebookPen, Bookmark, Wand2, Timer, HardDrive, UserSquare, Type, ClipboardCheck, BookOpen, Star, Workflow, Cpu, Footprints, Eye,
-} from 'lucide-react'
+import { ExternalLink, LogOut, Menu, Rocket, X } from 'lucide-react'
+import { NAV } from './nav'
+import { SearchBox } from './SearchBox'
 import { useAdmin } from './store'
 import { useRoute } from './router'
 import { ENTITIES, PAGES } from './schema'
@@ -30,47 +28,6 @@ import { UsersPage } from './pages/UsersPage'
 import { ServerPage } from './pages/ServerPage'
 import { Badge } from './ui'
 
-const NAV: { group: string; items: { id: string; label: string; icon: typeof User; owner?: boolean }[] }[] = [
-  { group: 'Overview', items: [{ id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard }] },
-  { group: 'Identity', items: [
-    { id: 'profile', label: 'Personal Profile', icon: User }, { id: 'about', label: 'About & Recruiter Overview', icon: BookOpen }, { id: 'hero', label: 'Hero', icon: Rocket },
-    { id: 'cv', label: 'Resume / CV', icon: FileText }, { id: 'social', label: 'Social Links', icon: Share2 }, { id: 'contact', label: 'Contact', icon: Mail },
-  ] },
-  { group: 'Look and layout', items: [
-    { id: 'appearance', label: 'Appearance', icon: Palette }, { id: 'cursor', label: 'Cursor effect', icon: MousePointer2 }, { id: 'seasons', label: 'Seasons', icon: Calendar }, { id: 'sections', label: 'Sections & Visibility', icon: ListChecks },
-    { id: 'design', label: 'Design', icon: Brush }, { id: 'extras', label: 'Extras', icon: Wand2 }, { id: 'looks', label: 'Saved Looks', icon: Bookmark },
-    { id: 'navigation', label: 'Navigation', icon: Compass }, { id: 'footer', label: 'Footer', icon: Footprints },
-  ] },
-  { group: 'Reach and engagement', items: [
-    { id: 'applications', label: 'Application Links', icon: UserSquare }, { id: 'profilePage', label: 'One Page Profile', icon: FileDown }, { id: 'shortLinks', label: 'Short Links', icon: LinkIcon },
-    { id: 'notes', label: 'Notes (blog)', icon: NotebookPen }, { id: 'journey', label: 'Career Journey', icon: Route }, { id: 'resources', label: 'Resources', icon: Files },
-    { id: 'engage', label: 'Booking & Newsletter', icon: Horn }, { id: 'announcement', label: 'Banner & Schedule', icon: Timer }, { id: 'languages', label: 'Languages', icon: Languages },
-    { id: 'maintenance', label: 'Maintenance & 404', icon: Type },
-  ] },
-  { group: 'Messages and insight', items: [
-    { id: 'inbox', label: 'Inbox', icon: Inbox }, { id: 'subscribers', label: 'Subscribers', icon: Users }, { id: 'insights', label: 'Visit Insights', icon: BarChart },
-    { id: 'qualityScore', label: 'Quality Score', icon: ClipboardCheck },
-  ] },
-  { group: 'Tools', items: [
-    { id: 'bulk', label: 'Bulk & CSV', icon: Files }, { id: 'altText', label: 'Alt Text Assistant', icon: Wand2 }, { id: 'quality', label: 'Quality Rules & Insights', icon: ShieldCheck },
-    { id: 'team', label: 'Team & Access', icon: Users, owner: true }, { id: 'server', label: 'Server & Backups', icon: HardDrive, owner: true },
-  ] },
-  { group: 'Portfolio', items: [
-    { id: 'projects', label: 'Portfolio', icon: Briefcase }, { id: 'caseStudies', label: 'Case Studies', icon: BookOpen }, { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
-    { id: 'posts', label: 'Social Media Content', icon: Camera }, { id: 'videos', label: 'Videos & Reels', icon: Film }, { id: 'screenshots', label: 'Screenshots', icon: Clapperboard }, { id: 'mediaDisplay', label: 'Pictures & Screenshots', icon: ImageIcon },
-    { id: 'results', label: 'Analytics & Results', icon: BarChart3 }, { id: 'websites', label: 'Websites & Digital Projects', icon: Laptop },
-  ] },
-  { group: 'Capabilities', items: [
-    { id: 'services', label: 'Services', icon: Layers }, { id: 'skills', label: 'Skills', icon: Star }, { id: 'platforms', label: 'Platform Expertise', icon: Globe },
-    { id: 'tools', label: 'Tools & Platforms', icon: Wrench }, { id: 'toolsDisplay', label: 'Tools Display', icon: Brush }, { id: 'ai', label: 'AI & Automation', icon: Cpu }, { id: 'process', label: 'Marketing Process', icon: Workflow },
-    { id: 'strategy', label: 'Strategy Framework', icon: Target }, { id: 'testimonials', label: 'Testimonials', icon: MessageSquareQuote }, { id: 'mentoring', label: 'Mentoring & Training', icon: PenTool },
-  ] },
-  { group: 'Publish', items: [
-    { id: 'media', label: 'Media Library', icon: ImageIcon }, { id: 'publish', label: 'Preview & Publish', icon: Eye }, { id: 'seo', label: 'SEO', icon: Search },
-    { id: 'analytics', label: 'Analytics Tracking', icon: Sparkles }, { id: 'advanced', label: 'Advanced Settings', icon: Settings },
-  ] },
-]
-void [Bot, LayoutList, Link2]
 
 function Page({ page, id }: { page: string; id?: string }) {
   if (page === 'dashboard') return <Dashboard />
@@ -104,6 +61,27 @@ export function Shell() {
   const [busy, setBusy] = useState(false)
   useEffect(() => setOpen(false), [page, id])
   useEffect(() => { if (!toast) return; const t = window.setTimeout(() => setToast(''), 4000); return () => window.clearTimeout(t) }, [toast])
+  // After the search opens a page, scroll to the setting that was asked for and flash it.
+  useEffect(() => {
+    const find = () => {
+      let text = ''
+      try { text = sessionStorage.getItem('sam-find') ?? ''; sessionStorage.removeItem('sam-find') } catch { return }
+      if (!text) return
+      window.setTimeout(() => {
+        const want = text.toLowerCase()
+        const el = Array.from(document.querySelectorAll<HTMLElement>('#amain label, #amain legend, #amain summary, #amain .alabel, #amain h2')).find((n) => (n.textContent ?? '').trim().toLowerCase().startsWith(want))
+        if (!el) return
+        let d = el.closest('details')
+        while (d) { d.open = true; d = d.parentElement?.closest('details') ?? null }
+        el.scrollIntoView({ block: 'center', behavior: 'smooth' })
+        el.classList.add('afound')
+        window.setTimeout(() => el.classList.remove('afound'), 2800)
+      }, 250)
+    }
+    find()
+    window.addEventListener('sam-find', find)
+    return () => window.removeEventListener('sam-find', find)
+  }, [page, id])
   const title = useMemo(() => NAV.flatMap((g) => g.items).find((i) => i.id === page)?.label ?? '', [page])
   useEffect(() => { document.title = `${title || 'Admin'} | Portfolio admin` }, [title])
 
@@ -140,6 +118,7 @@ export function Shell() {
       <div className="amain">
         <header className="atop">
           <button type="button" className="aicon atop__menu" aria-label="Open menu" onClick={() => setOpen(true)}><Menu size={20} /></button>
+          <SearchBox />
           <div className="atop__status" role="status" aria-live="polite">
             <Badge tone={tone}>{stateLabel}</Badge>
             {status?.unpublished || !status?.publishedAt ? <Badge tone="warn">{status?.publishedAt ? 'Unpublished changes' : 'Not published yet'}</Badge> : <Badge tone="good">Live site is up to date</Badge>}

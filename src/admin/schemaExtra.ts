@@ -133,6 +133,26 @@ Object.assign(PAGES, {
       ] },
     ],
   },
+  design: {
+    title: 'Design', intro: 'Shape, spacing and finish for the whole site. Colours come from the season; dark mode is below.',
+    blocks: [
+      { title: 'Shape and feel', base: 'portfolio.design', fields: [
+        { kind: 'select', key: 'radius', label: 'Corner roundness', options: [{ value: 'sharp', label: 'Sharp' }, { value: 'soft', label: 'Soft' }, { value: 'round', label: 'Very round' }] },
+        { kind: 'select', key: 'buttons', label: 'Button shape', options: [{ value: 'pill', label: 'Pill' }, { value: 'rounded', label: 'Rounded' }, { value: 'square', label: 'Square' }] },
+        { kind: 'select', key: 'density', label: 'Spacing', options: [{ value: 'compact', label: 'Compact' }, { value: 'comfortable', label: 'Comfortable' }, { value: 'spacious', label: 'Spacious' }] },
+        { kind: 'range', key: 'fontScale', label: 'Text size', min: 0.85, max: 1.3, step: 0.05, help: '1 is normal. Visitors can still zoom.' },
+        { kind: 'select', key: 'shadow', label: 'Shadows', options: [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'strong', label: 'Strong' }] },
+        { kind: 'select', key: 'borderWeight', label: 'Outline weight', options: [{ value: 'thin', label: 'Thin' }, { value: 'normal', label: 'Normal' }, { value: 'bold', label: 'Bold' }] },
+        { kind: 'select', key: 'headingCase', label: 'Headings', options: [{ value: 'normal', label: 'As written' }, { value: 'upper', label: 'Capitals' }] },
+        { kind: 'select', key: 'cards', label: 'Cards', options: [{ value: 'soft', label: 'Soft shadow' }, { value: 'flat', label: 'Flat' }, { value: 'outlined', label: 'Outlined' }, { value: 'glass', label: 'Frosted glass' }] },
+        { kind: 'bool', key: 'dialogAnimation', label: 'Animate pop-ups' }, { kind: 'bool', key: 'readingProgress', label: 'Show the scroll progress surfer' },
+      ] },
+      { title: 'Light and dark', base: 'portfolio.design', fields: [
+        { kind: 'select', key: 'colorMode', label: 'Colour mode', options: [{ value: 'light', label: 'Always light' }, { value: 'dark', label: 'Always dark' }, { value: 'system', label: 'Follow the visitor device' }], help: 'Every season has a dark version made from its own colours.' },
+        { kind: 'bool', key: 'colorToggle', label: 'Show a light and dark switch to visitors' },
+      ] },
+    ],
+  },
   announcement: {
     title: 'Banner & Schedule', intro: 'A banner across the top, and changes that switch on and off by themselves on dates you choose.',
     blocks: [

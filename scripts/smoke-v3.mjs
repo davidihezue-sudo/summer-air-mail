@@ -171,6 +171,32 @@ const open = async (path, w = 1280, h = 800, opts = {}) => {
   const s = await (await api('/api/admin/insights?range=7')).json()
   check(s.views >= 1, `insights counted visits (${s.views})`)
 }
+// Admin search: type, pick with the keyboard, and land on the right page.
+{
+  const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 } })
+  await ctx.addCookies([{ name: 'sam_session', value: decodeURIComponent(cookie.split('=')[1]), url: base }])
+  const page = await ctx.newPage()
+  await page.goto(`${base}/admin#/dashboard`)
+  await page.waitForSelector('h1:has-text("Dashboard")')
+  const find = async (text) => { await page.keyboard.press('/'); await page.waitForSelector('.asearch input:focus'); await page.keyboard.type(text, { delay: 20 }) }
+  await find('cursor')
+  await page.waitForSelector('[role=option]')
+  check((await page.locator('[role=option]').first().innerText()).includes('Cursor effect'), 'admin search offers matches while typing')
+  await page.keyboard.press('Enter')
+  await page.waitForSelector('h1:has-text("Cursor effect")')
+  check(page.url().endsWith('#/cursor'), 'pressing Enter opens the page')
+  await find('dark mode')
+  await page.waitForSelector('[role=option]')
+  await page.locator('[role=option]', { hasText: 'Colour mode' }).first().click()
+  await page.waitForSelector('h1:has-text("Design")')
+  await page.waitForTimeout(700)
+  check(await page.locator('.afound').count() === 1, 'searching for a setting scrolls to it and highlights it')
+  await find('Smoke project')
+  await page.waitForSelector('[role=option]')
+  const opts = await page.locator('[role=option]').allInnerTexts()
+  check(opts.some((o) => o.includes('Smoke project')), `admin search finds things you wrote (${opts.slice(0, 3).join(' / ').replace(/\n/g, ' ')})`)
+  await ctx.close()
+}
 // Maintenance mode.
 {
   const d = (await (await api('/api/admin/draft')).json()).draft
