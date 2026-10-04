@@ -39,6 +39,7 @@ c.projects = [{ id: 'p1', title: 'Smoke project', client: 'Brand', industry: 'x'
 const tall = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1170" height="2532"><rect width="1170" height="2532" fill="#F39CAB"/><text x="50" y="200" font-size="120">PHONE SCREENSHOT</text></svg>')}`
 c.projects.push({ ...c.projects[0], id: 'p2', title: 'Tall screenshot project', platforms: ['instagram'], thumbnail: { src: tall, alt: 'A phone screenshot', width: 1170, height: 2532 } })
 c.portfolio.extras = { ...c.portfolio.extras, clientStrip: true, backToTop: true }
+c.screenshots = [{ id: 'sc1', image: { src: tall, alt: 'Before', width: 1170, height: 2532 }, compareWith: { src: tall, alt: 'After', width: 1170, height: 2532 }, caption: 'Long screenshot', category: '', hidden: false }]
 c.notes = [{ id: 'n1', slug: 'hello-note', title: 'Hello note', date: '2026-01-01', summary: 'Sum', body: 'Body text here.', cover: null, tags: [], seoTitle: '', seoDescription: '', hidden: false }]
 c.applications = [{ id: 'a1', slug: 'acme-1234', label: 'Acme', company: 'Acme', role: 'SMM', enabled: true, expiresAt: '', hero: { label: '', headline: 'Hello Acme team', supporting: '', intro: '' }, greeting: { enabled: true, text: 'Prepared for Acme' }, featuredProjectIds: [], onlyFeatured: false, highlightSkills: [], hideSectionIds: [], lookId: '', professional: '', season: '', cvFile: '', cvFilename: '' }]
 c.testimonials = [1, 2].map((i) => ({ id: `t${i}`, name: `Person ${i}`, title: 'T', company: 'C', quote: `Quote ${i}`, relationship: 'r', approved: true }))
@@ -84,6 +85,10 @@ const open = async (path, w = 1280, h = 800, opts = {}) => {
   check(await tallCard.locator('img.fit__bg').count() === 1, 'the space around it is filled with a soft blurred copy')
   const box = await tallCard.boundingBox()
   check(box && box.height / box.width > 1.5, `the card follows the screenshot's tall shape (${box && (box.height / box.width).toFixed(2)})`)
+  await page.evaluate(() => document.getElementById('screenshots')?.scrollIntoView())
+  await page.waitForTimeout(500)
+  const ba = await page.locator('.ba__frame').boundingBox()
+  check(ba && ba.height / ba.width > 2, `a long before and after screenshot keeps its full height (${ba && (ba.height / ba.width).toFixed(2)})`)
   check(await page.locator('.totop').count() === 1, 'back to top button appears after scrolling')
   await page.evaluate(() => document.getElementById('tools')?.scrollIntoView())
   await page.waitForTimeout(500)

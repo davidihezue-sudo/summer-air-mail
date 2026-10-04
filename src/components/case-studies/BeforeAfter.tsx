@@ -1,5 +1,7 @@
 import { useState } from 'react'
+import type { CSSProperties } from 'react'
 import type { ImageRef } from '../../content/types'
+import { ratioOf } from '../../utils/media'
 
 const LABELS = {
   'before-after': ['Before', 'After'],
@@ -10,11 +12,15 @@ const LABELS = {
 
 export function BeforeAfter({ before, after, caption, variant = 'before-after' }: { before: ImageRef; after: ImageRef; caption?: string; variant?: keyof typeof LABELS }) {
   const [pos, setPos] = useState(50)
+  const [measured, setMeasured] = useState<number | null>(null)
+  // The frame takes the shape of the pictures themselves, so a long phone screenshot is shown from top to bottom, never trimmed.
+  const ratio = ratioOf(after) ?? ratioOf(before) ?? measured ?? 4 / 3
+  const onLoad = (e: React.SyntheticEvent<HTMLImageElement>) => { if (!ratioOf(after) && !ratioOf(before)) setMeasured(e.currentTarget.naturalWidth / (e.currentTarget.naturalHeight || 1)) }
   const [l, r] = LABELS[variant]
   return (
-    <figure className="ba">
-      <div className="ba__frame" style={{ ['--pos' as string]: `${pos}%` }}>
-        <img src={after.src} alt={after.alt || r} loading="lazy" draggable={false} />
+    <figure className="ba" style={{ ['--r' as string]: ratio } as CSSProperties}>
+      <div className="ba__frame" style={{ ['--pos' as string]: `${pos}%`, aspectRatio: String(ratio) } as CSSProperties}>
+        <img src={after.src} alt={after.alt || r} loading="lazy" draggable={false} onLoad={onLoad} />
         <img className="ba__before" src={before.src} alt={before.alt || l} loading="lazy" draggable={false} />
         <span className="ba__tag ba__tag--l">{l}</span>
         <span className="ba__tag ba__tag--r">{r}</span>
