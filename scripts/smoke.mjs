@@ -134,7 +134,7 @@ for (const [iso, expected] of [['2026-01-15', 'winter'], ['2026-04-10', 'spring'
   check(await page.locator('.viewer').count() === 1, 'screenshot opens in the zoom viewer')
   await page.keyboard.press('Escape')
   await jump(page, 'tools'); await page.waitForTimeout(400)
-  await page.click('.ring >> nth=0'); check((await page.locator('.ring[aria-pressed="true"]').count()) === 1, 'tool ring flips')
+  check((await page.locator('.toolcard').count()) > 0 && (await page.locator('.toolcard__use').first().innerText()).length > 0, 'tools show logo, name and usage without clicking')
   await jump(page, 'skills'); check(await page.locator('.skilllist__level').count() >= 1 && await page.locator('[class*="percent"]').count() === 0, 'skills use words, not percentage bars')
   await jump(page, 'ai'); check(await page.locator('.aicard').count() === 2, 'AI skills render')
 
