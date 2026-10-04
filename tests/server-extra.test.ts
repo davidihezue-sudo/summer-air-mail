@@ -141,7 +141,7 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     const send = async (file: string, label: string) => {
       const form = new FormData()
       form.append('file', new Blob([readFileSync(file)]), label)
-      const r = await fetch(base + '/api/admin/media', { method: 'POST', headers: { 'x-requested-with': 'sam-admin', cookie }, body: form })
+      const r = await fetch(base + '/api/admin/media', { method: 'POST', headers: { 'x-requested-with': 'sam-admin', cookie, connection: 'close' }, body: form })
       expect(r.status).toBe(202)
       const { job } = await r.json()
       for (let i = 0; i < 120; i++) {
@@ -335,5 +335,46 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     const r = await fetch(base + '/', { headers: { cookie } })
     expect(r.status).toBe(200)
     expect(await r.text()).toContain('sam-owner')
+  })
+})
+
+import { restoreBackup } from '../server/restore.mjs'
+import { backupStream } from '../server/backup.mjs'
+import { fileKv } from '../server/kv.mjs'
+import { zipSync, strToU8 } from 'fflate'
+import { mkdtempSync as mk, writeFileSync as wf, mkdirSync as md, readFileSync as rf, existsSync as ex, rmSync as rm2 } from 'node:fs'
+
+describe('restoring a backup', () => {
+  it('brings content and uploaded files to a new place and never touches logins', async () => {
+    const a = mk(join(tmpdir(), 'sam-ra-')); const b = mk(join(tmpdir(), 'sam-rb-'))
+    const kvA = fileKv(a); await kvA.init()
+    await kvA.write('content.json', { version: 1, published: { rev: 3, content: { portfolio: { x: 1 } } } })
+    await kvA.write('enquiries.json', { items: [{ id: '1', name: 'Sam' }] })
+    await kvA.write('admin.json', { username: 'owner', passwordHash: 'secret' })
+    md(join(a, 'uploads')); wf(join(a, 'uploads', 'pic-abc.webp'), 'IMG')
+    const chunks: Buffer[] = []
+    await new Promise<void>((ok, bad) => { const s = backupStream(a, kvA); s.on('data', (d: Buffer) => chunks.push(d)); s.on('end', ok); s.on('error', bad) })
+    const zip = Buffer.concat(chunks)
+    const kvB = fileKv(b); await kvB.init()
+    await kvB.write('admin.json', { username: 'new', passwordHash: 'keep' })
+    const r = await restoreBackup(zip, { kv: kvB, dataDir: b })
+    expect(r.uploads).toBe(1)
+    expect((await kvB.read('content.json')).published.rev).toBe(3)
+    expect((await kvB.read('enquiries.json')).items[0].name).toBe('Sam')
+    expect(rf(join(b, 'uploads', 'pic-abc.webp'), 'utf8')).toBe('IMG')
+    expect((await kvB.read('admin.json')).username).toBe('new')
+    rm2(a, { recursive: true, force: true }); rm2(b, { recursive: true, force: true })
+  })
+  it('refuses archives that are not backups and ignores unsafe file names', async () => {
+    const d = mk(join(tmpdir(), 'sam-rc-')); const kv = fileKv(d); await kv.init()
+    await expect(restoreBackup(Buffer.from('not a zip'), { kv, dataDir: d })).rejects.toThrow(/backup/)
+    const noContent = Buffer.from(zipSync({ 'settings.json': strToU8('{}') }))
+    await expect(restoreBackup(noContent, { kv, dataDir: d })).rejects.toThrow(/content.json/)
+    const evil = Buffer.from(zipSync({ 'content.json': strToU8('{"a":1}'), '../../evil.txt': strToU8('x'), 'uploads/../../evil2.txt': strToU8('x'), 'uploads/ok-1.webp': strToU8('y'), 'admin.json': strToU8('{"username":"hacker"}') }))
+    const r = await restoreBackup(evil, { kv, dataDir: d })
+    expect(r.uploads).toBe(1)
+    expect(ex(join(d, '..', 'evil.txt'))).toBe(false)
+    expect(await kv.read('admin.json')).toBeNull()
+    rm2(d, { recursive: true, force: true })
   })
 })

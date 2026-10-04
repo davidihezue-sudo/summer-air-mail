@@ -18,6 +18,7 @@ import { createMailer } from './mailer.mjs'
 import { createBackups, backupStream } from './backup.mjs'
 import { createLimiter, parseContact } from './routes.mjs'
 import { s3FromEnv } from './s3.mjs'
+import { restoreBackup } from './restore.mjs'
 import { buildCsp, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
 
 function parseCookies(header = '') {
@@ -48,6 +49,13 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   const snapshots = createSnapshots(kv)
   const store = createStore(kv, { onSave: (before, after) => snapshots.record(before, after) })
   const auth = createAuth({ kv, env })
+  // On the live site the address can come from SITE_URL until it is typed into the admin (SEO page), so search and sharing tags are right from the start.
+  const siteUrl = String(env.SITE_URL ?? '').replace(/\/$/, '')
+  const getPublished = () => {
+    const pub = store.getPublished()
+    if (!pub || !siteUrl || pub.content?.portfolio?.site?.url) return pub
+    return { ...pub, content: { ...pub.content, portfolio: { ...pub.content.portfolio, site: { ...pub.content.portfolio.site, url: siteUrl } } } }
+  }
   const media = createMedia(dataDir, kv)
   const enquiries = createEnquiries(kv)
   const subscribers = createSubscribers(kv)
@@ -59,7 +67,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   backups.schedule()
   const pruneTimer = setInterval(() => {
     void enquiries.prune(settings.get().enquiryRetentionDays)
-    void insights.prune(store.getPublished()?.content?.portfolio?.insights?.retentionDays ?? 365)
+    void insights.prune(getPublished()?.content?.portfolio?.insights?.retentionDays ?? 365)
   }, 6 * 3600 * 1000)
   pruneTimer.unref?.()
 
@@ -88,16 +96,18 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     setHeaders: (res) => res.set('Content-Security-Policy', "default-src 'none'; sandbox"),
   }))
 
+  app.get('/healthz', (_req, res) => res.type('text').send('ok'))
+
   /* ---------- public content ---------- */
   app.get('/api/content', (_req, res) => {
-    const pub = store.getPublished()
+    const pub = getPublished()
     res.set('Cache-Control', 'no-cache')
     res.json({ content: publicView(pub?.content) ?? null, rev: pub?.rev ?? 0, publishedAt: pub?.publishedAt ?? null })
   })
 
   /* ---------- public forms and tracking ---------- */
   const publicJson = express.json({ limit: '32kb' })
-  const published = () => store.getPublished()?.content ?? null
+  const published = () => getPublished()?.content ?? null
   const contactLimit = createLimiter({ max: 5, windowMs: 3600 * 1000 })
   const subscribeLimit = createLimiter({ max: 5, windowMs: 3600 * 1000 })
   const trackLimit = createLimiter({ max: 120, windowMs: 60 * 1000 })
@@ -146,7 +156,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
 
   /** A tailored application link. Only someone who knows the slug can fetch it; it is never in the public JSON. */
   app.get('/api/application/:slug', (req, res) => {
-    const pubc = store.getPublished()?.content
+    const pubc = getPublished()?.content
     const a = (pubc?.applications ?? []).find((x) => x.slug === req.params.slug)
     const expired = a?.expiresAt && Date.parse(a.expiresAt) + 864e5 < Date.now()
     res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })
@@ -383,6 +393,18 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     res.set({ 'Content-Type': 'application/zip', 'Content-Disposition': `attachment; filename="portfolio-backup-${new Date().toISOString().slice(0, 10)}.zip"` })
     backupStream(dataDir, kv).on('error', () => res.destroy()).pipe(res)
   })
+  // Put a backup zip back: content, messages, settings and every uploaded file. Sign-in details are never touched.
+  admin.post('/backups/restore', ownerOnly, express.raw({ type: ['application/zip', 'application/octet-stream', 'application/x-zip-compressed'], limit: `${Math.min(maxVideoMb, 1000)}mb` }), async (req, res) => {
+    if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ error: 'Choose a backup zip to restore.' })
+    try {
+      const r = await restoreBackup(req.body, { kv, dataDir })
+      await Promise.all([store.init(), media.init(), snapshots.init(), enquiries.init(), subscribers.init(), insights.init(), settings.init()])
+      backups.schedule()
+      res.json({ ok: true, ...r })
+    } catch (e) {
+      res.status(e.status ?? 500).json({ error: e.status ? e.message : 'The backup could not be restored.' })
+    }
+  })
   admin.get('/backups/file/:name', ownerOnly, (req, res) => {
     const p = backups.path(req.params.name)
     if (!p || !existsSync(p)) return res.status(404).json({ error: 'Not found.' })
@@ -394,7 +416,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   app.use('/api', (_req, res) => res.status(404).json({ error: 'Not found.' }))
 
   /* ---------- the website ---------- */
-  const portfolioNow = () => store.getPublished()?.content?.portfolio ?? null
+  const portfolioNow = () => getPublished()?.content?.portfolio ?? null
   let tplCache = null
   const template = async () => {
     if (!tplCache) tplCache = await readFile(join(distDir, 'index.html'), 'utf8')
@@ -409,7 +431,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   })
   app.get('/sitemap.xml', async (_req, res) => {
     const p = portfolioNow()
-    const xml = p ? buildFullSitemap(store.getPublished().content) : existsSync(join(distDir, 'sitemap.xml')) ? await readFile(join(distDir, 'sitemap.xml'), 'utf8') : ''
+    const xml = p ? buildFullSitemap(getPublished().content) : existsSync(join(distDir, 'sitemap.xml')) ? await readFile(join(distDir, 'sitemap.xml'), 'utf8') : ''
     if (xml) res.type('application/xml').send(xml)
     else res.status(404).end()
   })
@@ -421,7 +443,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     }))
     app.get(/^(?!\/(api|uploads)\/).*/, async (req, res) => {
       try {
-        const pub = store.getPublished()
+        const pub = getPublished()
         const c = pub?.content ?? null
         const p = c?.portfolio ?? null
         const isAdmin = req.path === '/admin' || req.path.startsWith('/admin/')

@@ -108,5 +108,11 @@ export const api = {
   updateUser: (username: string, patch: { role?: string; password?: string }) => request<{ users: UserRow[] }>(`/users/${encodeURIComponent(username)}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   removeUser: (username: string) => request<{ users: UserRow[] }>(`/users/${encodeURIComponent(username)}`, { method: 'DELETE' }),
   backups: () => request<{ backups: { name: string; size: number }[]; status: BackupStatus }>('/backups'),
+  restoreBackup: async (file: File) => {
+    const res = await fetch('/api/admin/backups/restore', { method: 'POST', credentials: 'same-origin', headers: { 'x-requested-with': 'sam-admin', 'content-type': 'application/zip' }, body: file })
+    const data = await res.json().catch(() => ({}))
+    if (!res.ok) throw new ApiError(res.status, data.error ?? `Restore failed (${res.status}).`)
+    return data as { ok: true; records: number; uploads: number }
+  },
   runBackup: () => request<{ result: BackupStatus; backups: { name: string; size: number }[] }>('/backups/run', { method: 'POST', body: '{}' }),
 }

@@ -1,0 +1,40 @@
+# Render blueprint: creates the live website from this repository.
+# In Render choose New > Blueprint, pick this repository, and fill in the three secrets when asked.
+services:
+  - type: web
+    name: summer-air-mail
+    runtime: node
+    plan: starter
+    region: ohio
+    buildCommand: npm ci --include=dev && npm run build
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    # Uploaded images, videos and backups live here. It survives deploys and restarts.
+    disk:
+      name: uploads
+      mountPath: /var/data
+      sizeGB: 2
+    envVars:
+      - key: NODE_VERSION
+        value: 22
+      - key: NODE_ENV
+        value: production
+      - key: TRUST_PROXY
+        value: 1
+      - key: COOKIE_SECURE
+        value: true
+      - key: DATA_DIR
+        value: /var/data
+      - key: SITE_URL
+        value: https://kidochukwuihezue.ca
+      # Your Postgres connection string (from Neon). Keeps content, messages and the admin login safe.
+      - key: DATABASE_URL
+        sync: false
+      # Optional email alerts for new messages. Leave empty to skip.
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false

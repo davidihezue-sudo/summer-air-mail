@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { Download } from 'lucide-react'
 import { api, type BackupStatus, type EnvInfo, type ServerSettings } from '../api'
 import { Badge, Card, PageHead, Switch } from '../ui'
@@ -12,6 +12,8 @@ export function ServerPage() {
   const [bs, setBs] = useState<BackupStatus | null>(null)
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
+  const restoreInput = useRef<HTMLInputElement>(null)
+  const [pending, setPending] = useState<File | null>(null)
   const load = useCallback(async () => {
     const [a, b] = await Promise.all([api.settings(), api.backups()])
     setS(a.settings); setEnv(a.env); setBackups(b.backups); setBs(b.status)
@@ -56,6 +58,20 @@ export function ServerPage() {
           {bs?.at && <p className="ahelp">Last attempt {new Date(bs.at).toLocaleString()}: {bs.ok ? 'worked' : `failed (${bs.error})`}</p>}
         </div>
         {backups.length > 0 && <ul className="arows">{backups.map((b) => <li key={b.name} className="arow-item"><span className="arow-item__main">{b.name} <span className="ahelp">{mb(b.size)}</span></span><a className="abtn" href={`/api/admin/backups/file/${b.name}`} download>Download</a></li>)}</ul>}
+      </Card>
+      <Card title="Restore from a backup">
+        <p className="ahelp">Use this to move your site to a new computer or to the live website, or to go back to an earlier backup. It brings back your content, images and files, messages, subscribers and settings. It never changes who can sign in. It replaces what is on this site now, so download a backup first if you are unsure.</p>
+        <input ref={restoreInput} type="file" accept=".zip,application/zip" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) setPending(f) }} />
+        <button type="button" className="abtn" onClick={() => restoreInput.current?.click()}>Choose a backup zip</button>
+        {pending && (
+          <div className="anotice" role="alert">
+            <p><strong>Restore {pending.name} ({mb(pending.size)})?</strong> Everything on this site is replaced by what is in the backup.</p>
+            <span className="arow">
+              <button type="button" className="abtn abtn--danger" disabled={busy} onClick={async () => { setBusy(true); try { const r = await api.restoreBackup(pending); setMsg(`Restored ${r.records} records and ${r.uploads} files. Reload the page to see them.`); setPending(null) } catch (e) { setMsg((e as Error).message) } finally { setBusy(false) } }}>{busy ? 'Restoring' : 'Yes, restore it'}</button>
+              <button type="button" className="abtn" onClick={() => setPending(null)}>Cancel</button>
+            </span>
+          </div>
+        )}
       </Card>
       {msg && <p role="status" className="atoast">{msg}</p>}
     </>

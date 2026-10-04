@@ -17,11 +17,12 @@ A four-season social media and digital marketing portfolio with a built-in admin
 5. [Professional intensity](#professional-intensity)
 6. [What is new in version 3](#what-is-new-in-version-3)
 7. [Keeping your work safe](#keeping-your-work-safe)
-8. [Deploying](#deploying)
-9. [How it is built](#how-it-is-built)
-10. [Security](#security)
-11. [Testing](#testing)
-12. [Known limits](#known-limits)
+8. [Putting the site online at your own address](#putting-the-site-online-at-your-own-address)
+9. [Deploying](#deploying)
+10. [How it is built](#how-it-is-built)
+11. [Security](#security)
+12. [Testing](#testing)
+13. [Known limits](#known-limits)
 
 ---
 
@@ -255,6 +256,37 @@ git push -u origin main
 ```
 
 `.gitignore` already keeps `node_modules`, `data` and `.env` (your secrets and database address) out of GitHub. GitHub stores the code; your content lives in your database.
+
+## Putting the site online at your own address
+
+The site needs a host that runs Node (GitHub cannot run it). These steps use **Render** to run it and **Neon** for the database, with your own domain. Budget about $7 a month for Render plus a few cents for the disk; Neon's free plan is enough.
+
+**1. Database (5 minutes).** At neon.tech make a project and copy the connection string (Connect, then Show password). Keep it for step 3 and for your own `.env` (`DATABASE_URL=...`).
+
+**2. Make your admin login in that database.** On your computer, with `DATABASE_URL` in `.env`:
+```powershell
+npm run admin:setup
+```
+It stores the username and password (hashed) in the database, so the live site recognises them.
+
+**3. Create the website on Render.**
+1. Sign up at render.com and connect your GitHub account.
+2. **New > Blueprint**, choose the `summer-air-mail` repository. Render reads `render.yaml`.
+3. When it asks for the secret values, paste your `DATABASE_URL`. Leave the email ones empty for now.
+4. Press Apply. The first build takes about 5 to 10 minutes. When it finishes, the site is live at `something.onrender.com`. Open `/healthz` on it; it should say `ok`.
+
+**4. Point your domain at it.**
+1. In Render open the service, **Settings > Custom Domains**, add `kidochukwuihezue.ca` and also `www.kidochukwuihezue.ca`. Render shows the exact DNS records to create.
+2. Log in where you bought the domain and open its DNS settings (for a `.ca` that is your registrar: GoDaddy, Namecheap, Google Domains successor, CIRA member registrar and so on). Delete any old "parking page" records for `@` and `www`, then add what Render shows. Normally that is an `A` record for `@` pointing at the IP Render gives you, and a `CNAME` record for `www` pointing at `your-service.onrender.com`.
+3. Back in Render press Verify. DNS can take from a few minutes to a few hours. Render then issues the HTTPS certificate by itself, and redirects `www` to the main address.
+
+**5. Move your content up.** On your computer: Admin > Server & Backups > **Download a backup now**. Then open `https://kidochukwuihezue.ca/admin`, sign in, and under Server & Backups use **Restore from a backup** with that zip. Your content, images, messages and settings appear on the live site. Press Publish if the draft says it is unpublished.
+
+**6. Check it.** In the admin open **SEO** and confirm the website address is `https://kidochukwuihezue.ca` (the server already supplies it until you do), then look at the live site on your phone.
+
+**After that.** Every time you `git push` to GitHub, Render rebuilds and updates the site by itself. Your content is in the database and your images are on the disk, so deploying never changes them. Daily backups are on; download one now and then.
+
+Costs and limits: the Starter plan stays awake (the free plan sleeps and would make visitors wait). The 2 GB disk holds your uploads and backups; raise `sizeGB` in `render.yaml` if you add many videos. Large videos are shrunk when uploaded, which needs a little memory, so keep one upload going at a time.
 
 ## Deploying
 
