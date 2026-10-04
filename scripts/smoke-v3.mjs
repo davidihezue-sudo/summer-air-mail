@@ -38,6 +38,7 @@ c.portfolio.cursor = { ...c.portfolio.cursor, enabled: true, style: 'ring', show
 c.projects = [{ id: 'p1', title: 'Smoke project', client: 'Brand', industry: 'x', category: 'Brand Development', description: 'A description long enough to be a real description of the work done.', year: '2025', period: '', platforms: [], role: 'Lead', thumbnail: { src: '', alt: '' }, media: [], externalLink: '', featured: true, hidden: false, contentTypes: [], serviceIds: [], toolIds: [], aiSkillIds: [], resultIds: [], contentIds: [], screenshotIds: [], relatedIds: [], blocks: [] }]
 const tall = `data:image/svg+xml;utf8,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="1170" height="2532"><rect width="1170" height="2532" fill="#F39CAB"/><text x="50" y="200" font-size="120">PHONE SCREENSHOT</text></svg>')}`
 c.projects.push({ ...c.projects[0], id: 'p2', title: 'Tall screenshot project', platforms: ['instagram'], thumbnail: { src: tall, alt: 'A phone screenshot', width: 1170, height: 2532 } })
+c.portfolio.media = { ...c.portfolio.media, screenshotSize: 'small' }
 c.portfolio.extras = { ...c.portfolio.extras, clientStrip: true, backToTop: true }
 c.screenshots = [{ id: 'sc1', image: { src: tall, alt: 'Before', width: 1170, height: 2532 }, compareWith: { src: tall, alt: 'After', width: 1170, height: 2532 }, caption: 'Long screenshot', category: '', hidden: false }]
 c.notes = [{ id: 'n1', slug: 'hello-note', title: 'Hello note', date: '2026-01-01', summary: 'Sum', body: 'Body text here.', cover: null, tags: [], seoTitle: '', seoDescription: '', hidden: false }]
@@ -89,6 +90,7 @@ const open = async (path, w = 1280, h = 800, opts = {}) => {
   await page.waitForTimeout(500)
   const ba = await page.locator('.ba__frame').boundingBox()
   check(ba && ba.height / ba.width > 2, `a long before and after screenshot keeps its full height (${ba && (ba.height / ba.width).toFixed(2)})`)
+  check(ba && ba.width <= 262, `the small size setting makes it smaller without changing its shape (${ba && Math.round(ba.width)}px wide)`)
   check(await page.locator('.totop').count() === 1, 'back to top button appears after scrolling')
   await page.evaluate(() => document.getElementById('tools')?.scrollIntoView())
   await page.waitForTimeout(500)

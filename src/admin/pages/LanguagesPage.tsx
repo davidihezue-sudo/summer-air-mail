@@ -42,20 +42,20 @@ export function LanguagesPage() {
                   <button role="tab" aria-selected={tab === 'ui'} type="button" className={`achip ${tab === 'ui' ? 'is-on' : ''}`} onClick={() => setTab('ui')}>Buttons and labels</button>
                 </div>
                 {tab === 'ui' ? (
-                  <table className="atable"><thead><tr><th>English</th><th>{lang.label || lang.code}</th></tr></thead><tbody>
+                  <div className="atable-wrap"><table className="atable atable--stack"><thead><tr><th>English</th><th>{lang.label || lang.code}</th></tr></thead><tbody>
                     {Object.entries(UI_DEFAULTS).map(([k, en]) => (
                       <tr key={k}><td>{en}</td><td><input aria-label={`${lang.label} for "${en}"`} value={lang.ui[k] ?? ''} onChange={(e) => set(`${base}.ui.${k}`, e.target.value)} /></td></tr>
                     ))}
-                  </tbody></table>
+                  </tbody></table></div>
                 ) : (
                   <>
                     <Switch checked={only} onChange={setOnly} label="Show only fields still to translate" />
-                    <table className="atable"><thead><tr><th>Original</th><th>{lang.label || lang.code}</th></tr></thead><tbody>
+                    <div className="atable-wrap"><table className="atable atable--stack"><thead><tr><th>Original</th><th>{lang.label || lang.code}</th></tr></thead><tbody>
                       {fields.filter((f) => !only || !(lang.text[f.path] ?? '').trim()).map((f) => (
                         <tr key={f.path}><td><span className="ahelp">{f.label}</span><br />{f.value.length > 160 ? `${f.value.slice(0, 160)}...` : f.value}</td>
                           <td>{f.value.length > 80 ? <textarea rows={3} aria-label={`${lang.label} for ${f.label}`} value={lang.text[f.path] ?? ''} onChange={(e) => set(`${base}.text.${f.path}`, e.target.value)} /> : <input aria-label={`${lang.label} for ${f.label}`} value={lang.text[f.path] ?? ''} onChange={(e) => set(`${base}.text.${f.path}`, e.target.value)} />}</td></tr>
                       ))}
-                    </tbody></table>
+                    </tbody></table></div>
                   </>
                 )}
                 <button type="button" className="abtn abtn--danger" onClick={() => setDel(true)}><Trash2 size={14} aria-hidden /> Delete this language</button>

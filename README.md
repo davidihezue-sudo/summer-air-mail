@@ -170,7 +170,7 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 | Tools with logos | Capabilities > Tools & Platforms, Tools Display | Every tool you switch on shows its logo, name, category and how you use it, with no clicking. Well known tools get their logo automatically; otherwise upload one, paste a link, or choose a built-in mark. Cards, compact chips or the original flip rings; sizes, brand or single colour, grouping. Logos also show in the admin list where you switch tools on and off. |
 | Admin search | Top bar of the admin (press `/` or Ctrl+K) | Start typing and matches appear: pages, individual settings, and the things you wrote (projects, tools, notes...). It understands everyday words ("dark mode", "logo", "backup", "password"). Pick with the arrow keys and Enter; for a setting it opens the page, scrolls to the setting and highlights it. |
 | Toolkit redesign | Capabilities > Tools Display | Six layouts: cards, logo wall (logos only, names on hover or shown), list (logo with description beside it), compact, a slow scrolling strip, and the original rings. Category tabs with counts, logo size and tile (white, frosted or none), brand or single colour logos, hover glow in each brand's colour. |
-| Pictures and screenshots | Portfolio > Pictures & Screenshots | Instagram, TikTok, YouTube, LinkedIn and Pinterest pictures are all different shapes. By default every card follows its own picture, so a tall phone screenshot is shown whole with a soft blurred fill. Force a shape for the whole site or per project, choose smart/whole/trim, and show screenshots as a masonry or even grid. |
+| Pictures and screenshots | Portfolio > Pictures & Screenshots | Instagram, TikTok, YouTube, LinkedIn and Pinterest pictures are all different shapes. By default every card follows its own picture, so a tall phone screenshot is shown whole with a soft blurred fill. Force a shape for the whole site or per project, choose smart/whole/trim, and show screenshots as a masonry or even grid. Screenshot size (small, medium or large, for the whole site or per screenshot) only changes how big a picture appears. Its shape and sharpness stay the same, and visitors can still zoom in to the full picture. |
 | Big video upload | Media Library | Videos up to 2 GB (MP4, MOV, WebM, MKV, AVI) upload with a progress bar, then are shrunk automatically to a web friendly 1080p MP4 with a cover image. Needs no setup: ffmpeg comes with `npm install`. Set `MAX_VIDEO_MB` to change the limit. |
 | Extras | Look and layout > Extras | Pulsing availability badge, previous and next project buttons, back to top, copy email, a strip of brands you have worked with (built only from your real projects), minutes to read on notes. |
 | Hero water bubble | Identity > Hero > Hero circle | The circle behind the stamp is now a glassy water bubble with a rainbow rim and reflection. Style, size, position, colour, opacity, sheen, frosted blur, wobble, drift, scroll movement and small satellite bubbles are all adjustable. |
@@ -330,6 +330,10 @@ tests/              Unit and server tests
 - **Private links.** Application links are served only by their code, are never in the public data, are marked noindex, and honour an expiry date.
 - **Backups.** Backup zips never include logins or password hashes.
 
+## On a phone
+
+Both the website and the admin are built phone first and checked at four phone widths (320, 360, 390 and 430 pixels) by `npm run mobile`: no sideways scrolling on any page, menus no wider than half the screen, every menu link at least 44 pixels tall, controls big enough for a thumb, and form fields at 16 pixels so iPhones do not zoom in. The menu on the website and in the admin opens as a narrow side panel (half the screen at most) that scrolls inside itself. On the website the language picker moves into the menu on phones to keep the top bar clear. The announcement banner makes room for however many lines it needs.
+
 ## Testing
 
 ```bash
@@ -338,6 +342,7 @@ npm run build && npm run smoke:admin  # the admin workflow in a real browser
 npm run dev                           # then, in another terminal:
 npm run smoke                         # public site: 8 widths, seasons, interactions, reduced motion
 npm run a11y                          # axe-core on the site (all seasons, light and dark, desktop and mobile) and every admin page
+npm run mobile                        # phone audit at four widths: overflow, menu width, tap targets, text size (needs npm run dev)
 npm run build && npm run smoke:v3     # version 3 features in a real browser: banner, dark mode, languages, application links, profile PDF, contact form, maintenance
 ```
 

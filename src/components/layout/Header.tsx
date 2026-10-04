@@ -62,7 +62,7 @@ export function Header() {
           <div className="header__tools">
             <AvailabilityBadge />
             <BookingButton place="header" className="btn btn--solid header__book" />
-            <LangSwitcher />
+            <span className="header__lang"><LangSwitcher /></span>
             <SchemeToggle />
             <button type="button" className="header__burger" onClick={() => setOpen(true)} aria-label={t('menu.open')} aria-haspopup="dialog">
               <Menu aria-hidden />
@@ -82,6 +82,7 @@ export function Header() {
           )}
           {cv && <a className="btn btn--solid" href={cv.href} download={cv.filename}>{t('cv.download')}</a>}
           <BookingButton place="header" className="btn btn--ghost" />
+          <div className="drawer__tools"><LangSwitcher /></div>
         </nav>
       </Modal>
     </>

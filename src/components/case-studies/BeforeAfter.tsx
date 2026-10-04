@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { CSSProperties } from 'react'
 import type { ImageRef } from '../../content/types'
 import { ratioOf } from '../../utils/media'
+import { useContent } from '../../hooks/useContent'
 
 const LABELS = {
   'before-after': ['Before', 'After'],
@@ -10,7 +11,8 @@ const LABELS = {
   'baseline-result': ['Baseline', 'Result'],
 } as const
 
-export function BeforeAfter({ before, after, caption, variant = 'before-after' }: { before: ImageRef; after: ImageRef; caption?: string; variant?: keyof typeof LABELS }) {
+export function BeforeAfter({ before, after, caption, variant = 'before-after', size }: { before: ImageRef; after: ImageRef; caption?: string; variant?: keyof typeof LABELS; size?: '' | 'small' | 'medium' | 'large' }) {
+  const siteSize = useContent().content.portfolio.media.screenshotSize
   const [pos, setPos] = useState(50)
   const [measured, setMeasured] = useState<number | null>(null)
   // The frame takes the shape of the pictures themselves, so a long phone screenshot is shown from top to bottom, never trimmed.
@@ -18,7 +20,7 @@ export function BeforeAfter({ before, after, caption, variant = 'before-after' }
   const onLoad = (e: React.SyntheticEvent<HTMLImageElement>) => { if (!ratioOf(after) && !ratioOf(before)) setMeasured(e.currentTarget.naturalWidth / (e.currentTarget.naturalHeight || 1)) }
   const [l, r] = LABELS[variant]
   return (
-    <figure className="ba" style={{ ['--r' as string]: ratio } as CSSProperties}>
+    <figure className={`ba ba--${size || siteSize}`} style={{ ['--r' as string]: ratio } as CSSProperties}>
       <div className="ba__frame" style={{ ['--pos' as string]: `${pos}%`, aspectRatio: String(ratio) } as CSSProperties}>
         <img src={after.src} alt={after.alt || r} loading="lazy" draggable={false} onLoad={onLoad} />
         <img className="ba__before" src={before.src} alt={before.alt || l} loading="lazy" draggable={false} />

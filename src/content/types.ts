@@ -169,6 +169,8 @@ export interface MediaSettings {
   /** auto follows each picture. The others force one shape on every card. */
   cardShape: 'auto' | 'square' | 'portrait' | 'story' | 'tall' | 'landscape' | 'wide'
   screenshots: 'masonry' | 'grid'
+  /** How large screenshots and before and after pictures are shown. Only the size on the page changes; the picture's shape and sharpness do not. */
+  screenshotSize: 'small' | 'medium' | 'large'
 }
 
 export interface Project {
@@ -371,6 +373,8 @@ export interface ScreenshotItem {
   image: ImageRef
   caption?: string
   category?: string
+  /** Overrides the site's screenshot size for this one. */
+  size?: '' | 'small' | 'medium' | 'large'
   projectId?: string
   /** Optional second image for before and after comparisons. */
   compareWith?: ImageRef | null

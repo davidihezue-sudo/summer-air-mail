@@ -57,9 +57,9 @@ export function BulkPage() {
           <button type="button" className="abtn" disabled={!picked.size} onClick={() => act((x) => setShown(x, false))}>Hide</button>
           <button type="button" className="abtn abtn--danger" disabled={!picked.size} onClick={() => setDel(true)}>Delete</button>
         </span>}>
-        <table className="atable"><thead><tr><th><input type="checkbox" aria-label="Select all" checked={picked.size === all.length && all.length > 0} onChange={(e) => setPicked(e.target.checked ? new Set(all) : new Set())} /></th><th>Title</th><th>Status</th></tr></thead><tbody>
+        <div className="atable-wrap"><table className="atable"><thead><tr><th><input type="checkbox" aria-label="Select all" checked={picked.size === all.length && all.length > 0} onChange={(e) => setPicked(e.target.checked ? new Set(all) : new Set())} /></th><th>Title</th><th>Status</th></tr></thead><tbody>
           {list.map((x) => <tr key={x.id}><td><input type="checkbox" aria-label={`Select ${titleOf(x)}`} checked={picked.has(x.id)} onChange={() => toggle(x.id)} /></td><td>{titleOf(x)}</td><td>{shownOf(x) ? 'Visible' : 'Hidden'}</td></tr>)}
-        </tbody></table>
+        </tbody></table></div>
       </Card>
       <Confirm open={del} title={`Delete ${picked.size} items?`} body="They are removed from the draft. You can restore an earlier version from the item history until you publish." onCancel={() => setDel(false)} onConfirm={() => { edit((c) => { (c as any)[key] = (c as any)[key].filter((x: any) => !picked.has(x.id)) }); setPicked(new Set()); setDel(false) }} />
     </>

@@ -85,6 +85,8 @@ for (const d of defs) ENTITIES[d.id] = d
 const SECTION_LAYOUT = 'Applies to sections that offer more than one arrangement.'
 void SECTION_LAYOUT
 
+if (ENTITIES.screenshots) ENTITIES.screenshots.fields.push({ kind: 'select', key: 'size', label: 'Size on the page (this screenshot)', options: [{ value: '', label: 'Use the site setting' }, { value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }], help: 'Only changes how big it appears. The shape and sharpness stay the same.' })
+
 Object.assign(PAGES, {
   extras: {
     title: 'Extras', intro: 'Small touches that make the site nicer to use. Each one can be switched off.',
@@ -103,6 +105,7 @@ Object.assign(PAGES, {
       { kind: 'select', key: 'cardShape', label: 'Shape of portfolio cards', options: [{ value: 'auto', label: 'Follow each picture (nothing is trimmed)' }, { value: 'square', label: 'Square (1:1)' }, { value: 'portrait', label: 'Instagram portrait (4:5)' }, { value: 'story', label: 'Story, Reel and TikTok (9:16)' }, { value: 'tall', label: 'Pinterest (2:3)' }, { value: 'landscape', label: 'YouTube (16:9)' }, { value: 'wide', label: 'Facebook and LinkedIn link (1.91:1)' }], help: 'You can also set the shape for one project in its own settings.' },
       { kind: 'select', key: 'cardFit', label: 'When a picture is not the frame\'s shape', options: [{ value: 'smart', label: 'Smart: trim only a sliver, otherwise show it whole' }, { value: 'contain', label: 'Always show the whole picture' }, { value: 'cover', label: 'Fill the frame and trim the edges' }] },
       { kind: 'select', key: 'fill', label: 'What fills the space around a picture', options: [{ value: 'blur', label: 'A soft blurred copy of the picture' }, { value: 'tone', label: 'A plain colour' }, { value: 'none', label: 'Nothing' }] },
+      { kind: 'select', key: 'screenshotSize', label: 'Screenshot size', options: [{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }], help: 'Only how big they appear on the page. Their shape and sharpness never change, and visitors can still zoom in to the full picture. You can also set the size on each screenshot.' },
       { kind: 'select', key: 'screenshots', label: 'Screenshots section layout', options: [{ value: 'masonry', label: 'Masonry: tall and wide screenshots fit together' }, { value: 'grid', label: 'Even grid' }] },
     ] }],
   },

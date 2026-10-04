@@ -63,7 +63,7 @@ function BlockView({ b }: { b: Block }) {
           <div className="blk-gallery__grid">
             {imgs.map((im, i) => (
               <button key={im.src + i} type="button" onClick={() => zoomable(list, i)} aria-label={`View image ${i + 1} of ${imgs.length} full size`}>
-                <img src={im.src} alt={im.alt} loading="lazy" decoding="async" />
+                <img src={im.src} alt={im.alt} width={im.width} height={im.height} loading="lazy" decoding="async" />
               </button>
             ))}
           </div>
