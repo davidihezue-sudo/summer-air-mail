@@ -235,3 +235,16 @@ describe('password change and lockout', () => {
     expect(readFileSync(join(dir, 'data', 'content.json'), 'utf8')).not.toContain(PASSWORD)
   })
 })
+
+import { parseEnv, loadEnv } from '../server/loadenv.mjs'
+describe('.env loading', () => {
+  it('parses values, quotes and comments, and never overrides what is already set', () => {
+    const p = parseEnv('# c\nA=1\nB="two words"\nC=3 # note\n  D = x\nbad line\n1X=no\n')
+    expect(p).toEqual({ A: '1', B: 'two words', C: '3', D: 'x' })
+    const f = join(dir, '.env.test'); writeFileSync(f, 'FOO=bar\nKEEP=new\nEMPTY=\n')
+    const target: Record<string, string | undefined> = { KEEP: 'old' }
+    expect(loadEnv(f, target)).toEqual(['FOO'])
+    expect(target).toMatchObject({ FOO: 'bar', KEEP: 'old' })
+    expect(target.EMPTY).toBeUndefined()
+  })
+})

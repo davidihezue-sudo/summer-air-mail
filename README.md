@@ -16,11 +16,12 @@ A four-season social media and digital marketing portfolio with a built-in admin
 4. [Seasons](#seasons)
 5. [Professional intensity](#professional-intensity)
 6. [What is new in version 3](#what-is-new-in-version-3)
-7. [Deploying](#deploying)
-8. [How it is built](#how-it-is-built)
-9. [Security](#security)
-10. [Testing](#testing)
-11. [Known limits](#known-limits)
+7. [Keeping your work safe](#keeping-your-work-safe)
+8. [Deploying](#deploying)
+9. [How it is built](#how-it-is-built)
+10. [Security](#security)
+11. [Testing](#testing)
+12. [Known limits](#known-limits)
 
 ---
 
@@ -164,6 +165,9 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 
 | Feature | Where to find it | What it does |
 | --- | --- | --- |
+| Tools with logos | Capabilities > Tools & Platforms, Tools Display | Every tool you switch on shows its logo, name, category and how you use it, with no clicking. Well known tools get their logo automatically; otherwise upload one, paste a link, or choose a built-in mark. Cards, compact chips or the original flip rings; sizes, brand or single colour, grouping. Logos also show in the admin list where you switch tools on and off. |
+| Hero water bubble | Identity > Hero > Hero circle | The circle behind the stamp is now a glassy water bubble with a rainbow rim and reflection. Style, size, position, colour, opacity, sheen, frosted blur, wobble, drift, scroll movement and small satellite bubbles are all adjustable. |
+| Per card customization | Portfolio, Testimonials, Results, Design | Each project has a card label and accent colour; testimonials and results have an accent colour; Design > Cards switches every card between soft, flat, outlined and frosted glass. |
 | Cursor effect | Look and layout > Cursor effect | 14 styles (bubbles, water drop, ripples, ring, circle, blob, spotlight, halo, comet, sparkles, crosshair, seasonal, emoji, your own image), size, colour, opacity, smoothing, trail length, blend, where it shows, which professional modes allow it, tap ripple on touch screens. Also sets the hero reveal circle size. Live preview as you edit. |
 | Clickable strategy notes | Capabilities > Strategy Framework | Each sticky note says "Tap to open", with an Open all button and an editable hint line. |
 | Design | Look and layout > Design | Corner roundness, button shape, spacing, text size, shadows, outline weight, heading case, pop-up animation, scroll progress. |
@@ -201,6 +205,49 @@ By default everything is stored as JSON files in `DATA_DIR`. Set `DATABASE_URL` 
 ### Email, webhooks and backups
 
 Secrets are never kept in the admin. Set them as environment variables (see `.env.example`): `SMTP_*` for email alerts, `ALERT_WEBHOOK_URL` for Slack, Discord or Zapier, and `S3_*` for off-site backups. The admin shows only whether each is configured. S3 uploads use a small hand written Signature V4 signer that is tested against Amazon's published example; it has not been run against a live bucket in the authoring environment, so make one backup and check that the object appears before relying on it.
+
+## Keeping your work safe
+
+**Why things disappeared.** Before version 3.1 your content lived in a `data` folder inside the project folder. A new zip unzipped into a new folder starts with an empty `data` folder, so the site (and the admin login) started from scratch. Your old work is still in the *old* folder's `data` directory.
+
+**What changed.**
+- Without a database, uploads and records now live in a folder called `.summer-air-mail` in your home directory (for example `C:\Users\you\.summer-air-mail`), outside the project. Unzipping a new version anywhere keeps your work. If a `data` folder already exists in the project, that is used instead.
+- Automatic daily backups are on by default (Admin > Tools > Server & Backups), and you can download one at any time.
+- The server prints where it is storing your work every time it starts, and the dashboard reminds you while you are on file storage.
+- A `.env` file in the project folder is now read automatically, so you can set `DATABASE_URL` once and forget it.
+
+**Get your old work back.** In PowerShell, from the new project folder:
+
+```powershell
+npm run data:import -- "C:\path\to\old-project-folder\data"
+npm run admin:setup        # only if you also want to reset the admin password
+```
+
+**Use a database so this can never happen again (recommended).**
+
+1. Make a free Postgres database. Easiest: sign up at neon.tech (or supabase.com), create a project, and copy the connection string. It looks like `postgres://user:password@host/dbname?sslmode=require`.
+   Prefer local? Install Docker Desktop and run `npm run db:up`, then use `postgres://sam:sam@localhost:5432/summer_air_mail`.
+2. Copy `.env.example` to `.env` and add one line: `DATABASE_URL=...your connection string...`
+3. Create the admin login in that database: `npm run admin:setup`
+4. If you have old work, run the `data:import` command above now.
+5. Start the site: `npm run dev:all`. It should print `Storing your content in: Postgres database`.
+
+Content, messages, subscribers, visit counts, settings and the admin login are then in the database, not on your computer. Uploaded images and files stay in the `.summer-air-mail` folder (or `DATA_DIR`); the backup zip includes them.
+
+**Can not sign in?** Run `npm run admin:setup` again in the project folder. It sets (or resets) the owner username and password in whichever place is in use. The most common cause is a fresh folder with no account yet.
+
+**Putting the code on GitHub.** From the project folder in PowerShell:
+
+```powershell
+git init
+git add .
+git commit -m "Summer Air Mail"
+git branch -M main
+git remote add origin https://github.com/YOUR-NAME/summer-air-mail.git
+git push -u origin main
+```
+
+`.gitignore` already keeps `node_modules`, `data` and `.env` (your secrets and database address) out of GitHub. GitHub stores the code; your content lives in your database.
 
 ## Deploying
 

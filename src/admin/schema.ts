@@ -6,6 +6,7 @@ import {
   newService, newSkillGroup, newTestimonial, newTool, newWebsite, newCaseStudy,
 } from '../content/factories'
 import { FONT_CHOICES } from '../themes/seasonManager'
+import { BRAND_CHOICES, brandDataUri, brandFor } from '../content/brands'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const PLATFORMS: Opt[] = ['instagram', 'tiktok', 'facebook', 'linkedin', 'youtube', 'pinterest', 'x', 'threads', 'snapchat', 'web']
@@ -53,6 +54,7 @@ export const PROJECT_FIELDS: Field[] = [
   {
     kind: 'group', label: 'Basics', fields: [
       { kind: 'text', key: 'title', label: 'Project title' }, { kind: 'text', key: 'client', label: 'Client or brand' },
+      { kind: 'text', key: 'badge', label: 'Card label (for example New, Award winner)', help: 'Replaces the Featured label on the card when filled in.', maxLength: 24 }, { kind: 'tone', key: 'accent', label: 'Card accent colour', help: 'Colours the label and the bottom edge of this card.' },
       { kind: 'text', key: 'industry', label: 'Industry' },
       { kind: 'select', key: 'category', label: 'Project type', options: (c: SiteContent) => [...new Set([...PROJECT_TYPES, ...c.categories, ...c.projects.map((p) => p.category).filter(Boolean)])], custom: true, help: 'Visitors can filter by this. Add your own type if none fit.' },
       { kind: 'textarea', key: 'description', label: 'Short description', help: 'One or two honest sentences. Shown on the project card.' },
@@ -173,11 +175,18 @@ export const ENTITIES: Record<string, EntityDef> = {
   tools: {
     id: 'tools', title: 'Tools & Platforms', singular: 'tool', collection: 'tools', make: newTool,
     intro: 'Software you genuinely use. A tool only appears publicly when you tick "I use this tool" and describe how.',
-    titleOf: (t) => t.name || 'Untitled tool', subtitleOf: (t) => t.category, shown: (t) => !!t.confirmed, setShown: (t, v) => { t.confirmed = v }, shownLabels: ['In use', 'Not shown'],
+    titleOf: (t) => t.name || 'Untitled tool', subtitleOf: (t) => [t.category, t.usage && !/^\[/.test(t.usage) ? t.usage : ''].filter(Boolean).join(' · '),
+    thumbOf: (t) => brandDataUri(brandFor(t)), shown: (t) => !!t.confirmed, setShown: (t, v) => { t.confirmed = v }, shownLabels: ['In use', 'Not shown'],
     fields: [
       { kind: 'text', key: 'name', label: 'Tool name' }, { kind: 'select', key: 'category', label: 'Category', options: TOOL_CATEGORIES },
-      { kind: 'bool', key: 'confirmed', label: 'I use this tool' }, { kind: 'textarea', key: 'usage', label: 'How I use it', help: 'Be specific. This is shown on the back of the tool ring.' },
-      { kind: 'file', key: 'logo', label: 'Logo (optional)', accept: 'image' }, { kind: 'tone', key: 'color', label: 'Ring colour' },
+      { kind: 'bool', key: 'confirmed', label: 'I use this tool' }, { kind: 'textarea', key: 'usage', label: 'How I use it', help: 'Be specific. It is shown on the tool card for everyone to read.' },
+      { kind: 'url', key: 'link', label: 'Link to the tool (optional)' },
+      { kind: 'group', label: 'Logo', open: true, help: 'Most well known tools get their logo automatically from the name. Pick one below, upload the official logo, or paste a link to one.', fields: [
+        { kind: 'select', key: 'logoSlug', label: 'Built-in logo', options: [{ value: '', label: 'Automatic (match the name)' }, ...BRAND_CHOICES] },
+        { kind: 'file', key: 'logo', label: 'Upload your own logo', accept: 'image' },
+        { kind: 'url', key: 'logoUrl', label: 'Or a link to a logo image (https)' },
+        { kind: 'tone', key: 'color', label: 'Logo colour', help: 'Choose "Custom colour" to set a brand colour. Empty uses the brand colour.' },
+      ] },
     ],
   },
   testimonials: {
@@ -189,6 +198,7 @@ export const ENTITIES: Record<string, EntityDef> = {
       { kind: 'text', key: 'name', label: 'Name' }, { kind: 'text', key: 'title', label: 'Job title' }, { kind: 'text', key: 'company', label: 'Company' },
       { kind: 'textarea', key: 'quote', label: 'Testimonial', rows: 5 }, { kind: 'text', key: 'relationship', label: 'How you worked together' },
       { kind: 'image', key: 'photo', label: 'Photo (optional)' }, { kind: 'file', key: 'video', label: 'Video recommendation (optional)', accept: 'video', help: 'Plays only when the visitor presses play. You can also paste a YouTube or Vimeo link in the page by using a link instead of a file.' }, { kind: 'number', key: 'order', label: 'Display order', nullable: true },
+      { kind: 'tone', key: 'accent', label: 'Accent colour' },
       { kind: 'bool', key: 'approved', label: 'I have permission to publish this' },
     ],
   },
@@ -254,7 +264,7 @@ export const ENTITIES: Record<string, EntityDef> = {
     intro: 'Real numbers with a start, an end and a period. Percentages are only shown if you enter them or if both values exist. Label who produced each result.',
     titleOf: (r) => r.metric || 'Untitled result', subtitleOf: (r) => [r.platform, r.period, r.classification].filter(Boolean).join(' · '), thumbOf: (r) => r.screenshot?.src, ...hiddenToggle,
     fields: [
-      { kind: 'text', key: 'metric', label: 'Metric (for example Engagement rate, Follower growth, ROAS)' },
+      { kind: 'text', key: 'metric', label: 'Metric (for example Engagement rate, Follower growth, ROAS)' }, { kind: 'tone', key: 'accent', label: 'Card accent colour' },
       { kind: 'select', key: 'classification', label: 'Result type', options: RESULT_CLASSES, help: 'This label is shown on the card so visitors know how much weight to give it.' },
       { kind: 'select', key: 'contribution', label: 'Who produced it', options: [{ value: 'individual', label: 'Me (individual contribution)' }, { value: 'shared', label: 'Shared with the team' }, { value: 'team', label: 'The team' }] },
       { kind: 'number', key: 'start', label: 'Starting value' }, { kind: 'number', key: 'end', label: 'Ending value' },

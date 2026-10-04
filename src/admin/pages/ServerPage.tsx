@@ -30,6 +30,7 @@ export function ServerPage() {
       <PageHead title="Server Settings & Backups" intro="Settings that live on your server rather than in your published content. Passwords and keys are never shown here: they are set as environment variables." />
       <Card title="Where your data lives">
         <p>Storage: <Badge tone="info">{env.storage === 'postgres' ? 'Postgres database' : 'Files in the data folder'}</Badge></p>
+        {env.dataDir && <p className="ahelp">Folder: <code>{env.dataDir}</code>{env.storage === 'postgres' ? ' (uploaded files and backups only)' : ' (everything)'}</p>}
         <p className="ahelp">Set DATABASE_URL to keep content, messages and settings in Postgres. Uploaded images and files stay in the data folder (or your host's persistent disk).</p>
       </Card>
       <Card title="Alerts">

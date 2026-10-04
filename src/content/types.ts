@@ -57,6 +57,7 @@ export interface Metric {
 
 export interface ResultEntry {
   id: string
+  accent?: string
   metric: string
   start?: number | null
   end?: number | null
@@ -147,6 +148,10 @@ export interface CaseStudy {
 
 export interface Project {
   id: string
+  /** A short label on the card, for example "New" or "Award winner". Replaces "Featured" when set. */
+  badge?: string
+  /** A palette name or hex colour used for this card's accent. */
+  accent?: string
   title: string
   client: string
   industry: string
@@ -248,8 +253,26 @@ export interface Tool {
   /** Set true only for tools you genuinely use. Unconfirmed tools never render. */
   confirmed: boolean
   usage: string
+  /** An uploaded logo. Takes priority over the automatic brand mark. */
   logo?: string
+  /** Or a link to a logo image (https). */
+  logoUrl?: string
+  /** Pick a built-in brand mark by name, or leave empty to match the tool's name automatically. */
+  logoSlug?: string
+  /** Brand colour for the logo tile. Blank uses the brand's own colour. */
   color?: string
+  /** Where the tool's own site is. Makes the card a link. */
+  link?: string
+}
+
+export interface ToolsUi {
+  layout: 'cards' | 'rings' | 'compact'
+  showLogos: boolean
+  showUsage: boolean
+  showCategory: boolean
+  logoSize: 'sm' | 'md' | 'lg'
+  logoStyle: 'color' | 'mono'
+  group: boolean
 }
 
 export type AiCategory =
@@ -329,6 +352,7 @@ export interface WebsiteProject {
 
 export interface Testimonial {
   id: string
+  accent?: string
   name: string
   title: string
   company: string
@@ -465,6 +489,34 @@ export interface HeroConfig {
   /** Night Tide reveal circle: radius in px on desktop (touch uses 65% of it) and whether it is allowed at all. */
   tideSize: number
   tideEnabled: boolean
+  /** The large circle behind the stamp. */
+  orb: HeroOrb
+}
+
+export interface HeroOrb {
+  /** bubble: a glassy water bubble. sun, glow and ring are simpler. */
+  style: 'bubble' | 'sun' | 'glow' | 'ring' | 'none'
+  /** Diameter in vmin (a percentage of the screen's shorter side). */
+  size: number
+  /** Where the centre sits, as a percentage of the hero width and height. */
+  x: number
+  y: number
+  /** Blank uses a colour that suits the style and the season. Otherwise a palette name or a hex colour. */
+  color: string
+  opacity: number
+  /** How strong the rainbow sheen on the rim is, 0 to 1. */
+  rim: number
+  /** The bright reflection in the top left. */
+  shine: boolean
+  /** Frosted glass blur behind the bubble in px. */
+  blur: number
+  wobble: 'off' | 'gentle' | 'lively'
+  /** Distance in px it drifts up and down. 0 holds it still. */
+  float: number
+  /** How far it moves as the visitor scrolls, 0 to 100. */
+  parallax: number
+  /** Small bubbles that float around it, 0 to 8. */
+  satellites: number
 }
 
 export type CursorStyle =
@@ -512,6 +564,8 @@ export interface DesignSettings {
   colorToggle: boolean
   dialogAnimation: boolean
   readingProgress: boolean
+  /** Look of cards across the site. */
+  cards: 'soft' | 'flat' | 'outlined' | 'glass'
 }
 
 export interface Announcement {
@@ -685,6 +739,7 @@ export interface Portfolio {
   }
   seasons: SeasonSettings
   design: DesignSettings
+  toolsUi: ToolsUi
   cursor: CursorSettings
   announcement: Announcement
   schedule: ScheduleRule[]

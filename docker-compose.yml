@@ -1,0 +1,19 @@
+# A local Postgres for your content, so nothing depends on a folder in the project.
+#   docker compose up -d db
+# Then put this in your .env file:
+#   DATABASE_URL=postgres://sam:sam@localhost:5432/summer_air_mail
+# The data lives in a Docker volume and survives restarts and new versions of the project.
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: sam
+      POSTGRES_PASSWORD: sam
+      POSTGRES_DB: summer_air_mail
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - sam-db:/var/lib/postgresql/data
+volumes:
+  sam-db:

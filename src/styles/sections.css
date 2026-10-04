@@ -239,7 +239,7 @@ code, .prose, .lede { overflow-wrap: anywhere; }
 .facet { position: relative; }
 .facet__menu { position: absolute; z-index: 10; top: calc(100% + 6px); left: 0; display: flex; flex-wrap: wrap; gap: .4rem; width: max-content; max-width: min(86vw, 420px); padding: .7rem; background: var(--c-paper); border: var(--bw, 1.5px) solid var(--c-ink); border-radius: 14px; box-shadow: var(--shadow); }
 .chip--outline { background: transparent; }
-.polaroid__flag { justify-self: start; font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; font-weight: 800; background: var(--c-red); color: #fff; padding: .05rem .5rem; border-radius: 999px; }
+.polaroid__flag { background: var(--accent, var(--c-red)); justify-self: start; font-size: .65rem; letter-spacing: .15em; text-transform: uppercase; font-weight: 800; background: var(--c-red); color: #fff; padding: .05rem .5rem; border-radius: 999px; }
 .polaroid__blank { display: block; width: 100%; height: 100%; background: linear-gradient(135deg, var(--c-sand), var(--c-butter)); }
 .section__image { max-width: 520px; border-radius: 12px; }
 
@@ -449,3 +449,27 @@ figcaption { font-size: .88rem; opacity: .85; }
 .notegrid--list { grid-template-columns: 1fr; max-width: 760px; }
 html[dir='rtl'] .timeline { padding-left: 0; padding-right: 1.6rem; border-left: 0; border-right: 2px solid color-mix(in srgb, var(--c-ink) 25%, transparent); }
 html[dir='rtl'] .timeline__dot { left: auto; right: calc(-1.6rem - 7px); }
+
+/* ---------- Tools: logos and always visible details ---------- */
+.toollogo { flex: none; display: inline-grid; place-items: center; background: #fff; border-radius: 12px; padding: 8px; color: #17323f; box-shadow: 0 6px 14px -8px rgb(0 0 0 / .5); }
+.toollogo--sm { padding: 5px; border-radius: 8px; } .toollogo--lg { padding: 10px; border-radius: 16px; }
+.toollogo img, .toollogo svg { display: block; object-fit: contain; }
+.toollogo__mono { display: grid; place-items: center; width: 100%; height: 100%; min-width: 28px; min-height: 28px; border-radius: 8px; color: #fff; font-weight: 800; font-size: .9rem; padding: 0 .35rem; }
+.toolgrid { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); }
+.toolcard { display: flex; gap: .9rem; align-items: flex-start; padding: 1rem 1.1rem; border-radius: var(--radius); background: color-mix(in srgb, var(--c-paper) 10%, transparent); border: 1px solid color-mix(in srgb, var(--c-paper) 26%, transparent); }
+.toolcard__name { margin: 0; font-size: 1.05rem; } .toolcard__name a { color: inherit; text-underline-offset: 3px; }
+.toolcard__cat { margin: .1rem 0 0; font-size: .72rem; letter-spacing: .14em; text-transform: uppercase; font-weight: 700; }
+.toolcard__use { margin: .4rem 0 0; font-size: .92rem; line-height: 1.4; }
+.toolgrid--compact { grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap: .6rem; }
+.toolgrid--compact .toolcard { padding: .55rem .8rem; align-items: center; } .toolgrid--compact .toolcard__cat { display: none; } .toolgrid--compact .toolcard__use { font-size: .8rem; margin-top: .1rem; }
+.ringitem__use { font-size: .8rem; line-height: 1.3; text-align: center; max-width: 160px; }
+.ringitem__name a { color: inherit; }
+.ring__face--front .toollogo { position: relative; box-shadow: none; background: transparent; padding: 0; }
+
+/* ---------- Per entry accent and card styles ---------- */
+.quote { border-top-color: var(--accent, var(--c-red)); }
+.result { border-bottom: 6px solid var(--accent, transparent); }
+.polaroid-wrap .polaroid { border-bottom: 5px solid var(--accent, transparent); }
+[data-cards='flat'] :is(.result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric, .related button, .toolcard) { box-shadow: none; }
+[data-cards='outlined'] :is(.result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric) { box-shadow: none; background: transparent; border: var(--bw, 1.5px) solid var(--c-ink); }
+[data-cards='glass'] :is(.result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric) { background: color-mix(in srgb, var(--surface, #fff) 62%, transparent); backdrop-filter: blur(10px); border: 1px solid color-mix(in srgb, var(--c-ink) 18%, transparent); }

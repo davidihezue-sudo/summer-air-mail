@@ -8,6 +8,7 @@ import { useScrollVar } from '../../hooks/useScrollVar'
 import { useStageInteraction } from '../../hooks/useStageInteraction'
 import { HeroScene } from './HeroScene'
 import { TideCanvas } from './TideCanvas'
+import { HeroOrb } from './HeroOrb'
 
 export function Hero({ config }: { config: SectionConfig }) {
   const { content } = useContent()
@@ -66,7 +67,7 @@ export function Hero({ config }: { config: SectionConfig }) {
         onClick={onTap}
         {...handlers}
       >
-        <div className="hero__sun" aria-hidden />
+        <HeroOrb orb={hero.orb} />
         <HeroScene />
         {tideAllowed && (
           <div className={`tide ${tideOn ? 'is-on' : ''}`} aria-hidden inert>

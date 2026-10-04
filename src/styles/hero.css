@@ -9,7 +9,40 @@
 }
 .hero--static .hero__stage { position: relative; min-height: 100svh; height: auto; }
 .hero__stage::after { content: ''; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, var(--c-sand) 0%, transparent 38%); opacity: calc(var(--p, 0) * 1.2); }
-.hero__sun { position: absolute; width: 60vmin; height: 60vmin; right: -10vmin; top: 8vmin; border-radius: 50%; background: radial-gradient(circle, var(--sun), transparent 68%); opacity: .55; }
+/* The big circle behind the stamp. Default style is a glassy water bubble. */
+.orb { position: absolute; left: calc(var(--ox) * 1%); top: calc(var(--oy) * 1%); width: calc(var(--os) * 1vmin); aspect-ratio: 1; pointer-events: none; opacity: var(--oo);
+  translate: -50% calc(-50% - var(--p, 0) * var(--par, 0) * 40vmin); animation: orb-float calc(7s / var(--motion-speed, 1)) ease-in-out infinite; }
+.orbfx { position: absolute; border-radius: 50%; }
+.orbfx--main { inset: 0; }
+.orb[data-style='sun'] .orbfx--main { background: radial-gradient(circle, var(--oc), transparent 68%); }
+.orb[data-style='glow'] .orbfx--main { background: radial-gradient(circle, color-mix(in srgb, var(--oc) 80%, #fff) 0%, color-mix(in srgb, var(--oc) 35%, transparent) 40%, transparent 70%); filter: blur(calc(var(--ob) * 2)); }
+.orb[data-style='ring'] .orbfx--main { border: calc(var(--os) * .035vmin) solid color-mix(in srgb, var(--oc) 75%, transparent); box-shadow: 0 0 calc(var(--os) * .3vmin) color-mix(in srgb, var(--oc) 40%, transparent), inset 0 0 calc(var(--os) * .3vmin) color-mix(in srgb, var(--oc) 25%, transparent); }
+.orb[data-style='bubble'] .orbfx {
+  background:
+    radial-gradient(circle at 50% 50%, transparent 56%, color-mix(in srgb, var(--oc) 20%, transparent) 76%, color-mix(in srgb, var(--oc) 52%, transparent) 100%),
+    radial-gradient(circle at 70% 80%, color-mix(in srgb, #fff 38%, transparent), transparent 36%),
+    radial-gradient(circle at 50% 50%, color-mix(in srgb, var(--oc) 12%, transparent), transparent 72%);
+  border: 1px solid color-mix(in srgb, #fff 55%, transparent);
+  box-shadow: inset 0 0 calc(var(--os) * .5vmin) color-mix(in srgb, #fff 38%, transparent), inset calc(var(--os) * -.25vmin) calc(var(--os) * -.35vmin) calc(var(--os) * .7vmin) color-mix(in srgb, var(--oc) 42%, transparent), 0 calc(var(--os) * .45vmin) calc(var(--os) * 1vmin) calc(var(--os) * -.7vmin) color-mix(in srgb, var(--oc) 55%, transparent);
+  backdrop-filter: blur(var(--ob)) saturate(1.3); -webkit-backdrop-filter: blur(var(--ob)) saturate(1.3);
+}
+/* Rainbow sheen around the rim, like the film on a soap bubble. */
+.orb[data-style='bubble'] .orbfx--main::before { content: ''; position: absolute; inset: 0; border-radius: inherit; opacity: var(--orim);
+  background: conic-gradient(from 0deg, #ff9ecb, #9ee7ff, #fff3a3, #b6f5c0, #c8b6ff, #ff9ecb);
+  -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 9%), #000 calc(100% - 2%)); mask: radial-gradient(farthest-side, transparent calc(100% - 9%), #000 calc(100% - 2%));
+  animation: orb-spin calc(18s / var(--motion-speed, 1)) linear infinite; }
+/* The bright window reflection. */
+.orb[data-style='bubble'][data-shine='true'] .orbfx--main::after { content: ''; position: absolute; left: 15%; top: 11%; width: 27%; height: 15%; border-radius: 50%; rotate: -34deg;
+  background: radial-gradient(ellipse at 40% 40%, rgb(255 255 255 / .96), rgb(255 255 255 / 0) 72%); }
+.orbfx--sat { left: var(--sx); top: var(--sy); width: var(--ss); aspect-ratio: 1; translate: -50% -50%; animation: orb-sat 6s ease-in-out var(--sd) infinite; opacity: .9; }
+.orb[data-wobble='gentle'] .orbfx--main { animation: orb-wobble calc(11s / var(--motion-speed, 1)) ease-in-out infinite; }
+.orb[data-wobble='lively'] .orbfx--main { animation: orb-wobble calc(5s / var(--motion-speed, 1)) ease-in-out infinite; }
+@keyframes orb-float { 50% { transform: translateY(calc(var(--of) * -1px)); } }
+@keyframes orb-spin { to { rotate: 360deg; } }
+@keyframes orb-sat { 50% { translate: -50% calc(-50% - 10px); } }
+@keyframes orb-wobble { 0%, 100% { border-radius: 50%; scale: 1; } 25% { border-radius: 48% 52% 51% 49% / 52% 48% 52% 48%; scale: 1.015 .985; } 50% { border-radius: 52% 48% 49% 51% / 49% 53% 47% 51%; scale: .99 1.01; } 75% { border-radius: 49% 51% 52% 48% / 51% 49% 51% 49%; scale: 1.01 .99; } }
+[data-motion='none'] .orb, [data-motion='none'] .orb *, [data-motion='none'] .orb::before { animation: none !important; }
+@media (prefers-reduced-motion: reduce) { .orb, .orb *, .orb *::before { animation: none !important; } }
 @media (min-width: 900px) {
   .hero__stage { --stamp-h: min(68svh, 600px); --shift-x: -19vw; --shift-y: 0px; --grow: .3; }
 }

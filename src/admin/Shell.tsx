@@ -62,7 +62,7 @@ const NAV: { group: string; items: { id: string; label: string; icon: typeof Use
   ] },
   { group: 'Capabilities', items: [
     { id: 'services', label: 'Services', icon: Layers }, { id: 'skills', label: 'Skills', icon: Star }, { id: 'platforms', label: 'Platform Expertise', icon: Globe },
-    { id: 'tools', label: 'Tools & Platforms', icon: Wrench }, { id: 'ai', label: 'AI & Automation', icon: Cpu }, { id: 'process', label: 'Marketing Process', icon: Workflow },
+    { id: 'tools', label: 'Tools & Platforms', icon: Wrench }, { id: 'toolsDisplay', label: 'Tools Display', icon: Brush }, { id: 'ai', label: 'AI & Automation', icon: Cpu }, { id: 'process', label: 'Marketing Process', icon: Workflow },
     { id: 'strategy', label: 'Strategy Framework', icon: Target }, { id: 'testimonials', label: 'Testimonials', icon: MessageSquareQuote }, { id: 'mentoring', label: 'Mentoring & Training', icon: PenTool },
   ] },
   { group: 'Publish', items: [

@@ -1,8 +1,10 @@
+import './loadenv.mjs'
 import express from 'express'
 import compression from 'compression'
 import multer from 'multer'
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
+import { homedir } from 'node:os'
 import { join, resolve } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createStore } from './store.mjs'
@@ -29,9 +31,18 @@ function parseCookies(header = '') {
 
 const COOKIE = 'sam_session'
 
+/**
+ * Where uploads and file records live when DATA_DIR is not set. An existing ./data folder keeps working.
+ * Otherwise a folder in the user's home directory is used, so unzipping a new version of the project
+ * somewhere else never starts you from an empty site.
+ */
+export function defaultDataDir() {
+  return existsSync(resolve('data')) ? resolve('data') : join(homedir(), '.summer-air-mail')
+}
+
 /** @param {{ dataDir?: string, distDir?: string, env?: Record<string, string | undefined>, deps?: { transportFactory?: Function, fetchImpl?: Function } }} [options] */
 export async function createApp({ dataDir, distDir, env = process.env, deps = {} } = {}) {
-  dataDir = resolve(dataDir ?? env.DATA_DIR ?? 'data')
+  dataDir = resolve(dataDir ?? env.DATA_DIR ?? defaultDataDir())
   distDir = resolve(distDir ?? 'dist')
   const kv = await createKv({ dataDir, env })
   const snapshots = createSnapshots(kv)
@@ -344,7 +355,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     const r = await auth.removeUser(req.params.username)
     return r.ok ? res.json({ users: await auth.listUsers() }) : res.status(400).json({ error: r.error })
   })
-  const envInfo = () => ({ emailConfigured: mailer.emailConfigured, webhookConfigured: mailer.webhookConfigured, s3Configured: !!s3FromEnv(env), storage: kv.kind })
+  const envInfo = () => ({ emailConfigured: mailer.emailConfigured, webhookConfigured: mailer.webhookConfigured, s3Configured: !!s3FromEnv(env), storage: kv.kind, dataDir })
   admin.get('/settings', ownerOnly, (_req, res) => res.json({ settings: settings.get(), env: envInfo() }))
   admin.put('/settings', ownerOnly, async (req, res) => {
     const next = await settings.set(req.body?.settings ?? {})
@@ -453,6 +464,8 @@ export async function start(env = process.env) {
   const { app, auth, dataDir } = await createApp({ env })
   const port = Number(env.PORT ?? 8787)
   const host = env.HOST ?? (env.PORT ? '0.0.0.0' : '127.0.0.1')
+  const storage = env.DATABASE_URL ? 'Postgres database' : `files in ${dataDir}`
+  console.log(`Storing your content in: ${storage}`)
   if (!(await auth.configured())) {
     console.warn('\nNo admin account yet. Create one with:  npm run admin:setup\n')
   }

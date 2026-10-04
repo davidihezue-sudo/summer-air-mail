@@ -42,7 +42,7 @@ html.theme-fading *, html.theme-fading *::before, html.theme-fading *::after { t
 [data-season='autumn'] .stamp3d .layer--bg { filter: drop-shadow(0 22px 26px rgb(42 26 19 / .4)) sepia(.1); }
 [data-season='winter'] .hero-roles__line--1 { color: var(--c-red-text); }
 [data-hero-bg='plain'] .hero__stage { background: var(--c-sand); }
-[data-hero-decor='false'] .hero__sun { display: none; }
+[data-hero-decor='false'] .orb { display: none; }
 
 /* ===== Hero layouts ===== */
 .hero-supporting { font-family: var(--font-display); font-style: italic; font-size: clamp(1.2rem, 3vw, 1.7rem); color: var(--c-red-text); }
@@ -61,7 +61,7 @@ html.theme-fading *, html.theme-fading *::before, html.theme-fading *::after { t
 }
 
 /* ===== Professional intensity ===== */
-[data-professional='professional'] .progress__surfer, [data-professional='professional'] .sticker, [data-professional='professional'] .surfboard, [data-professional='professional'] .hero__sun { display: none; }
+[data-professional='professional'] .progress__surfer, [data-professional='professional'] .sticker, [data-professional='professional'] .surfboard, [data-professional='professional'] .orb { display: none; }
 [data-professional='professional'] .stamp-float, [data-professional='professional'] .polaroid, [data-professional='professional'] .ring__float { animation: none; }
 [data-professional='professional'] .polaroid { transform: none; box-shadow: 0 10px 24px -14px rgb(23 50 63 / .5); }
 [data-professional='professional'] .polaroid-wrap::before, [data-professional='professional'] .polaroid__pin { display: none; }

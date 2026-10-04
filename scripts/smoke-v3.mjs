@@ -33,6 +33,7 @@ c.portfolio.design = { ...c.portfolio.design, colorMode: 'light', colorToggle: t
 c.portfolio.contact.delivery = 'server'
 c.portfolio.insights.enabled = true
 c.portfolio.i18n = { enabled: true, defaultLabel: 'English', switcher: true, languages: [{ code: 'fr', label: 'Francais', rtl: false, ui: {}, text: { 'portfolio.profile.tagline': 'Bonjour tagline' } }] }
+c.tools = [{ id: 'tl1', name: 'Figma', category: 'Design', confirmed: true, usage: 'Smoke usage line.' }, { id: 'tl2', name: 'Canva', category: 'Design', confirmed: true, usage: 'Second usage line.' }]
 c.portfolio.cursor = { ...c.portfolio.cursor, enabled: true, style: 'ring', showIn: 'professional' }
 c.projects = [{ id: 'p1', title: 'Smoke project', client: 'Brand', industry: 'x', category: 'Brand Development', description: 'A description long enough to be a real description of the work done.', year: '2025', period: '', platforms: [], role: 'Lead', thumbnail: { src: '', alt: '' }, media: [], externalLink: '', featured: true, hidden: false, contentTypes: [], serviceIds: [], toolIds: [], aiSkillIds: [], resultIds: [], contentIds: [], screenshotIds: [], relatedIds: [], blocks: [] }]
 c.notes = [{ id: 'n1', slug: 'hello-note', title: 'Hello note', date: '2026-01-01', summary: 'Sum', body: 'Body text here.', cover: null, tags: [], seoTitle: '', seoDescription: '', hidden: false }]
@@ -62,6 +63,7 @@ const open = async (path, w = 1280, h = 800, opts = {}) => {
   check(await page.locator('.banner').count() === 0, 'banner can be dismissed')
   check(await page.getByRole('link', { name: /Book smoke/ }).count() > 0, 'booking button shows in the hero')
   check(await page.locator('canvas.cursorfx').count() === 1, 'cursor effect canvas is present')
+  check(await page.locator('.orb[data-style=bubble] .orbfx--sat').count() === 3, 'hero circle is a water bubble with small bubbles around it')
   await page.getByRole('button', { name: /Switch to dark mode/ }).click()
   await page.waitForTimeout(300)
   check(await page.evaluate(() => document.documentElement.dataset.scheme) === 'dark', 'visitor can switch to dark mode')
@@ -72,6 +74,11 @@ const open = async (path, w = 1280, h = 800, opts = {}) => {
   await page.selectOption('.langsel select', 'fr')
   await page.waitForTimeout(300)
   check(await page.evaluate(() => document.documentElement.lang) === 'fr', 'language switch sets the page language')
+  await page.evaluate(() => document.getElementById('tools')?.scrollIntoView())
+  await page.waitForTimeout(500)
+  check(await page.locator('.toolcard').count() === 2, 'tools show as cards without clicking')
+  check(await page.locator('.toolcard svg').count() === 1 && await page.locator('.toollogo__mono').count() === 1, 'a known brand shows its logo and an unknown one a monogram')
+  check((await page.locator('.toolcard').first().innerText()).includes('Smoke usage line.'), 'how a tool is used is visible without clicking')
   await page.evaluate(() => document.getElementById('testimonials')?.scrollIntoView())
   check(await page.locator('.quotes--carousel').count() === 1, 'testimonials render as a carousel')
   await page.evaluate(() => document.getElementById('contact')?.scrollIntoView())

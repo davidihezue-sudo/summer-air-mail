@@ -7,6 +7,7 @@ import { MetricBar } from '../case-studies/MetricBar'
 import { hasValue } from '../../utils/text'
 import { platformLabel } from '../ui/Icons'
 import { useViewer } from '../projects/Viewer'
+import { toneValue } from '../../utils/theme'
 
 const CONTRIBUTION = { individual: 'Individual contribution', team: 'Team result', shared: 'Shared with the team' } as const
 
@@ -27,7 +28,7 @@ export function ResultCard({ result: r }: { result: ResultEntry }) {
   const project = r.projectId ? content.projects.find((p) => p.id === r.projectId) : undefined
 
   return (
-    <article className="result">
+    <article className="result" style={toneValue(r.accent) ? ({ ['--accent' as string]: toneValue(r.accent) } as React.CSSProperties) : undefined}>
       <header className="result__head">
         <ClassBadge value={r.classification} />
         {r.contribution && <span className="result__who">{CONTRIBUTION[r.contribution]}</span>}

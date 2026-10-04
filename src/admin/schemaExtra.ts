@@ -86,6 +86,17 @@ const SECTION_LAYOUT = 'Applies to sections that offer more than one arrangement
 void SECTION_LAYOUT
 
 Object.assign(PAGES, {
+  toolsDisplay: {
+    title: 'Tools Display', intro: 'How the tools you use appear on the site. Everything shows without clicking. Turn individual tools on under Tools & Platforms.',
+    blocks: [{ base: 'portfolio.toolsUi', fields: [
+      { kind: 'select', key: 'layout', label: 'Layout', options: [{ value: 'cards', label: 'Cards: logo, name, category and how you use it' }, { value: 'compact', label: 'Compact: small logo chips' }, { value: 'rings', label: 'Rings: flip to read (the original look)' }] },
+      { kind: 'bool', key: 'showLogos', label: 'Show logos' },
+      { kind: 'select', key: 'logoSize', label: 'Logo size', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Large' }] },
+      { kind: 'select', key: 'logoStyle', label: 'Logo colour', options: [{ value: 'color', label: 'Brand colours' }, { value: 'mono', label: 'One colour (matches the site)' }] },
+      { kind: 'bool', key: 'showUsage', label: 'Show how I use each tool' }, { kind: 'bool', key: 'showCategory', label: 'Show the category on each card' },
+      { kind: 'bool', key: 'group', label: 'Group by category' },
+    ] }],
+  },
   design: {
     title: 'Design', intro: 'Shape, spacing and finish for the whole site. Colours come from the season; dark mode is below.',
     blocks: [
@@ -97,6 +108,7 @@ Object.assign(PAGES, {
         { kind: 'select', key: 'shadow', label: 'Shadows', options: [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'strong', label: 'Strong' }] },
         { kind: 'select', key: 'borderWeight', label: 'Outline weight', options: [{ value: 'thin', label: 'Thin' }, { value: 'normal', label: 'Normal' }, { value: 'bold', label: 'Bold' }] },
         { kind: 'select', key: 'headingCase', label: 'Headings', options: [{ value: 'normal', label: 'As written' }, { value: 'upper', label: 'Capitals' }] },
+        { kind: 'select', key: 'cards', label: 'Cards', options: [{ value: 'soft', label: 'Soft shadow' }, { value: 'flat', label: 'Flat' }, { value: 'outlined', label: 'Outlined' }, { value: 'glass', label: 'Frosted glass' }] },
         { kind: 'bool', key: 'dialogAnimation', label: 'Animate pop-ups' }, { kind: 'bool', key: 'readingProgress', label: 'Show the scroll progress surfer' },
       ] },
       { title: 'Light and dark', base: 'portfolio.design', fields: [
@@ -187,4 +199,23 @@ Object.assign(PAGES, {
       ] },
     ],
   },
+})
+
+PAGES.hero.blocks.push({
+  title: 'Hero circle (the water bubble behind the stamp)', base: 'portfolio.hero.orb',
+  fields: [
+    { kind: 'select', key: 'style', label: 'Style', options: [{ value: 'bubble', label: 'Water bubble' }, { value: 'sun', label: 'Soft sun glow' }, { value: 'glow', label: 'Diffuse glow' }, { value: 'ring', label: 'Thin ring' }, { value: 'none', label: 'None' }] },
+    { kind: 'range', key: 'size', label: 'Size', min: 20, max: 110, step: 1, unit: ' vmin', help: 'vmin is a share of the screen\'s shorter side, so it scales on every device.' },
+    { kind: 'range', key: 'x', label: 'Horizontal position', min: -10, max: 110, step: 1, unit: '%', help: '0 is the left edge, 100 the right edge.' },
+    { kind: 'range', key: 'y', label: 'Vertical position', min: -10, max: 110, step: 1, unit: '%' },
+    { kind: 'tone', key: 'color', label: 'Colour', help: 'Season default picks aqua for the bubble and the season glow for the others.' },
+    { kind: 'range', key: 'opacity', label: 'Opacity', min: 0.1, max: 1, step: 0.05 },
+    { kind: 'range', key: 'rim', label: 'Rainbow sheen on the rim', min: 0, max: 1, step: 0.05, showIf: (o: any) => o.style === 'bubble' },
+    { kind: 'bool', key: 'shine', label: 'Bright reflection in the top left', showIf: (o: any) => o.style === 'bubble' },
+    { kind: 'range', key: 'blur', label: 'Frosted glass blur', min: 0, max: 20, step: 1, unit: 'px', showIf: (o: any) => o.style === 'bubble' },
+    { kind: 'select', key: 'wobble', label: 'Wobble', options: [{ value: 'off', label: 'Still' }, { value: 'gentle', label: 'Gentle' }, { value: 'lively', label: 'Lively' }], showIf: (o: any) => o.style === 'bubble' },
+    { kind: 'range', key: 'float', label: 'Up and down drift', min: 0, max: 60, step: 1, unit: 'px', help: '0 holds it still.' },
+    { kind: 'range', key: 'parallax', label: 'Movement as the visitor scrolls', min: 0, max: 100, step: 5 },
+    { kind: 'range', key: 'satellites', label: 'Small bubbles around it', min: 0, max: 8, step: 1, showIf: (o: any) => o.style === 'bubble' },
+  ],
 })

@@ -10,6 +10,7 @@ import { Img } from '../ui/Img'
 import { VideoPlayer } from '../ui/VideoPlayer'
 import { useT } from '../../i18n/useT'
 import { hasValue } from '../../utils/text'
+import { toneValue } from '../../utils/theme'
 
 export function Testimonials({ config }: { config: SectionConfig }) {
   const { content } = useContent()
@@ -31,7 +32,7 @@ export function Testimonials({ config }: { config: SectionConfig }) {
         {items.map((q) => (
           <li key={q.id}>
             <Reveal>
-              <figure className="quote">
+              <figure className="quote" style={toneValue(q.accent) ? ({ ['--accent' as string]: toneValue(q.accent) } as React.CSSProperties) : undefined}>
                 {hasValue(q.video) && <VideoPlayer src={q.video} poster={q.photo?.src} title={`Video recommendation from ${q.name}`} />}
                 <blockquote><p>{q.quote}</p></blockquote>
                 <figcaption>

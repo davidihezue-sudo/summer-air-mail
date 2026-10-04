@@ -157,7 +157,7 @@ export function createSnapshots(dir, { max = 12 } = {}) {
 export const DEFAULT_SETTINGS = {
   notifyEmail: '', notifyOnEnquiry: true, notifyOnSubscriber: false, enquiryRetentionDays: 0,
   editorsCanPublish: false,
-  backups: { enabled: false, everyHours: 24, keep: 7, s3: false },
+  backups: { enabled: true, everyHours: 24, keep: 7, s3: false },
 }
 export function createSettings(dir) {
   const f = jsonFile(dir, 'settings.json', structuredClone(DEFAULT_SETTINGS))

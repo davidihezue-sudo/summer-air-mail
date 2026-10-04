@@ -2,13 +2,15 @@
 //   npm run admin:setup                       (interactive)
 //   npm run admin:hash                        (prints a hash for ADMIN_PASSWORD_HASH on hosts without a disk)
 //   ADMIN_USERNAME=me ADMIN_PASSWORD='...' npm run admin:setup   (non-interactive)
+import '../server/loadenv.mjs'
 import { createInterface } from 'node:readline'
 import { resolve } from 'node:path'
+import { defaultDataDir } from '../server/index.mjs'
 import { createAuth, hashPassword, passwordProblem } from '../server/auth.mjs'
 import { createKv } from '../server/kv.mjs'
 
 const hashOnly = process.argv.includes('--hash')
-const dir = resolve(process.env.DATA_DIR ?? 'data')
+const dir = resolve(process.env.DATA_DIR ?? defaultDataDir())
 
 function ask(question, hidden = false) {
   return new Promise((done) => {

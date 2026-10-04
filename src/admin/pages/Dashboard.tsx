@@ -11,7 +11,7 @@ import { isPlaceholder, cvLink, hasValue } from '../../utils/text'
 import { resolveSections } from '../../content/selectors'
 
 export function Dashboard() {
-  const { content: c, status } = useAdmin()
+  const { content: c, status, me } = useAdmin()
   const p = c.portfolio
   const season = resolveSeason(p.seasons)
   const [unread, setUnread] = useState<number | null>(null)
@@ -84,6 +84,13 @@ export function Dashboard() {
           <Link to="sections">Order and visibility</Link>
         </Card>
       </div>
+
+      {me.storage === 'file' && me.role === 'owner' && (
+        <Card title="Protect your work">
+          <p>Your content is saved in files on this computer, not in a database. If you move or replace the project folder you can lose it. Automatic daily backups are on, and you can download one any time.</p>
+          <p><Link to="server">Open Server &amp; Backups</Link> · To keep everything in Postgres instead, see the README section "Keeping your work safe".</p>
+        </Card>
+      )}
 
       {todo.length > 0 && (
         <Card title="Needs your attention">

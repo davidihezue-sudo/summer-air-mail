@@ -275,3 +275,4 @@
 .abars__k { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .abars__bar { height: 12px; border-radius: 6px; background: #2a8db0; min-width: 2px; } .abars__v { text-align: right; font-weight: 700; }
 .atodo { margin: .4rem 0 0; padding-left: 1.2rem; }
 .aalt__img { width: 96px; height: 72px; object-fit: cover; border-radius: 6px; } .aalt__form { display: grid; gap: .4rem; flex: 1; min-width: 220px; }
+.arow-item__main img[src^='data:image/svg'] { object-fit: contain; background: #fff; padding: 4px; border-radius: 8px; border: 1px solid #ddd; }

@@ -107,7 +107,7 @@ export const newLook = (): Look => ({
   id: uid('look'), name: '', description: '',
   settings: {
     professional: 'balanced', animationIntensity: 'full', seasonMode: 'auto',
-    design: { radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal', headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true },
+    design: { radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal', headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true, cards: 'soft' },
     hero: { layout: 'stamp-right', alignment: 'left', breakout: true, animation: 'inherit', decorativeElements: true, background: 'season' },
   },
 })

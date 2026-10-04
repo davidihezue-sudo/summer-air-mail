@@ -82,6 +82,7 @@ export const portfolio: Portfolio = {
     background: 'season',
     tideSize: 190,
     tideEnabled: true,
+    orb: { style: 'bubble', size: 84, x: 79, y: 47, color: '', opacity: 0.95, rim: 0.7, shine: true, blur: 6, wobble: 'gentle', float: 14, parallax: 30, satellites: 3 },
   },
   theme: {
     fonts: {
@@ -109,8 +110,9 @@ export const portfolio: Portfolio = {
   },
   design: {
     radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal',
-    headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true,
+    headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true, cards: 'soft',
   },
+  toolsUi: { layout: 'cards', showLogos: true, showUsage: true, showCategory: true, logoSize: 'md', logoStyle: 'color', group: true },
   cursor: {
     enabled: true, style: 'bubbles', size: 28, color: '', opacity: 0.85, smoothing: 0.35, trail: 20,
     blend: 'normal', scope: 'page', hideNativeCursor: false, growOnLinks: true, emoji: '', image: null,

@@ -43,7 +43,7 @@ export interface Enquiry { id: string; at: string; read: boolean; name: string; 
 export interface Subscriber { id: string; at: string; email: string; consent: string }
 export interface InsightsSummary { views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>> }
 export interface ServerSettings { notifyEmail: string; notifyOnEnquiry: boolean; notifyOnSubscriber: boolean; enquiryRetentionDays: number; editorsCanPublish: boolean; backups: { enabled: boolean; everyHours: number; keep: number; s3: boolean } }
-export interface EnvInfo { emailConfigured: boolean; webhookConfigured: boolean; s3Configured: boolean; storage: string }
+export interface EnvInfo { dataDir?: string; emailConfigured: boolean; webhookConfigured: boolean; s3Configured: boolean; storage: string }
 export interface UserRow { username: string; role: 'owner' | 'editor' | 'viewer'; managedByEnv: boolean }
 export interface BackupStatus { at: string | null; ok: boolean | null; file: string; uploaded: boolean; error: string; s3Configured: boolean }
 

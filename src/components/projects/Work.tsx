@@ -1,3 +1,5 @@
+import { hasValue } from '../../utils/text'
+import { toneValue } from '../../utils/theme'
 import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
@@ -55,12 +57,12 @@ export function Work({ config }: { config: SectionConfig }) {
       {shown.length === 0 && <p className="prose">No projects match those filters.</p>}
       <ul className="polaroids">
         {shown.map((p, i) => (
-          <li key={p.id} className="polaroid-wrap" style={{ ['--i' as string]: i }}>
+          <li key={p.id} className="polaroid-wrap" style={{ ['--i' as string]: i, ...(toneValue(p.accent) ? { ['--accent' as string]: toneValue(p.accent) } : {}) }}>
             <button type="button" className="polaroid" onClick={() => openProject(p.id)} aria-label={`Open project: ${p.title}, ${p.client}`}>
               <span className="polaroid__pin" aria-hidden />
               <span className="polaroid__photo">{p.thumbnail?.src ? <Img image={p.thumbnail} sizes="(min-width: 900px) 25vw, 70vw" /> : <span className="polaroid__blank" />}</span>
               <span className="polaroid__meta">
-                {p.featured && <span className="polaroid__flag">Featured</span>}
+                {(hasValue(p.badge) || p.featured) && <span className="polaroid__flag">{hasValue(p.badge) ? p.badge : 'Featured'}</span>}
                 <span className="polaroid__brand">{p.client}</span>
                 <span className="polaroid__title">{p.title}</span>
                 <span className="polaroid__cat">{p.category} · {p.year}</span>
