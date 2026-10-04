@@ -80,6 +80,8 @@ export const portfolio: Portfolio = {
     ],
     decorativeElements: true,
     background: 'season',
+    tideSize: 190,
+    tideEnabled: true,
   },
   theme: {
     fonts: {
@@ -105,6 +107,33 @@ export const portfolio: Portfolio = {
       winter: emptyOverride(),
     },
   },
+  design: {
+    radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal',
+    headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true,
+  },
+  cursor: {
+    enabled: true, style: 'bubbles', size: 28, color: '', opacity: 0.85, smoothing: 0.35, trail: 20,
+    blend: 'normal', scope: 'page', hideNativeCursor: false, growOnLinks: true, emoji: '', image: null,
+    touchRipple: false, showIn: 'creative',
+  },
+  announcement: { enabled: false, text: '', linkLabel: '', link: '', tone: 'ink', dismissible: true, from: '', to: '' },
+  schedule: [],
+  booking: { enabled: false, label: 'Book a call', url: '', showIn: ['contact'] },
+  newsletter: {
+    enabled: false, mode: 'link', heading: 'Stay in the loop', text: 'Occasional notes on social media and marketing. No spam.',
+    buttonLabel: 'Subscribe', consentText: 'I agree to receive occasional emails and understand I can unsubscribe at any time.',
+    successMessage: 'Thank you. You are on the list.', link: '',
+  },
+  profilePage: {
+    enabled: true, title: '', subtitle: '', showPhoto: true, accent: '',
+    include: { summary: true, competencies: true, platforms: true, industries: true, achievements: true, results: true, projects: true, tools: true, education: true, certifications: true, employment: true, contact: true },
+    resultIds: [], projectIds: [], maxProjects: 4, footerNote: '',
+  },
+  maintenance: { enabled: false, title: 'Back soon', message: 'The portfolio is being updated. Please check back shortly.', status503: false, showContact: true, showSocial: true },
+  notFound: { title: 'This page has moved on', message: 'The page you were looking for is not here. The portfolio home page is a good place to start.', buttonLabel: 'Back to the portfolio' },
+  i18n: { enabled: false, defaultLabel: 'English', switcher: true, languages: [] },
+  insights: { enabled: false, respectDoNotTrack: true, requireConsent: false, retentionDays: 365 },
+  quality: { minDescription: 60, requireCover: true, requireAlt: true, requirePeriod: false, requireLink: false },
   sections: defaultSections(),
   navigation: { mode: 'auto', items: [] },
   seo: {
@@ -166,6 +195,8 @@ export const portfolio: Portfolio = {
     showBudget: true,
     availableFor: ['Full-time roles'],
     workModes: ['Hybrid', 'Remote'],
+    delivery: 'client',
+    successMessage: 'Thank you. Your message has been sent and I will reply soon.',
   },
   mentoring: {
     heading: 'Learn social media marketing with me',
@@ -178,6 +209,8 @@ export const portfolio: Portfolio = {
   },
   strategy: {
     label: 'Sample framework',
+    hint: 'Tap any note to open it and see the questions behind each step.',
+    showToggleAll: true,
     heading: 'How a marketing plan comes together',
     intro:
       'This is an illustrative framework showing how I structure planning. It is not a client project and contains no results.',

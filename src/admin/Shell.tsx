@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import {
   BarChart3, Bot, Briefcase, Calendar, Clapperboard, Compass, ExternalLink, FileText, Film, Globe, Image as ImageIcon, LayoutDashboard, Layers,
   LayoutList, Link2, ListChecks, LogOut, Megaphone, Menu, MessageSquareQuote, Palette, PenTool, Rocket, Search, Settings, Share2, Sparkles, Target, User, Wrench, X,
-  Laptop, Mail, Camera, BookOpen, Star, Workflow, Cpu, Footprints, Eye,
+  Laptop, Mail, Camera, MousePointer2, BookOpen, Star, Workflow, Cpu, Footprints, Eye,
 } from 'lucide-react'
 import { useAdmin } from './store'
 import { useRoute } from './router'
@@ -16,6 +16,7 @@ import { NavigationPage } from './pages/NavigationPage'
 import { PublishPage } from './pages/PublishPage'
 import { AdvancedPage } from './pages/AdvancedPage'
 import { MediaPage } from './pages/MediaPage'
+import { CursorPage } from './pages/CursorPage'
 import { Badge } from './ui'
 
 const NAV: { group: string; items: { id: string; label: string; icon: typeof User }[] }[] = [
@@ -25,7 +26,7 @@ const NAV: { group: string; items: { id: string; label: string; icon: typeof Use
     { id: 'cv', label: 'Resume / CV', icon: FileText }, { id: 'social', label: 'Social Links', icon: Share2 }, { id: 'contact', label: 'Contact', icon: Mail },
   ] },
   { group: 'Look and layout', items: [
-    { id: 'appearance', label: 'Appearance', icon: Palette }, { id: 'seasons', label: 'Seasons', icon: Calendar }, { id: 'sections', label: 'Sections & Visibility', icon: ListChecks },
+    { id: 'appearance', label: 'Appearance', icon: Palette }, { id: 'cursor', label: 'Cursor effect', icon: MousePointer2 }, { id: 'seasons', label: 'Seasons', icon: Calendar }, { id: 'sections', label: 'Sections & Visibility', icon: ListChecks },
     { id: 'navigation', label: 'Navigation', icon: Compass }, { id: 'footer', label: 'Footer', icon: Footprints },
   ] },
   { group: 'Portfolio', items: [
@@ -53,6 +54,7 @@ function Page({ page, id }: { page: string; id?: string }) {
   if (page === 'publish') return <PublishPage />
   if (page === 'advanced') return <AdvancedPage />
   if (page === 'media') return <MediaPage />
+  if (page === 'cursor') return <CursorPage />
   if (ENTITIES[page]) return <EntityPage key={page} def={ENTITIES[page]} id={id} />
   if (PAGES[page]) return <FormPage key={page} page={PAGES[page]} />
   return <p>That page does not exist. <a href="#/dashboard">Back to the dashboard</a></p>

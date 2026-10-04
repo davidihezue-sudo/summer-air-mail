@@ -141,6 +141,8 @@ export interface CaseStudy {
   contribution: { personal: string[]; team?: string[] }
   lessons: string[]
   beforeAfter?: { before: ImageRef; after: ImageRef; caption?: string }
+  /** The one-glance headline at the top of the case study. metricIndex picks one of the measured results. */
+  highlight?: { metricIndex: number | null; headline: string }
 }
 
 export interface Project {
@@ -172,6 +174,8 @@ export interface Project {
   relatedIds?: string[]
   blocks?: Block[]
   caseStudy?: CaseStudy
+  /** Optional overrides for search results and social sharing of this project's own link. */
+  seo?: { title: string; description: string; image: string }
 }
 
 /* ---------- Services, skills, tools ---------- */
@@ -331,6 +335,8 @@ export interface Testimonial {
   quote: string
   relationship: string
   photo?: ImageRef
+  /** A recorded recommendation. Plays only when the visitor presses play. */
+  video?: string
   approved: boolean
   order?: number
 }
@@ -406,6 +412,7 @@ export type SectionType =
   | 'hero' | 'overview' | 'about' | 'services' | 'skills' | 'platforms' | 'process' | 'work'
   | 'caseStudies' | 'results' | 'tools' | 'ai' | 'content' | 'screenshots' | 'strategy'
   | 'websites' | 'testimonials' | 'mentoring' | 'richText' | 'contact'
+  | 'journey' | 'resources' | 'notes' | 'newsletter'
 
 export interface SectionConfig {
   id: string
@@ -423,6 +430,14 @@ export interface SectionConfig {
   filterCategory?: string
   /** For richText sections. */
   body?: string
+  /** Vertical breathing room. Empty uses the global density. */
+  spacing?: '' | 'compact' | 'spacious'
+  /** Shape between this section and the one above. Empty follows the season. */
+  divider?: '' | 'none' | 'waves' | 'hills' | 'deckle' | 'ridge'
+  pattern?: '' | 'dots' | 'grid' | 'paper'
+  width?: '' | 'narrow' | 'wide'
+  /** For sections with more than one arrangement (testimonials, notes, journey, results). */
+  layout?: '' | 'grid' | 'list' | 'carousel'
 }
 
 export interface NavItem {
@@ -447,6 +462,181 @@ export interface HeroConfig {
   ctas: { label: string; target: string }[]
   decorativeElements: boolean
   background: 'season' | 'plain'
+  /** Night Tide reveal circle: radius in px on desktop (touch uses 65% of it) and whether it is allowed at all. */
+  tideSize: number
+  tideEnabled: boolean
+}
+
+export type CursorStyle =
+  | 'bubbles' | 'water' | 'ring' | 'dot' | 'spotlight' | 'glow' | 'ripple' | 'sparkles'
+  | 'comet' | 'blob' | 'crosshair' | 'seasonal' | 'emoji' | 'image'
+
+/** The thing that follows the pointer. Everything here is editable in Admin > Cursor. */
+export interface CursorSettings {
+  enabled: boolean
+  style: CursorStyle
+  /** Diameter in px of the main shape (or particle scale for trails). */
+  size: number
+  /** "auto" follows the season; otherwise a palette tone name or a hex colour. */
+  color: string
+  opacity: number
+  /** 0 snaps to the pointer, 1 trails far behind. */
+  smoothing: number
+  /** Length of the trail for trail styles (0 to 40). */
+  trail: number
+  blend: 'normal' | 'multiply' | 'screen' | 'difference'
+  scope: 'page' | 'hero'
+  hideNativeCursor: boolean
+  growOnLinks: boolean
+  emoji: string
+  image: ImageRef | null
+  /** Play a small ripple where touch screens are tapped. */
+  touchRipple: boolean
+  /** The calmest professional intensity at which the effect still appears. creative: Creative only. balanced: Creative and Balanced. professional: always. */
+  showIn: ProfessionalIntensity
+}
+
+/* ---------- Design, banner, schedule, looks ---------- */
+
+export interface DesignSettings {
+  radius: 'sharp' | 'soft' | 'round'
+  buttons: 'pill' | 'rounded' | 'square'
+  density: 'compact' | 'comfortable' | 'spacious'
+  /** Scales all text. 1 is normal. */
+  fontScale: number
+  shadow: 'none' | 'soft' | 'strong'
+  borderWeight: 'thin' | 'normal' | 'bold'
+  headingCase: 'normal' | 'upper'
+  colorMode: 'light' | 'dark' | 'system'
+  /** Show a light and dark switch to visitors. */
+  colorToggle: boolean
+  dialogAnimation: boolean
+  readingProgress: boolean
+}
+
+export interface Announcement {
+  enabled: boolean
+  text: string
+  linkLabel: string
+  link: string
+  tone: 'ink' | 'red' | 'butter' | 'sky' | 'green'
+  dismissible: boolean
+  /** ISO dates. Empty means no limit. */
+  from: string
+  to: string
+}
+
+export interface ScheduleRule {
+  id: string
+  label: string
+  enabled: boolean
+  from: string
+  to: string
+  seasonMode: SeasonMode | ''
+  professional: ProfessionalIntensity | ''
+  availability: string
+  heroLabel: string
+  heroHeadline: string
+  heroIntro: string
+  showSectionIds: string[]
+  hideSectionIds: string[]
+  announcementText: string
+  announcementLink: string
+}
+
+export interface LookSettings {
+  professional: ProfessionalIntensity
+  animationIntensity: Intensity
+  seasonMode: SeasonMode
+  design: DesignSettings
+  hero: Pick<HeroConfig, 'layout' | 'alignment' | 'breakout' | 'animation' | 'decorativeElements' | 'background'>
+}
+
+export interface Look {
+  id: string
+  name: string
+  description: string
+  settings: LookSettings
+}
+
+/* ---------- Applications, journey, resources, notes, links ---------- */
+
+export interface Application {
+  id: string
+  /** Part of the link: yoursite.com/for/<slug>. Use something unguessable for private applications. */
+  slug: string
+  /** Private note to yourself. Never sent to visitors. */
+  label: string
+  company: string
+  role: string
+  enabled: boolean
+  /** ISO date. Empty means the link never expires. */
+  expiresAt: string
+  hero: { label: string; headline: string; supporting: string; intro: string }
+  greeting: { enabled: boolean; text: string }
+  featuredProjectIds: string[]
+  onlyFeatured: boolean
+  highlightSkills: string[]
+  hideSectionIds: string[]
+  lookId: string
+  professional: ProfessionalIntensity | ''
+  season: SeasonName | ''
+  cvFile: string
+  cvFilename: string
+}
+
+export interface JourneyItem {
+  id: string
+  period: string
+  title: string
+  org: string
+  description: string
+  kind: 'role' | 'project' | 'learning' | 'award' | 'milestone'
+  link: string
+  image: ImageRef | null
+  hidden?: boolean
+}
+
+export interface Resource {
+  id: string
+  title: string
+  description: string
+  file: string
+  image: ImageRef | null
+  format: string
+  hidden?: boolean
+}
+
+export interface Note {
+  id: string
+  slug: string
+  title: string
+  date: string
+  summary: string
+  body: string
+  cover: ImageRef | null
+  tags: string[]
+  seoTitle: string
+  seoDescription: string
+  hidden?: boolean
+}
+
+export interface ShortLink {
+  id: string
+  slug: string
+  label: string
+  target: { type: 'section' | 'project' | 'application' | 'note' | 'profile' | 'url'; value: string }
+  enabled: boolean
+}
+
+export interface LanguagePack {
+  code: string
+  label: string
+  rtl: boolean
+  /** Interface strings by key (see src/i18n/ui.ts). */
+  ui: Record<string, string>
+  /** Content strings by path, for example "portfolio.profile.intro" or "projects.<id>.title". */
+  text: Record<string, string>
 }
 
 export interface Portfolio {
@@ -494,6 +684,38 @@ export interface Portfolio {
     professional: ProfessionalIntensity
   }
   seasons: SeasonSettings
+  design: DesignSettings
+  cursor: CursorSettings
+  announcement: Announcement
+  schedule: ScheduleRule[]
+  booking: { enabled: boolean; label: string; url: string; showIn: ('hero' | 'header' | 'contact' | 'profile')[] }
+  newsletter: {
+    enabled: boolean
+    mode: 'collect' | 'link'
+    heading: string
+    text: string
+    buttonLabel: string
+    consentText: string
+    successMessage: string
+    link: string
+  }
+  profilePage: {
+    enabled: boolean
+    title: string
+    subtitle: string
+    showPhoto: boolean
+    accent: string
+    include: Record<'summary' | 'competencies' | 'platforms' | 'industries' | 'achievements' | 'results' | 'projects' | 'tools' | 'education' | 'certifications' | 'employment' | 'contact', boolean>
+    resultIds: string[]
+    projectIds: string[]
+    maxProjects: number
+    footerNote: string
+  }
+  maintenance: { enabled: boolean; title: string; message: string; status503: boolean; showContact: boolean; showSocial: boolean }
+  notFound: { title: string; message: string; buttonLabel: string }
+  i18n: { enabled: boolean; defaultLabel: string; switcher: boolean; languages: LanguagePack[] }
+  insights: { enabled: boolean; respectDoNotTrack: boolean; requireConsent: boolean; retentionDays: number }
+  quality: { minDescription: number; requireCover: boolean; requireAlt: boolean; requirePeriod: boolean; requireLink: boolean }
   sections: SectionConfig[]
   navigation: { mode: 'auto' | 'custom'; items: NavItem[] }
   seo: {
@@ -535,6 +757,9 @@ export interface Portfolio {
     showBudget: boolean
     availableFor: string[]
     workModes: string[]
+    /** client: opens email or WhatsApp. both: also lets visitors send here. server: send here, falling back to email. */
+    delivery: 'client' | 'both' | 'server'
+    successMessage: string
   }
   mentoring: {
     heading: string
@@ -545,7 +770,7 @@ export interface Portfolio {
     instructorPhoto: ImageRef | null
     showLiveBadge: boolean
   }
-  strategy: { heading: string; intro: string; label: string; steps: StrategyStep[] }
+  strategy: { heading: string; intro: string; label: string; hint: string; showToggleAll: boolean; steps: StrategyStep[] }
 }
 
 export interface SiteContent {
@@ -564,6 +789,15 @@ export interface SiteContent {
   process: ProcessStep[]
   /** Custom project types added in the admin, on top of the built-in list. */
   categories: string[]
+  journey: JourneyItem[]
+  resources: Resource[]
+  notes: Note[]
+  /** Private. Never sent to visitors; one is delivered only to someone who knows its link. */
+  applications: Application[]
+  /** Private. Resolved by the server. */
+  shortLinks: ShortLink[]
+  /** Private saved combinations of look and feel. */
+  looks: Look[]
 }
 
 export interface MediaAsset {

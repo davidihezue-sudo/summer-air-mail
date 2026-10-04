@@ -17,6 +17,7 @@ export type Field =
   | (Base & { kind: 'text' | 'url' | 'email' | 'tel' | 'date'; key: string; placeholder?: string; maxLength?: number })
   | (Base & { kind: 'number'; key: string; min?: number; max?: number; step?: number; nullable?: boolean })
   | (Base & { kind: 'textarea' | 'rich'; key: string; rows?: number; placeholder?: string })
+  | (Base & { kind: 'range'; key: string; min: number; max: number; step?: number; unit?: string })
   | (Base & { kind: 'bool'; key: string })
   | (Base & { kind: 'select'; key: string; options: Opt[] | ((root: SiteContent) => Opt[]); custom?: boolean })
   | (Base & { kind: 'multi'; key: string; options: Opt[]; custom?: boolean })
@@ -81,6 +82,7 @@ function FieldView({ f, base }: { f: Field; base: string }) {
     case 'group': return <GroupField f={f} base={base} />
     case 'list': return <ListField f={f} base={base} />
     case 'refs': case 'ref': return <RefField f={f} base={base} />
+    case 'range': return <RangeField f={f} base={base} />
     case 'blocks': return <BlocksField f={f} base={base} />
   }
 }
@@ -101,6 +103,20 @@ function NumberField({ f, base }: { f: Extract<Field, { kind: 'number' }>; base:
   return (
     <Shell label={f.label} help={f.help} htmlFor={id}>
       <input id={id} type="number" inputMode="decimal" min={f.min} max={f.max} step={f.step ?? 'any'} value={typeof value === 'number' ? value : ''} onChange={(e) => set(path, e.target.value === '' ? (f.nullable === false ? 0 : null) : Number(e.target.value))} />
+    </Shell>
+  )
+}
+
+function RangeField({ f, base }: { f: Extract<Field, { kind: 'range' }>; base: string }) {
+  const { value, path, set } = useValue(base, f.key)
+  const id = useId()
+  const n = typeof value === 'number' ? value : f.min
+  return (
+    <Shell label={f.label} help={f.help} htmlFor={id}>
+      <div className="arow">
+        <input id={id} type="range" min={f.min} max={f.max} step={f.step ?? 1} value={n} onChange={(e) => set(path, Number(e.target.value))} />
+        <output htmlFor={id} className="arange">{n}{f.unit ?? ''}</output>
+      </div>
     </Shell>
   )
 }

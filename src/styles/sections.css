@@ -366,3 +366,34 @@ figcaption { font-size: .88rem; opacity: .85; }
 .case__block--mine { background: color-mix(in srgb, var(--c-sage) 40%, white); }
 .case__block--lessons { background: color-mix(in srgb, var(--c-pink) 28%, white); }
 .case__block h5 { margin-top: 1rem; }
+
+.board-hint { display: flex; flex-wrap: wrap; align-items: center; gap: .6rem 1rem; margin-bottom: 1rem; }
+.board-hint__t { display: inline-flex; align-items: center; gap: .4rem; font-weight: 700; margin: 0; }
+.note__more { display: inline-flex; align-items: center; gap: .35rem; margin-top: .5rem; font-size: .78rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.note__more svg { transition: transform .25s; animation: note-nudge 2.4s ease-in-out infinite; }
+.note[open] .note__more svg { transform: rotate(180deg); animation: none; }
+.note__shut, .note[open] .note__open { display: none; }
+.note[open] .note__shut { display: inline; }
+.note summary:focus-visible { outline: 3px solid var(--c-ink); outline-offset: 3px; }
+.note[open] ul { animation: note-drop .28s ease-out; }
+@keyframes note-nudge { 50% { translate: 0 3px; } }
+@keyframes note-drop { from { opacity: 0; translate: 0 -6px; } }
+@media (prefers-reduced-motion: reduce) { .note__more svg, .note[open] ul { animation: none; } }
+[data-motion='off'] .note__more svg, [data-motion='off'] .note[open] ul { animation: none; }
+
+/* Journey, resources, notes, newsletter */
+.timeline { position: relative; display: grid; gap: 1.6rem; padding-left: 1.6rem; border-left: 2px solid color-mix(in srgb, var(--c-ink) 25%, transparent); }
+.timeline__item { position: relative; display: grid; gap: .3rem; }
+.timeline__dot { position: absolute; left: calc(-1.6rem - 7px); top: .35rem; width: 12px; height: 12px; border-radius: 50%; background: var(--c-red); border: 2px solid var(--c-paper); }
+.timeline__meta { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; font-weight: 700; font-size: .85rem; margin: 0; }
+.timeline__img { max-width: 320px; border-radius: 10px; }
+.filegrid, .notegrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); gap: 1.2rem; }
+.filecard, .notecard { display: grid; gap: .6rem; align-content: start; background: #fff; border-radius: 14px; padding: 1.1rem; height: 100%; box-shadow: 0 8px 18px -12px rgb(23 50 63 / .5); color: #17323F; }
+.filecard__img, .notecard__img { border-radius: 10px; width: 100%; aspect-ratio: 16 / 10; object-fit: cover; }
+.newsletter__form { display: grid; gap: .8rem; max-width: 460px; }
+.newsletter .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.chip--static { cursor: default; }
+.check { display: flex; gap: .6rem; align-items: flex-start; font-size: .9rem; }
+.check input { margin-top: .25rem; }
+.form-ok { font-weight: 700; } .form-err { color: var(--c-red-text); font-weight: 600; }
+.link { text-decoration: underline; font-weight: 700; }

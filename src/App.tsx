@@ -5,7 +5,8 @@ import type { SectionConfig, SectionType } from './content/types'
 import { Loader } from './components/layout/Loader'
 import { Header } from './components/layout/Header'
 import { ScrollProgress } from './components/layout/ScrollProgress'
-import { BubbleCursor } from './components/layout/BubbleCursor'
+import { CursorFx, TouchRipple } from './components/layout/CursorFx'
+import { cursorAllowed } from './motion/cursor'
 import { Decor } from './components/layout/Decor'
 import { Hero } from './components/hero/Hero'
 import { RecruiterOverview } from './components/about/RecruiterOverview'
@@ -40,14 +41,19 @@ const REGISTRY: Record<SectionType, SectionComponent> = {
   websites: lazySection(() => import('./components/websites/Websites'), 'Websites'),
   testimonials: lazySection(() => import('./components/testimonials/Testimonials'), 'Testimonials'),
   mentoring: lazySection(() => import('./components/mentoring/Mentoring'), 'Mentoring'),
+  journey: lazySection(() => import('./components/journey/Journey'), 'Journey'),
+  resources: lazySection(() => import('./components/resources/Resources'), 'Resources'),
+  notes: lazySection(() => import('./components/notes/Notes'), 'Notes'),
+  newsletter: lazySection(() => import('./components/newsletter/Newsletter'), 'Newsletter'),
   richText: lazySection(() => import('./components/about/RichTextSection'), 'RichTextSection'),
 }
 
 export default function App() {
   const { content, sections } = useContent()
-  const { plan, resolved } = useTheme()
+  const { plan, resolved, finePointer, reduced } = useTheme()
   const { profile, theme } = content.portfolio
-  const trail = theme.bubbleCursor && plan.cursorTrail && resolved.decorations.includes('bubbles')
+  const { cursor } = content.portfolio
+  const fx = cursorAllowed(cursor, { professional: theme.professional, global: theme.animationIntensity, prefersReduced: reduced, finePointer })
 
   return (
     <ViewerProvider>
@@ -68,7 +74,8 @@ export default function App() {
       </main>
       <Footer />
       <ScrollProgress />
-      {trail && <BubbleCursor stroke={resolved.theme.cursor.stroke} fill={resolved.theme.cursor.fill} />}
+      {fx && <CursorFx settings={cursor} rgb={resolved.theme.cursor.stroke} season={resolved.season} imageSrc={cursor.image?.src} />}
+      {cursor.touchRipple && !reduced && !finePointer && <TouchRipple rgb={resolved.theme.cursor.stroke} />}
     </ViewerProvider>
   )
 }

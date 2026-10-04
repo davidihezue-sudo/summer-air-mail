@@ -4,8 +4,8 @@
 const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 const DANGEROUS = /^\s*(javascript|vbscript|data:text\/html|data:application)/i
 export const MAX_BYTES = 3 * 1024 * 1024
-const COLLECTIONS = ['projects', 'services', 'tools', 'testimonials', 'contentItems', 'websites', 'skills', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'categories']
-const SECTION_TYPES = new Set(['hero', 'overview', 'about', 'services', 'skills', 'platforms', 'process', 'work', 'caseStudies', 'results', 'tools', 'ai', 'content', 'screenshots', 'strategy', 'websites', 'testimonials', 'mentoring', 'richText', 'contact'])
+const COLLECTIONS = ['projects', 'services', 'tools', 'testimonials', 'contentItems', 'websites', 'skills', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'categories', 'journey', 'resources', 'notes', 'applications', 'shortLinks', 'looks']
+const SECTION_TYPES = new Set(['hero', 'overview', 'about', 'services', 'skills', 'platforms', 'process', 'work', 'caseStudies', 'results', 'tools', 'ai', 'content', 'screenshots', 'strategy', 'websites', 'testimonials', 'mentoring', 'richText', 'contact', 'journey', 'resources', 'notes', 'newsletter'])
 
 function clean(value, depth, path) {
   if (depth > 14) throw new Error(`Content is nested too deeply at ${path}`)

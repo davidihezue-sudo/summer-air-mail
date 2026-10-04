@@ -110,3 +110,35 @@ describe('motion plan', () => {
     expect(resolveMotion({ ...base, season: 'subtle' }).level).toBe('subtle')
   })
 })
+
+import { cursorAllowed, resolveRgb, isShapeStyle } from '../src/motion/cursor'
+import { portfolio as basePortfolio } from '../src/content/portfolio.config'
+
+describe('cursor effect', () => {
+  const on = { ...basePortfolio.cursor, enabled: true }
+  const env = { professional: 'creative' as const, global: 'full' as const, prefersReduced: false, finePointer: true }
+  it('shows only on fine pointers and never under reduced motion', () => {
+    expect(cursorAllowed(on, env)).toBe(true)
+    expect(cursorAllowed(on, { ...env, finePointer: false })).toBe(false)
+    expect(cursorAllowed(on, { ...env, prefersReduced: true })).toBe(false)
+    expect(cursorAllowed(on, { ...env, global: 'off' })).toBe(false)
+    expect(cursorAllowed({ ...on, enabled: false }, env)).toBe(false)
+  })
+  it('respects the chosen professional intensity', () => {
+    expect(cursorAllowed(on, { ...env, professional: 'balanced' })).toBe(false)
+    expect(cursorAllowed({ ...on, showIn: 'balanced' }, { ...env, professional: 'balanced' })).toBe(true)
+    expect(cursorAllowed({ ...on, showIn: 'balanced' }, { ...env, professional: 'professional' })).toBe(false)
+    expect(cursorAllowed({ ...on, showIn: 'professional' }, { ...env, professional: 'professional' })).toBe(true)
+  })
+  it('resolves colours', () => {
+    expect(resolveRgb('', '1,2,3')).toBe('1,2,3')
+    expect(resolveRgb('auto', '1,2,3')).toBe('1,2,3')
+    expect(resolveRgb('#ff0000', '1,2,3')).toBe('255,0,0')
+    expect(resolveRgb('sky', '1,2,3', () => '#00ff00')).toBe('0,255,0')
+    expect(resolveRgb('nope', '1,2,3')).toBe('1,2,3')
+  })
+  it('knows which styles draw a shape', () => {
+    expect(isShapeStyle('dot')).toBe(true)
+    expect(isShapeStyle('bubbles')).toBe(false)
+  })
+})

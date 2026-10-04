@@ -149,7 +149,8 @@ function walk(dir: string, out: string[] = []) {
   for (const f of readdirSync(dir)) {
     if (f === 'node_modules' || f === 'dist' || f === 'data' || f.startsWith('.git')) continue
     const p = join(dir, f)
-    statSync(p).isDirectory() ? walk(p, out) : out.push(p)
+    if (statSync(p).isDirectory()) walk(p, out)
+    else out.push(p)
   }
   return out
 }

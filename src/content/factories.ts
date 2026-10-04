@@ -1,6 +1,6 @@
 import type {
   AiSkill, Block, BlockType, CaseStudy, ContentItem, PlatformExpertise, ProcessStep, Project, ResultEntry,
-  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject,
+  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject, JourneyItem, Resource, Note, Application, ShortLink, Look, LanguagePack,
 } from './types'
 
 export const uid = (prefix = 'id') => `${prefix}-${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-3)}`
@@ -90,3 +90,25 @@ export function newBlock(type: BlockType): Block {
     case 'skills': case 'platforms': return { ...base, title: '', items: [] }
   }
 }
+
+export const newJourney = (): JourneyItem => ({ id: uid('journey'), period: '', title: '', org: '', description: '', kind: 'role', link: '', image: null, hidden: true })
+export const newResource = (): Resource => ({ id: uid('resource'), title: '', description: '', file: '', image: null, format: 'PDF', hidden: true })
+export const newNote = (): Note => ({
+  id: uid('note'), slug: '', title: '', date: new Date().toISOString().slice(0, 10), summary: '', body: '', cover: null, tags: [],
+  seoTitle: '', seoDescription: '', hidden: true,
+})
+export const newApplication = (): Application => ({
+  id: uid('application'), slug: Math.random().toString(36).slice(2, 10), label: '', company: '', role: '', enabled: true, expiresAt: '',
+  hero: { label: '', headline: '', supporting: '', intro: '' }, greeting: { enabled: false, text: '' }, featuredProjectIds: [],
+  onlyFeatured: false, highlightSkills: [], hideSectionIds: [], lookId: '', professional: '', season: '', cvFile: '', cvFilename: '',
+})
+export const newShortLink = (): ShortLink => ({ id: uid('link'), slug: '', label: '', target: { type: 'section', value: 'work' }, enabled: true })
+export const newLook = (): Look => ({
+  id: uid('look'), name: '', description: '',
+  settings: {
+    professional: 'balanced', animationIntensity: 'full', seasonMode: 'auto',
+    design: { radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal', headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true },
+    hero: { layout: 'stamp-right', alignment: 'left', breakout: true, animation: 'inherit', decorativeElements: true, background: 'season' },
+  },
+})
+export const newLanguage = (): LanguagePack => ({ code: '', label: '', rtl: false, ui: {}, text: {} })

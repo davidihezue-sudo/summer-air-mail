@@ -167,3 +167,12 @@ dialog.modal::backdrop { background: rgb(23 50 63 / .6); backdrop-filter: blur(3
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
 }
+
+.cursorfx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 70; }
+@media (pointer: fine) {
+  [data-cursor-hide] body, [data-cursor-hide] a, [data-cursor-hide] button, [data-cursor-hide] summary, [data-cursor-hide] label { cursor: none; }
+  [data-cursor-hide] input, [data-cursor-hide] textarea, [data-cursor-hide] select { cursor: auto; }
+}
+.tapripple { position: fixed; z-index: 70; width: 14px; height: 14px; margin: -7px 0 0 -7px; border-radius: 50%; border: 2px solid rgb(var(--rgb)); pointer-events: none; animation: tap .65s ease-out forwards; }
+@keyframes tap { to { transform: scale(7); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tapripple { display: none; } }

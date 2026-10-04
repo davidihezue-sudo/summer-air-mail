@@ -259,3 +259,5 @@
   .agroup__body { padding: .2rem .8rem .8rem; }
   .atoast { bottom: .8rem; }
 }
+.cursorfx { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 90; }
+.arange { min-width: 4rem; font-weight: 700; }

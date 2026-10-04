@@ -1,3 +1,4 @@
+import { CURSOR_STYLES } from '../motion/cursor'
 import type { Field, Opt } from './fields'
 import type { SiteContent } from '../content/types'
 import {
@@ -352,12 +353,41 @@ export const PAGES: Record<string, PageForm> = {
       { title: 'Stamp', base: 'portfolio.theme', fields: [{ kind: 'text', key: 'stampNumeral', label: 'Stamp number (shown in red)', maxLength: 4 }] },
     ],
   },
+  cursor: {
+    title: 'Cursor effect', intro: 'The shape or trail that follows the mouse on desktop. Move your pointer anywhere on this page to try your changes live. Phones and tablets never show it, and visitors who ask for reduced motion never see it.',
+    blocks: [
+      { title: 'Style', base: 'portfolio.cursor', fields: [
+        { kind: 'bool', key: 'enabled', label: 'Show a cursor effect' },
+        { kind: 'select', key: 'style', label: 'Style', options: CURSOR_STYLES.map((o) => ({ value: o.value, label: `${o.label}: ${o.help}` })) },
+        { kind: 'text', key: 'emoji', label: 'Emoji or symbol', help: 'Used by the Emoji style. One to four characters.', maxLength: 4, showIf: (c) => c.style === 'emoji' },
+        { kind: 'image', key: 'image', label: 'Image', help: 'Used by the Image style. A small transparent PNG or WebP works best.', showIf: (c) => c.style === 'image' },
+      ] },
+      { title: 'Size, colour and feel', base: 'portfolio.cursor', fields: [
+        { kind: 'range', key: 'size', label: 'Size', min: 8, max: 220, step: 2, unit: 'px', help: 'Diameter of the main shape. For trails it scales the particles.' },
+        { kind: 'tone', key: 'color', label: 'Colour', help: 'Season default follows the active season.' },
+        { kind: 'range', key: 'opacity', label: 'Opacity', min: 0.1, max: 1, step: 0.05 },
+        { kind: 'range', key: 'smoothing', label: 'Smoothing', min: 0, max: 0.95, step: 0.05, help: '0 sticks to the pointer. Higher values glide behind it.' },
+        { kind: 'range', key: 'trail', label: 'Trail length and density', min: 0, max: 40, step: 1 },
+        { kind: 'select', key: 'blend', label: 'Blend with the page', options: [{ value: 'normal', label: 'Normal' }, { value: 'multiply', label: 'Multiply (darkens)' }, { value: 'screen', label: 'Screen (lightens)' }, { value: 'difference', label: 'Difference (inverts)' }] },
+      ] },
+      { title: 'Where and when', base: 'portfolio.cursor', fields: [
+        { kind: 'select', key: 'scope', label: 'Where it appears', options: [{ value: 'page', label: 'The whole page' }, { value: 'hero', label: 'The hero only' }] },
+        { kind: 'select', key: 'showIn', label: 'Professional intensity', options: [{ value: 'creative', label: 'Creative mode only' }, { value: 'balanced', label: 'Creative and Balanced' }, { value: 'professional', label: 'Every mode' }], help: 'Professional mode is calm by default, so the effect stays off there unless you choose otherwise.' },
+        { kind: 'bool', key: 'growOnLinks', label: 'Grow over links and buttons' },
+        { kind: 'bool', key: 'hideNativeCursor', label: 'Hide the normal arrow (shape styles only)', help: 'The arrow stays visible over text fields. Leave this off if unsure.' },
+        { kind: 'bool', key: 'touchRipple', label: 'Show a small ripple when touch screens are tapped' },
+      ] },
+      { title: 'Hero reveal circle (Night Tide)', base: 'portfolio.hero', fields: [
+        { kind: 'bool', key: 'tideEnabled', label: 'Allow the reveal circle in the hero', help: 'The circle that follows the pointer or finger over the hero and reveals the night scene.' },
+        { kind: 'range', key: 'tideSize', label: 'Reveal circle radius', min: 60, max: 420, step: 10, unit: 'px', help: 'Touch screens use about two thirds of this.' },
+      ] },
+    ],
+  },
   appearance: {
     title: 'Appearance', intro: 'Global look and feel. Seasonal colours, decorations and images are on the Seasons page.',
     blocks: [{ base: 'portfolio.theme', fields: [
       { kind: 'select', key: 'professional', label: 'Professional intensity', options: [{ value: 'creative', label: 'Creative: full decoration and motion' }, { value: 'balanced', label: 'Balanced: personality with restraint (recommended)' }, { value: 'professional', label: 'Professional: calm, editorial, minimal motion' }], help: 'Use Professional for corporate applications. It switches off playful extras and uses plain section titles.' },
       { kind: 'select', key: 'animationIntensity', label: 'Maximum animation', options: [{ value: 'full', label: 'Full' }, { value: 'subtle', label: 'Subtle' }, { value: 'off', label: 'Off' }], help: 'A ceiling over everything else. Visitors who ask their device for reduced motion always get a calm site.' },
-      { kind: 'bool', key: 'bubbleCursor', label: 'Allow the cursor trail (desktop, Creative mode only)' },
       { kind: 'group', label: 'Fonts', open: false, fields: [
         { kind: 'select', key: 'fonts.display', label: 'Headings', options: FONT_CHOICES.filter((f) => f.value) }, { kind: 'select', key: 'fonts.script', label: 'Signature script', options: FONT_CHOICES.filter((f) => f.value) }, { kind: 'select', key: 'fonts.body', label: 'Body text', options: FONT_CHOICES.filter((f) => f.value) },
       ] },
@@ -421,6 +451,7 @@ export const PAGES: Record<string, PageForm> = {
     title: 'Strategy Framework', intro: 'The planning board. It is labelled as a sample framework, so keep that label unless this is a real client plan.',
     blocks: [{ base: 'portfolio.strategy', fields: [
       { kind: 'text', key: 'label', label: 'Badge text' }, { kind: 'text', key: 'heading', label: 'Heading' }, { kind: 'textarea', key: 'intro', label: 'Introduction' },
+      { kind: 'text', key: 'hint', label: 'Click hint above the notes (leave empty to hide)' }, { kind: 'bool', key: 'showToggleAll', label: 'Show an Open all / Close all button' },
       { kind: 'list', key: 'steps', label: 'Steps', item: (s: any) => s.title, make: () => ({ title: '', summary: '', questions: [], color: 'sky' }), addLabel: 'Add step', fields: [{ kind: 'text', key: 'title', label: 'Title' }, { kind: 'textarea', key: 'summary', label: 'Summary' }, { kind: 'strings', key: 'questions', label: 'Questions' }, { kind: 'tone', key: 'color', label: 'Note colour' }] },
     ] }],
   },

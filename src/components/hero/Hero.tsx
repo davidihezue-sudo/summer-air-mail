@@ -15,7 +15,7 @@ export function Hero({ config }: { config: SectionConfig }) {
   const { finePointer, plan } = useMotion()
   const { resolved } = useTheme()
   const reduced = plan.reduced || !plan.breakout || !hero.breakout
-  const tideAllowed = plan.tide && !reduced
+  const tideAllowed = plan.tide && !reduced && hero.tideEnabled
   const root = useRef<HTMLElement>(null)
   const stage = useRef<HTMLDivElement>(null)
   const [tapped, setTapped] = useState(false)
@@ -23,7 +23,7 @@ export function Hero({ config }: { config: SectionConfig }) {
   const [canMotion, setCanMotion] = useState(false)
 
   useScrollVar(root, !reduced)
-  const { tideOn, tilt, ...handlers } = useStageInteraction(stage, { enabled: plan.tilt && !plan.reduced, radius: finePointer ? 190 : 120 })
+  const { tideOn, tilt, ...handlers } = useStageInteraction(stage, { enabled: plan.tilt && !plan.reduced, radius: Math.round(finePointer ? hero.tideSize : hero.tideSize * 0.65) })
 
   useEffect(() => {
     setCanMotion(!reduced && !finePointer && typeof DeviceOrientationEvent !== 'undefined')

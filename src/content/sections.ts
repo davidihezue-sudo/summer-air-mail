@@ -7,6 +7,7 @@ export function defaultSections(): SectionConfig[] {
     on('top', 'hero'),
     on('overview', 'overview'),
     on('about', 'about', { navLabel: 'About' }),
+    on('journey', 'journey'),
     on('services', 'services', { navLabel: 'Services' }),
     on('process', 'process'),
     on('skills', 'skills', { navLabel: 'Skills' }),
@@ -18,10 +19,13 @@ export function defaultSections(): SectionConfig[] {
     on('ai', 'ai', { navLabel: 'AI' }),
     on('content', 'content'),
     on('screenshots', 'screenshots'),
+    on('resources', 'resources'),
     on('strategy', 'strategy'),
     on('websites', 'websites'),
+    on('notes', 'notes'),
     on('testimonials', 'testimonials'),
     on('mentoring', 'mentoring', { enabled: false }),
+    on('newsletter', 'newsletter'),
     on('contact', 'contact', { navLabel: 'Contact' }),
   ]
 }
@@ -45,6 +49,10 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   websites: 'Websites and digital projects',
   testimonials: 'Testimonials',
   mentoring: 'Mentoring and training',
+  journey: 'Career journey (timeline)',
+  resources: 'Resources and downloads',
+  notes: 'Notes (blog)',
+  newsletter: 'Newsletter signup',
   richText: 'Text and call to action',
   contact: 'Contact',
 }
