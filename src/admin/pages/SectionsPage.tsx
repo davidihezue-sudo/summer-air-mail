@@ -17,6 +17,13 @@ const FIELDS = (type: SectionType): Field[] => [
   { kind: 'tone', key: 'tone', label: 'Background colour' },
   { kind: 'image', key: 'image', label: 'Optional image' },
   { kind: 'group', key: 'cta', label: 'Call to action button', open: false, fields: [{ kind: 'text', key: 'label', label: 'Button text' }, { kind: 'text', key: 'href', label: 'Link (a section like #contact, or a full https:// link)' }] },
+  { kind: 'group', label: 'Section styling', open: false, fields: [
+    { kind: 'select', key: 'spacing', label: 'Space above and below', options: [{ value: '', label: 'Follow the site setting' }, { value: 'compact', label: 'Compact' }, { value: 'spacious', label: 'Spacious' }] },
+    { kind: 'select', key: 'divider', label: 'Edge above this section', options: [{ value: '', label: 'Follow the season' }, { value: 'none', label: 'None' }, { value: 'waves', label: 'Waves' }, { value: 'hills', label: 'Hills' }, { value: 'deckle', label: 'Torn paper' }, { value: 'ridge', label: 'Mountain ridge' }] },
+    { kind: 'select', key: 'pattern', label: 'Background pattern', options: [{ value: '', label: 'None' }, { value: 'dots', label: 'Dots' }, { value: 'grid', label: 'Grid' }, { value: 'paper', label: 'Paper grain' }] },
+    { kind: 'select', key: 'width', label: 'Content width', options: [{ value: '', label: 'Standard' }, { value: 'narrow', label: 'Narrow' }, { value: 'wide', label: 'Wide' }] },
+    ...(['testimonials', 'notes', 'journey'].includes(type) ? [{ kind: 'select', key: 'layout', label: 'Arrangement', options: [{ value: '', label: 'Default' }, { value: 'grid', label: 'Grid' }, { value: 'list', label: 'List' }, ...(type === 'testimonials' ? [{ value: 'carousel', label: 'Carousel' }] : [])] } as Field] : []),
+  ] },
   ...(type === 'work' ? [{ kind: 'select', key: 'filterCategory', label: 'Show only this project type', options: ['', ...PROJECT_TYPES], custom: true } as Field] : []),
   ...(type === 'richText' ? [{ kind: 'rich', key: 'body', label: 'Text', rows: 8 } as Field] : []),
 ]

@@ -34,7 +34,10 @@ export function applyTheme(resolved: ResolvedTheme, portfolio: Portfolio, plan: 
   const derived = dark ? dark.derived : resolved.derived
   const { theme, fonts } = resolved
   const d = portfolio.design
-  for (const t of TOKENS) root.style.setProperty(`--c-${t}`, colors[t])
+  for (const t of TOKENS) {
+    root.style.setProperty(`--c-${t}`, colors[t])
+    root.style.setProperty(`--l-${t}`, resolved.colors[t]) // the season's own light colours, for dark bands in dark mode
+  }
   root.style.setProperty('--c-red-text', derived.redText)
   root.style.setProperty('--c-sea-deep', derived.seaDeep)
   root.style.setProperty('--c-sea-text', derived.seaText)

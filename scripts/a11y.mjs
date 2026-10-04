@@ -23,18 +23,18 @@ async function audit(page, label) {
   for (const v of result) console.log(`   - [${v.impact}] ${v.id}: ${v.help}\n     ${v.nodes.join('\n     ')}`)
 }
 
-for (const season of ['spring', 'summer', 'autumn', 'winter']) {
+for (const [season, scheme] of ['spring', 'summer', 'autumn', 'winter'].flatMap((x) => [[x, 'light'], [x, 'dark']])) {
   for (const [w, h, tag] of [[1440, 900, 'desktop'], [390, 844, 'mobile']]) {
     const ctx = await browser.newContext({ viewport: { width: w, height: h } })
     const page = await ctx.newPage()
-    await page.goto(`${DEV}/?sample=1&preview=1&season=${season}`)
+    await page.goto(`${DEV}/?sample=1&preview=1&season=${season}&scheme=${scheme}`)
     await page.waitForSelector('#top')
     await page.waitForTimeout(1800)
     // Scroll through so lazy sections and reveal animations have rendered.
     const height = await page.evaluate(() => document.documentElement.scrollHeight)
     for (let y = 0; y < height; y += 600) { await page.evaluate((v) => window.scrollTo({ top: v, behavior: 'instant' }), y); await page.waitForTimeout(90) }
     await page.waitForTimeout(1200)
-    await audit(page, `public ${season} ${tag}`)
+    await audit(page, `public ${season} ${scheme} ${tag}`)
     await ctx.close()
   }
 }
@@ -58,7 +58,7 @@ if (process.env.SKIP_ADMIN !== '1') {
     await page.fill('input[type=password]', 'correct horse battery staple')
     await page.click('button:has-text("Sign in")')
     await page.waitForSelector('h1:has-text("Dashboard")')
-    for (const p of ['dashboard', 'profile', 'hero', 'seasons', 'sections', 'navigation', 'projects', 'services', 'results', 'media', 'publish', 'seo', 'advanced']) {
+    for (const p of ['dashboard', 'profile', 'hero', 'seasons', 'sections', 'navigation', 'projects', 'services', 'results', 'media', 'publish', 'seo', 'advanced', 'cursor', 'design', 'looks', 'languages', 'inbox', 'subscribers', 'insights', 'qualityScore', 'bulk', 'altText', 'team', 'server', 'applications', 'notes', 'announcement', 'engage', 'profilePage', 'maintenance', 'quality']) {
       await page.goto(`${base}/admin#/${p}`)
       await page.waitForTimeout(p === 'seasons' || p === 'publish' ? 2200 : 500)
       await audit(page, `admin ${p} ${tag}`)

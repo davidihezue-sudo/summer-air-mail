@@ -10,7 +10,7 @@ import { BlockListEditor } from './blocks'
 
 export type Opt = string | { value: string; label: string }
 type Pred = (obj: any, root: SiteContent) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
-export type RefSource = 'projects' | 'services' | 'tools' | 'aiSkills' | 'results' | 'contentItems' | 'screenshots'
+export type RefSource = 'projects' | 'services' | 'tools' | 'aiSkills' | 'results' | 'contentItems' | 'screenshots' | 'looks' | 'notes'
 
 interface Base { label: string; help?: string; showIf?: Pred }
 export type Field =
@@ -20,7 +20,7 @@ export type Field =
   | (Base & { kind: 'range'; key: string; min: number; max: number; step?: number; unit?: string })
   | (Base & { kind: 'bool'; key: string })
   | (Base & { kind: 'select'; key: string; options: Opt[] | ((root: SiteContent) => Opt[]); custom?: boolean })
-  | (Base & { kind: 'multi'; key: string; options: Opt[]; custom?: boolean })
+  | (Base & { kind: 'multi'; key: string; options: Opt[] | ((root: SiteContent) => Opt[]); custom?: boolean })
   | (Base & { kind: 'strings'; key: string; placeholder?: string; multiline?: boolean })
   | (Base & { kind: 'image'; key: string })
   | (Base & { kind: 'images'; key: string })
@@ -173,9 +173,9 @@ function CustomAdd({ label, onAdd }: { label: string; onAdd: (v: string) => void
 }
 
 function MultiField({ f, base }: { f: Extract<Field, { kind: 'multi' }>; base: string }) {
-  const { value, path, set } = useValue(base, f.key)
+  const { value, path, set, content } = useValue(base, f.key)
   const list = (Array.isArray(value) ? value : []) as string[]
-  const opts = f.options.map(optOf)
+  const opts = (typeof f.options === 'function' ? f.options(content) : f.options).map(optOf)
   const extras = list.filter((v) => !opts.some((o) => o.value === v))
   const toggle = (v: string) => set(path, list.includes(v) ? list.filter((x) => x !== v) : [...list, v])
   return (
@@ -364,6 +364,7 @@ function ListField({ f, base }: { f: Extract<Field, { kind: 'list' }>; base: str
 
 const REF_LABEL: Record<RefSource, (x: any) => string> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   projects: (x) => x.title || x.id, services: (x) => x.name || x.id, tools: (x) => x.name || x.id, aiSkills: (x) => x.name || x.id,
+  looks: (x) => x.name || x.id, notes: (x) => x.title || x.id,
   results: (x) => x.metric || x.id, contentItems: (x) => x.title || x.id, screenshots: (x) => x.caption || x.image?.alt || x.id,
 }
 

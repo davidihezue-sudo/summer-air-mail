@@ -1,6 +1,6 @@
 {
   "name": "summer-air-mail",
-  "version": "2.0.0",
+  "version": "3.0.0",
   "private": true,
   "description": "Summer Air Mail: a four-season social media and digital marketing portfolio with a built-in admin",
   "type": "module",
@@ -19,6 +19,7 @@
     "admin:setup": "node scripts/admin-setup.mjs",
     "admin:hash": "node scripts/admin-setup.mjs --hash",
     "smoke:admin": "node scripts/smoke-admin.mjs",
+    "smoke:v3": "node scripts/smoke-v3.mjs",
     "a11y": "node scripts/a11y.mjs",
     "check": "npm run typecheck && npm run lint && npm test && npm run build",
     "dev:phone": "node scripts/dev-all.mjs --host"

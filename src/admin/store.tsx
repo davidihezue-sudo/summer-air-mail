@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { api, ApiError, type Status } from './api'
+import { api, ApiError, type Me, type Status } from './api'
 import { baseContent, normalizeContent } from '../content/bundle'
 import type { MediaAsset, SiteContent } from '../content/types'
 import { setIn } from './paths'
@@ -7,6 +7,9 @@ import { setIn } from './paths'
 type SaveState = 'idle' | 'dirty' | 'saving' | 'saved' | 'error'
 
 interface AdminCtx {
+  me: Me
+  /** False for viewers: every editing control is disabled and the server refuses writes. */
+  canEdit: boolean
   content: SiteContent
   status: Status | null
   save: SaveState
@@ -36,7 +39,7 @@ export const useAdmin = () => {
 
 const AUTOSAVE_MS = 1200
 
-export function AdminProvider({ onLogout, children }: { onLogout: () => void; children: ReactNode }) {
+export function AdminProvider({ onLogout, me, children }: { onLogout: () => void; me: Me; children: ReactNode }) {
   const [content, setContent] = useState<SiteContent | null>(null)
   const [status, setStatus] = useState<Status | null>(null)
   const [save, setSave] = useState<SaveState>('idle')
@@ -169,8 +172,8 @@ export function AdminProvider({ onLogout, children }: { onLogout: () => void; ch
   const setMedia = useCallback((fn: (m: MediaAsset[]) => MediaAsset[]) => setMediaState(fn), [])
 
   const value = useMemo<AdminCtx | null>(() => (content ? {
-    content, status, save, error, conflict, media, set, edit, saveNow, publish, discard, replace, reload: load, refreshMedia, setMedia, logout,
-  } : null), [content, status, save, error, conflict, media, set, edit, saveNow, publish, discard, replace, load, refreshMedia, setMedia, logout])
+    me, canEdit: me.role !== 'viewer', content, status, save, error, conflict, media, set, edit, saveNow, publish, discard, replace, reload: load, refreshMedia, setMedia, logout,
+  } : null), [me, content, status, save, error, conflict, media, set, edit, saveNow, publish, discard, replace, load, refreshMedia, setMedia, logout])
 
   if (!value) {
     return (

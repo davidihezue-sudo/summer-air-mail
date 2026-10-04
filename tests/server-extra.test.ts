@@ -96,7 +96,7 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     c.portfolio.newsletter = { ...c.portfolio.newsletter, enabled: true, mode: 'collect' }
     c.portfolio.insights.enabled = true
     c.applications = [{ id: 'a1', slug: 'acme-x7', enabled: true, expiresAt: '', company: 'Acme', hero: { headline: 'Hi Acme' } }, { id: 'a2', slug: 'old', enabled: true, expiresAt: '2001-01-01' }]
-    c.shortLinks = [{ id: 's1', slug: 'cv', enabled: true, label: '', target: { type: 'section', value: 'work' } }, { id: 's2', slug: 'bad', enabled: true, label: '', target: { type: 'url', value: 'ftp://example.com/x' } }]
+    c.shortLinks = [{ id: 's1', slug: 'cv', enabled: true, label: '', target: { type: 'section', value: 'work' } }]
     c.notes = [{ id: 'n1', slug: 'hello', title: 'Hello', date: '2026-01-02', summary: 'S', body: 'B', cover: null, tags: [], seoTitle: '', seoDescription: '', hidden: false }]
     c.projects = [{ ...c.projects[0], id: 'p1', title: 'Launch one', description: 'Description here', hidden: false }]
     return c
@@ -108,7 +108,7 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     writeFileSync(join(dist, 'index.html'), '<!doctype html><html lang="en"><head><meta name="robots" content="index" /><!--head:start--><!--head:end--></head><body></body></html>')
     const fakeFetch = async (url: string, init: any) => { hooks.push({ url, init }); return new Response('', { status: 200 }) }
     const transportFactory = () => ({ sendMail: async (m: any) => { sent.push(m) } })
-    const env: Record<string, string> = { SMTP_HOST: 'smtp.test', SMTP_USER: 'u', SMTP_PASS: 'p', ALERT_WEBHOOK_URL: 'https://hooks.example/x', ...(dbUrl ? { DATABASE_URL: dbUrl } : {}) }
+    const env: Record<string, string> = { SMTP_HOST: 'smtp.test', SMTP_USER: 'u', SMTP_PASS: 'p', ALERT_WEBHOOK_URL: 'https://hooks.example/x', S3_ENDPOINT: 'https://s3.example.test', S3_BUCKET: 'bk', S3_ACCESS_KEY: 'AKTEST', S3_SECRET_KEY: 'SKTEST', S3_REGION: 'us-east-1', ...(dbUrl ? { DATABASE_URL: dbUrl } : {}) }
     if (dbUrl) {
       const pg = (await import('pg' as string)).default
       const pool = new pg.Pool({ connectionString: dbUrl }); await pool.query('DROP TABLE IF EXISTS sam_kv'); await pool.end()
@@ -151,11 +151,14 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     expect((await fetch(base + '/for/old')).status).toBe(404)
   })
 
-  it('redirects short links and refuses unsafe targets', async () => {
+  it('redirects short links, and refuses unsafe targets and duplicate addresses when saving', async () => {
     const r = await fetch(base + '/go/cv', { redirect: 'manual' })
     expect(r.status).toBe(302)
     expect(r.headers.get('location')).toBe('/#work')
-    expect(((await fetch(base + '/go/bad', { redirect: 'manual' })).headers.get('location'))).toBe('/')
+    const bad = content(); bad.shortLinks.push({ id: 's2', slug: 'bad', enabled: true, label: '', target: { type: 'url', value: 'ftp://example.com/x' } })
+    expect((await api('/api/admin/draft', { method: 'PUT', body: JSON.stringify({ content: bad }) })).status).toBe(400)
+    const dup = content(); dup.notes.push({ ...dup.notes[0], id: 'n9' })
+    expect((await api('/api/admin/draft', { method: 'PUT', body: JSON.stringify({ content: dup }) })).status).toBe(400)
     expect((await fetch(base + '/go/none', { redirect: 'manual' })).status).toBe(404)
   })
 
@@ -256,8 +259,14 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     expect(text).toContain('content.json')
     expect(text).not.toContain('admin.json')
     expect(text).not.toContain('users.json')
+    await api('/api/admin/settings', { method: 'PUT', body: JSON.stringify({ settings: { backups: { s3: true, keep: 3 } } }) })
     const run = await (await api('/api/admin/backups/run', { method: 'POST', body: '{}' })).json()
     expect(run.result.ok).toBe(true)
+    expect(run.result.uploaded).toBe(true)
+    const up = hooks.find((h) => String(h.url).startsWith('https://s3.example.test/bk/backups/backup-'))
+    expect(up.init.method).toBe('PUT')
+    expect(up.init.headers.authorization).toMatch(/^AWS4-HMAC-SHA256 Credential=AKTEST\/\d{8}\/us-east-1\/s3\/aws4_request, SignedHeaders=content-type;host;x-amz-content-sha256;x-amz-date, Signature=[0-9a-f]{64}$/)
+    expect(up.init.headers['x-amz-content-sha256']).toMatch(/^[0-9a-f]{64}$/)
     expect(existsSync(join(dir, 'data', 'backups'))).toBe(true)
     expect(readdirSync(join(dir, 'data', 'backups')).length).toBe(1)
   })

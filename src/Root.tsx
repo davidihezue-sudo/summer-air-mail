@@ -21,7 +21,8 @@ function previewFromUrl(): ThemePreview | undefined {
   const q = new URLSearchParams(location.search)
   if (!q.has('preview')) return undefined
   const season = q.get('season') as SeasonName | null
-  return { season: season && SEASONS.includes(season) ? season : undefined }
+  const scheme = q.get('scheme')
+  return { season: season && SEASONS.includes(season) ? season : undefined, scheme: scheme === 'dark' || scheme === 'light' ? scheme : undefined }
 }
 
 const readLang = () => {
@@ -127,6 +128,7 @@ export default function Root({ initial }: { initial: LoadedContent }) {
 function Shell({ source, preview, greeting, children }: { source: LoadedContent['source']; preview: boolean; greeting: string; children: React.ReactNode }) {
   const consent = useAnalytics(preview)
   const [hello, setHello] = useState(!!greeting)
+  useEffect(() => { setHello(!!greeting) }, [greeting])
   return (
     <>
       {hello && greeting && <p className="greeting" role="status">{greeting} <button type="button" onClick={() => setHello(false)} aria-label="Dismiss greeting">&times;</button></p>}

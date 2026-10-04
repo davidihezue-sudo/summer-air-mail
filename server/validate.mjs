@@ -53,6 +53,20 @@ export function validateContent(input) {
         ids.add(item.id)
       }
     }
+    const SLUG = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,79}$/
+    for (const [coll, label] of [['notes', 'Note address'], ['applications', 'Application code'], ['shortLinks', 'Short link code']]) {
+      const seen = new Set()
+      for (const item of content[coll] ?? []) {
+        const slug = item.slug
+        if (slug === '' || slug === undefined) continue
+        if (typeof slug !== 'string' || !SLUG.test(slug)) return { ok: false, error: `${label} "${slug}" may only use letters, numbers and dashes (2 to 80 characters).` }
+        if (seen.has(slug.toLowerCase())) return { ok: false, error: `${label} "${slug}" is used twice.` }
+        seen.add(slug.toLowerCase())
+      }
+    }
+    for (const l of content.shortLinks ?? []) {
+      if (l.target?.type === 'url' && l.target.value && !/^https?:\/\//i.test(l.target.value)) return { ok: false, error: 'A short link to another website must start with http:// or https://.' }
+    }
     const sections = content.portfolio.sections
     if (sections !== undefined) {
       if (!Array.isArray(sections)) return { ok: false, error: 'sections must be a list.' }

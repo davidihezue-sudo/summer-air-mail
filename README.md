@@ -6,6 +6,7 @@ A four-season social media and digital marketing portfolio with a built-in admin
 - **Real admin.** Sign-in with a hashed password, private drafts, preview on desktop, tablet and mobile in any season, one-click publish, version history, media library.
 - **Proof of work.** Projects are built from content blocks, case studies are structured, results carry a start, an end, a period and a label saying who produced them.
 - **No invented content.** Nothing is shown unless the owner switches it on. There are no fake projects, clients, testimonials, tools or statistics.
+- **Version 3 adds** a customizable cursor effect, dark mode, a design panel, private application links, a one page printable profile, a contact form that really sends, a messages inbox, privacy friendly visit counts, notes with an RSS feed, languages, scheduled changes, saved looks, a team with roles, backups, and optional Postgres storage. See [What is new in version 3](#what-is-new-in-version-3).
 
 ## Contents
 
@@ -14,11 +15,12 @@ A four-season social media and digital marketing portfolio with a built-in admin
 3. [Using the admin](#using-the-admin)
 4. [Seasons](#seasons)
 5. [Professional intensity](#professional-intensity)
-6. [Deploying](#deploying)
-7. [How it is built](#how-it-is-built)
-8. [Security](#security)
-9. [Testing](#testing)
-10. [Known limits](#known-limits)
+6. [What is new in version 3](#what-is-new-in-version-3)
+7. [Deploying](#deploying)
+8. [How it is built](#how-it-is-built)
+9. [Security](#security)
+10. [Testing](#testing)
+11. [Known limits](#known-limits)
 
 ---
 
@@ -156,6 +158,50 @@ Appearance > **Professional intensity** lets one portfolio serve different appli
 
 Motion is also capped by the **Maximum animation** setting, by each season's intensity, and by the visitor's own "reduce motion" preference, which always wins.
 
+## What is new in version 3
+
+Everything below is controlled from the admin. Nothing is on unless you switch it on, and nothing is invented.
+
+| Feature | Where to find it | What it does |
+| --- | --- | --- |
+| Cursor effect | Look and layout > Cursor effect | 14 styles (bubbles, water drop, ripples, ring, circle, blob, spotlight, halo, comet, sparkles, crosshair, seasonal, emoji, your own image), size, colour, opacity, smoothing, trail length, blend, where it shows, which professional modes allow it, tap ripple on touch screens. Also sets the hero reveal circle size. Live preview as you edit. |
+| Clickable strategy notes | Capabilities > Strategy Framework | Each sticky note says "Tap to open", with an Open all button and an editable hint line. |
+| Design | Look and layout > Design | Corner roundness, button shape, spacing, text size, shadows, outline weight, heading case, pop-up animation, scroll progress. |
+| Dark mode | Design > Light and dark | Always light, always dark, or follow the visitor's device, with an optional visitor switch. Every season gets a dark version derived from its own colours, and every pairing is contrast tested. |
+| Section styling | Sections & Visibility > any section | Spacing, edge shape, background pattern, width, and the arrangement (grid, list, carousel) for testimonials, notes and journey. |
+| Saved looks | Look and layout > Saved Looks | Save the current professional intensity, season setting, design and hero layout; apply in one click. |
+| Application links | Reach and engagement > Application Links | A private `/for/<code>` version of the site for one employer: its own hero words, welcome note, projects first, hidden sections, look, season and CV. Never listed, noindex, can expire, and never part of the public data. |
+| One page profile | One Page Profile | `/profile`: a clean summary that prints to A4 or saves as a PDF with the browser's Print dialog. You choose what it includes. |
+| Short links | Short Links | `/go/cv` style addresses that redirect on the server. |
+| Notes | Notes (blog) | Articles at `/notes/<address>` with their own share preview, an RSS feed at `/feed.xml` and sitemap entries. |
+| Career journey, Resources | Career Journey, Resources | A timeline and a downloads section. Hidden until they have real entries. |
+| Booking and newsletter | Booking & Newsletter | A booking button in the hero, header, contact and profile. A newsletter signup that either collects addresses on your server (with a consent tick box) or sends people to your newsletter service. |
+| Contact form | Identity > Contact | Choose: open the visitor's email or WhatsApp, or send to your inbox here (with fallback to email). A hidden honeypot field, a minimum fill time and a rate limit stop most bots. |
+| Inbox and subscribers | Messages and insight | Read, mark, reply, delete, export to CSV. Optional email and webhook alerts. Old messages can be deleted automatically. |
+| Visit insights | Messages and insight > Visit Insights | Cookieless, first party counts of visitors and views per day, top pages, sources, project opens, downloads and shares. No IP address, cookie or profile is stored. Your own visits while signed in are ignored. |
+| Banner and schedule | Banner & Schedule | An announcement bar with a date window, plus rules that switch season, professional intensity, availability, hero words, sections and a banner on and off by themselves on dates you set. |
+| Maintenance and 404 | Maintenance & 404 | A "back soon" page (optionally a proper 503) while you are signed in you still see the site, and your own 404 page. |
+| Languages | Languages | Add languages, translate your own text field by field and the interface labels, with right to left support and a header switcher. |
+| Share links | Portfolio | Every project has its own address (`/work/<id>`), a copy link button, and its own share preview. The back button closes the project. |
+| Case study highlight | Case Studies > Highlight strip | Feature one of your own measured results as a headline strip on the case study card. |
+| Testimonials | Testimonials | Optional video recommendation (plays only on click) and a carousel layout. |
+| Quality score | Messages and insight > Quality Score | A checklist scored from your real content, using rules you set. |
+| Bulk tools and CSV | Tools > Bulk & CSV | Publish, hide or delete many items; export and import projects, results, testimonials, services, journey and notes as CSV. Imports only ever create new drafts. |
+| Alt text assistant | Tools > Alt Text Assistant | Finds every image without alt text and helps you write it. It suggests a starting point from where the image is used; you describe what is actually shown. |
+| Undo for one item | Any item > History | Earlier versions of a single project, result, note and so on, with Restore. |
+| Team and roles | Tools > Team & Access | Owner, editor and viewer, enforced on the server. A setting decides whether editors may publish. |
+| Backups | Tools > Server & Backups | A zip of your content, messages, subscribers, insights, media list and uploads, on a schedule and on demand, optionally uploaded to S3 compatible storage. |
+
+### Storage: files or Postgres
+
+By default everything is stored as JSON files in `DATA_DIR`. Set `DATABASE_URL` to keep content, the admin login, messages, subscribers, insights, snapshots and settings in Postgres instead (a single table, `sam_kv`, created automatically). Uploaded images and files stay in `DATA_DIR`, so mount a persistent disk there either way. Backups, roles and every feature behave the same on both. The server tests run against both when `TEST_DATABASE_URL` is set.
+
+`npm run admin:setup` writes the owner login to whichever store `DATABASE_URL` selects.
+
+### Email, webhooks and backups
+
+Secrets are never kept in the admin. Set them as environment variables (see `.env.example`): `SMTP_*` for email alerts, `ALERT_WEBHOOK_URL` for Slack, Discord or Zapier, and `S3_*` for off-site backups. The admin shows only whether each is configured. S3 uploads use a small hand written Signature V4 signer that is tested against Amazon's published example; it has not been run against a live bucket in the authoring environment, so make one backup and check that the object appears before relying on it.
+
 ## Deploying
 
 The site is a Node server that serves the built site, the API and the uploads. Deploy it anywhere that runs Node 22: Render, Railway, Fly.io, a VPS, or Docker.
@@ -167,14 +213,15 @@ npm run admin:setup      # once, on the server
 NODE_ENV=production npm start
 ```
 
-**Persistent storage is essential.** Content, the admin login and uploads live in `DATA_DIR` (default `./data`). Mount a persistent disk there and back it up. On hosts with ephemeral disks your edits would be lost on every deploy.
+**Persistent storage is essential.** Uploads (and, without Postgres, content, the admin login and messages) live in `DATA_DIR` (default `./data`). Mount a persistent disk there and back it up. On hosts with ephemeral disks your edits would be lost on every deploy.
 
 Environment variables are listed in `.env.example`. The ones you will usually set:
 
 | Variable | Purpose |
 | --- | --- |
 | `PORT` | Port to listen on (most hosts set it for you) |
-| `DATA_DIR` | Folder for `content.json`, `admin.json` and `uploads/` |
+| `DATA_DIR` | Folder for uploads, and for the JSON files when you are not using Postgres |
+| `DATABASE_URL` | Optional. Use Postgres instead of JSON files |
 | `TRUST_PROXY=1` | Behind a proxy or platform load balancer, so HTTPS and client addresses are detected |
 | `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` | Admin login without a disk file. Make the hash with `npm run admin:hash` |
 
@@ -223,7 +270,11 @@ tests/              Unit and server tests
 - **Content.** The server validates every save: size and depth limits, no `javascript:` links, no prototype pollution keys, unique ids. The browser renders text through React and a small safe formatter, never through raw HTML, and only allows `http`, `https`, `mailto` and `tel` links.
 - **Headers.** The server sends a Content-Security-Policy that allows trackers only if you have switched them on. `frame-src` allows only your own site (for the preview) and YouTube and Vimeo.
 - **Analytics.** Off by default. Only correctly formatted IDs are accepted. When consent is required, trackers load only after the visitor agrees, and Do Not Track and Global Privacy Control are respected.
-- **Secrets.** The browser code contains no keys or secrets. The contact form sends nothing to a server; it opens the visitor's email app or WhatsApp with a drafted message and says so.
+- **Secrets.** The browser code contains no keys or secrets. SMTP, webhook and S3 credentials exist only as server environment variables.
+- **Public forms.** The contact, newsletter and tracking endpoints validate and size limit input, rate limit per address, reject hidden-field and too-fast posts, and never store an IP address. Exports neutralise spreadsheet formulas.
+- **Roles.** Viewer, editor and owner are enforced on every admin route on the server. Removing a person or changing their role signs them out at once.
+- **Private links.** Application links are served only by their code, are never in the public data, are marked noindex, and honour an expiry date.
+- **Backups.** Backup zips never include logins or password hashes.
 
 ## Testing
 
@@ -232,16 +283,19 @@ npm run check                         # type-check, lint, unit and server tests,
 npm run build && npm run smoke:admin  # the admin workflow in a real browser
 npm run dev                           # then, in another terminal:
 npm run smoke                         # public site: 8 widths, seasons, interactions, reduced motion
-npm run a11y                          # axe-core on the site (all seasons, desktop and mobile) and every admin page
+npm run a11y                          # axe-core on the site (all seasons, light and dark, desktop and mobile) and every admin page
+npm run build && npm run smoke:v3     # version 3 features in a real browser: banner, dark mode, languages, application links, profile PDF, contact form, maintenance
 ```
 
 Covered by tests: season detection on and around every boundary (including Southern Hemisphere dates and invalid dates), colour contrast of every season's palette, the motion plan, section ordering and visibility, empty states, navigation without broken links, SEO and CSP output, writing rules (no em dashes, no banned fonts, no fabricated defaults), password hashing, access control on every admin route, CSRF protection, lockout, draft and publish, private content filtering, upload safety, and the full admin workflow through publishing to the live site.
 
 ## Known limits
 
-- **One server, one editor.** The JSON file store has no locking across several servers. If you need several editors or several servers, replace `server/store.mjs` and `server/media.mjs` with a database (PostgreSQL) and object storage (S3 compatible); the API and the front end do not change. A second tab saving over the first is detected and refused.
-- **One admin account.** There is one login, not a user system with roles.
-- **Sessions are in memory.** Restarting the server signs you out.
+- **One server.** Postgres removes the file store limit for content, but sessions, rate limits and uploads are still per server. Several servers need a shared session store and shared object storage for uploads. A second tab saving over the first is detected and refused.
+- **Sessions are in memory.** Restarting the server signs everyone out.
+- **No real PDF engine.** The one page profile uses your browser's Print dialog (Save as PDF), styled for A4. It is not generated on the server.
+- **Email and S3 are untested against real services.** The code is tested with stand-ins (a fake mail transport and Amazon's published signature example). Send yourself a test alert and make one backup before relying on either.
+- **Translations are yours.** The admin helps you translate field by field; it does not translate for you.
 - **Uploaded files are public by link.** They are not drafts. Do not upload anything that must stay confidential; use **Hide parts** on screenshots first.
 - **Instagram and TikTok are link cards, not embeds.** Their embed scripts cannot be loaded under a strict security policy. YouTube and Vimeo play in the page after a click.
 - **The Dockerfile has not been run** in the environment this was built in.

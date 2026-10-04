@@ -178,7 +178,7 @@ dialog.modal::backdrop { background: rgb(23 50 63 / .6); backdrop-filter: blur(3
 @media (prefers-reduced-motion: reduce) { .tapripple { display: none; } }
 
 /* ---------- Dark mode, set by data-scheme. Palette comes from darkPalette(); these rules cover what tokens cannot. ---------- */
-[data-scheme='dark'] :is(.section--dark, .footer, .cases) { --c-ink: var(--deep); --c-paper: var(--on-deep); }
+[data-scheme='dark'] :is(.section--dark, .footer, .cases) { --c-ink: var(--deep); --c-paper: var(--on-deep); --c-pink: var(--l-pink); --c-butter: var(--l-butter); --c-peach: var(--l-peach); --c-sky: var(--l-sky); --c-aqua: var(--l-aqua); --c-sage: var(--l-sage); --c-sea: var(--l-sea); --c-green-text: var(--l-sage); --c-red-text: var(--l-pink); }
 [data-scheme='dark'] .footer, [data-scheme='dark'] .cases { background: var(--deep); }
 [data-scheme='dark'] .header.is-scrolled { box-shadow: 0 1px 0 rgb(255 255 255 / .1); }
 [data-scheme='dark'] dialog.modal::backdrop { background: rgb(0 0 0 / .72); }
@@ -207,7 +207,7 @@ dialog.modal::backdrop { background: rgb(23 50 63 / .6); backdrop-filter: blur(3
 body { padding-top: var(--banner-h, 0px); }
 .header { top: var(--banner-h, 0px); }
 .banner { position: fixed; top: 0; left: 0; right: 0; z-index: 60; min-height: 44px; display: flex; align-items: center; justify-content: center; gap: .8rem; padding: .35rem 3rem .35rem 1rem; font-size: .92rem; font-weight: 600; text-align: center; }
-.banner p { margin: 0; } .banner a { color: inherit; text-decoration: underline; }
+.banner p { margin: 0; } .banner a { color: inherit; text-decoration: underline; display: inline-block; padding: .65rem .3rem; margin: -.65rem 0; }
 .banner button { position: absolute; right: 6px; top: 50%; translate: 0 -50%; width: 44px; height: 44px; display: grid; place-items: center; background: transparent; border: 0; color: inherit; border-radius: 50%; }
 .banner--ink { background: #17323f; color: #fff; } .banner--red { background: #8a1d24; color: #fff; }
 .banner--butter { background: #f6dc8c; color: #17323f; } .banner--sky { background: #a9dceb; color: #17323f; } .banner--green { background: #044a26; color: #fff; }
@@ -217,3 +217,6 @@ body { padding-top: var(--banner-h, 0px); }
 html[dir='rtl'] .banner { padding: .35rem 1rem .35rem 3rem; } html[dir='rtl'] .banner button { right: auto; left: 6px; }
 .header__book { min-height: 44px; padding: .4rem 1.1rem; font-size: .9rem; display: none; }
 @media (min-width: 900px) { .header__book { display: inline-flex; } }
+[data-scheme='dark'] :is(.drawer__name, .loader__name, .hero-roles__line--1, .stat__num, .case__h span, .heart, .contact__sig, .field__error) { color: var(--c-red-text); }
+[data-scheme='dark'] :is(.vcard__result, .hero-roles__line--2) { color: var(--c-green-text); }
+main { overflow-x: clip; }

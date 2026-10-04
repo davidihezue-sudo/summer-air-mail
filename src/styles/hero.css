@@ -1,7 +1,7 @@
 .hero { position: relative; height: 200svh; background: var(--c-sand); }
 .hero--static { height: auto; }
 .hero__stage {
-  --stamp-h: min(38svh, 330px);
+  --stamp-h: min(calc(38svh - var(--banner-h, 0px) * 1.4), 330px);
   --shift-x: 0px; --shift-y: 4svh; --grow: .35;
   position: sticky; top: 0; height: 100svh; overflow: hidden; touch-action: pan-y;
   background: var(--hero-bg-image, none) center / cover, var(--hero-bg);

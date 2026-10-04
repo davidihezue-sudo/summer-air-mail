@@ -1,13 +1,15 @@
 import { useMemo, useState } from 'react'
-import { ArrowDown, ArrowLeft, ArrowUp, Copy, Eye, EyeOff, Plus, Star, Trash2 } from 'lucide-react'
+import { ArrowDown, ArrowLeft, ArrowUp, Copy, Eye, EyeOff, History, Plus, Star, Trash2 } from 'lucide-react'
 import type { SiteContent } from '../../content/types'
 import { newCaseStudy, uid } from '../../content/factories'
 import { Fields, IconBtn } from '../fields'
 import type { EntityDef } from '../schema'
 import { useAdmin } from '../store'
 import { useRoute } from '../router'
+import { Modal } from '../../components/ui/Modal'
 import { moveItem } from '../paths'
 import { Badge, Card, Confirm, PageHead, Switch } from '../ui'
+import { api } from '../api'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const LISTS_TO_SCRUB: [string, string[]][] = [
@@ -24,7 +26,8 @@ function scrubRefs(c: SiteContent, id: string) {
 }
 
 export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
-  const { content, edit, set } = useAdmin()
+  const { content, edit, set, replace, status, me } = useAdmin()
+  const [versions, setVersions] = useState<{ index: number; at: string; title: string }[] | null>(null)
   const { go } = useRoute()
   const [q, setQ] = useState('')
   const [state, setState] = useState<'all' | 'on' | 'off'>('all')
@@ -43,7 +46,10 @@ export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
         <PageHead
           title={def.titleOf(item)}
           intro={`Editing ${def.singular}. Changes save automatically as a draft and go live when you press Publish.`}
-          actions={<a className="abtn" href={`#/${def.id}`}><ArrowLeft size={14} aria-hidden /> All {def.title.toLowerCase()}</a>}
+          actions={<>
+            <button type="button" className="abtn" onClick={async () => setVersions((await api.itemVersions(def.collection, id)).versions)}><History size={14} aria-hidden /> History</button>
+            <a className="abtn" href={`#/${def.id}`}><ArrowLeft size={14} aria-hidden /> All {def.title.toLowerCase()}</a>
+          </>}
         />
         <Card>
           <div className="aform">
@@ -55,6 +61,14 @@ export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
             <Fields fields={def.fields} base={`${def.collection}.${index}`} />
           </div>
         </Card>
+        <Modal open={!!versions} onClose={() => setVersions(null)} label="Earlier versions" className="dialog dialog--narrow adialog">
+          <h2 className="adialog__title">Earlier versions</h2>
+          {versions?.length === 0 && <p>No earlier versions yet. A version is remembered each time you change this {def.singular}.</p>}
+          <ul className="arows">{versions?.map((v) => (
+            <li key={v.index} className="arow-item"><span className="arow-item__main">{new Date(v.at).toLocaleString()} <span className="ahelp">{v.title}</span></span>
+              <button type="button" className="abtn" disabled={!me || me.role === 'viewer'} onClick={async () => { const r = await api.restoreItem(def.collection, id, v.index); replace(r.draft, r.rev, { ...(status as NonNullable<typeof status>), ...r }); setVersions(null) }}>Restore</button></li>
+          ))}</ul>
+        </Modal>
         <Confirm open={csOff} title="Remove the case study?" body="The structured case study text for this project will be deleted. The project and its content blocks stay." confirmLabel="Remove case study" onCancel={() => setCsOff(false)} onConfirm={() => { edit((c) => { delete (c as any)[def.collection][index].caseStudy }); setCsOff(false) }} />
       </>
     )

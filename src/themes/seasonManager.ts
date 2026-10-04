@@ -116,7 +116,7 @@ export function deriveTokens(c: ThemeColors) {
 export function darkPalette(c: ThemeColors) {
   const black = '#000000'
   const white = '#ffffff'
-  const dim = (hex: string) => mixHex(hex, black, 0.42)
+  const dim = (hex: string) => mixHex(hex, black, 0.34)
   const ink = mixHex(c.paper, white, 0.85)
   const colors: ThemeColors = {
     ...c,
@@ -128,10 +128,10 @@ export function darkPalette(c: ThemeColors) {
   return {
     colors,
     derived: {
-      redText: mixHex(c.red, white, 0.45),
+      redText: mixHex(c.red, white, 0.28),
       seaDeep: mixHex(c.sea, black, 0.42),
-      seaText: mixHex(c.sea, white, 0.4),
-      greenText: mixHex(c.sage, white, 0.5),
+      seaText: mixHex(c.sea, white, 0.3),
+      greenText: mixHex(c.sage, white, 0.4),
     },
     /** Dark bands (footer, case studies, tools): a deeper surface with the light text colour. */
     deep: mixHex(c.ink, black, 0.45),

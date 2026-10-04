@@ -38,6 +38,7 @@ export interface ThemePreview {
   season?: SeasonName
   professional?: ProfessionalIntensity
   intensity?: Level
+  scheme?: 'light' | 'dark'
 }
 
 export function ThemeProvider({ preview, children }: { preview?: ThemePreview; children: ReactNode }) {
@@ -52,7 +53,7 @@ export function ThemeProvider({ preview, children }: { preview?: ThemePreview; c
     try { const v = localStorage.getItem('sam-scheme'); return v === 'light' || v === 'dark' ? v : '' } catch { return '' }
   })
   const { design } = content.portfolio
-  const scheme: 'light' | 'dark' = visitor && design.colorToggle ? visitor : design.colorMode === 'system' ? (sysDark ? 'dark' : 'light') : design.colorMode
+  const scheme: 'light' | 'dark' = preview?.scheme ? preview.scheme : visitor && design.colorToggle ? visitor : design.colorMode === 'system' ? (sysDark ? 'dark' : 'light') : design.colorMode
   const setScheme = useCallback((v: 'light' | 'dark') => {
     setVisitor(v)
     try { localStorage.setItem('sam-scheme', v) } catch { /* private mode: lasts for this visit */ }

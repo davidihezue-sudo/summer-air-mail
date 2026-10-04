@@ -1,4 +1,6 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { api } from '../api'
+import { quality } from '../../content/derive'
 import { Link } from './Link'
 import type { ReactNode } from 'react'
 import { useAdmin } from '../store'
@@ -12,6 +14,9 @@ export function Dashboard() {
   const { content: c, status } = useAdmin()
   const p = c.portfolio
   const season = resolveSeason(p.seasons)
+  const [unread, setUnread] = useState<number | null>(null)
+  useEffect(() => { api.enquiries().then((r) => setUnread(r.unread)).catch(() => setUnread(null)) }, [])
+  const q = useMemo(() => quality(c), [c])
 
   const stats = useMemo(() => {
     const pub = (l: { hidden?: boolean }[]) => l.filter((x) => !x.hidden).length
@@ -31,6 +36,9 @@ export function Dashboard() {
       { label: 'Websites', value: pub(c.websites), to: 'websites' },
       { label: 'Testimonials approved', value: c.testimonials.filter((t) => t.approved).length, to: 'testimonials' },
       { label: 'Social links', value: socials, to: 'social' },
+      { label: 'Career journey entries', value: pub(c.journey), to: 'journey' },
+      { label: 'Notes published', value: pub(c.notes), to: 'notes' },
+      { label: 'Application links active', value: c.applications.filter((a) => a.enabled !== false).length, to: 'applications' },
     ]
   }, [c, p])
 
@@ -65,6 +73,10 @@ export function Dashboard() {
           <p>Mode: <strong>{p.seasons.mode === 'auto' ? `Auto (now ${THEMES[season].label})` : THEMES[season].label}</strong></p>
           <p>Intensity: <strong>{p.theme.professional}</strong></p>
           <Link to="seasons">Change season</Link> · <Link to="appearance">Appearance</Link>
+        </Card>
+        <Card title="Inbox and quality">
+          <p>Messages: <strong>{unread === null ? 'not available' : `${unread} unread`}</strong> · <Link to="inbox">Open inbox</Link></p>
+          <p>Quality score: <strong>{q.overall} / 100</strong> · <Link to="qualityScore">See what to improve</Link></p>
         </Card>
         <Card title="Page sections">
           <p><strong>{live}</strong> sections are showing on the public site.</p>

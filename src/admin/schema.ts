@@ -85,6 +85,11 @@ export const PROJECT_FIELDS: Field[] = [
     ],
   },
   {
+    kind: 'group', label: 'Search and sharing (optional)', open: false,
+    help: 'What appears when this project is shared as /work/<id>. Blank uses the title, description and cover image.',
+    fields: [{ kind: 'group', key: 'seo', label: 'Share preview', open: true, fields: [{ kind: 'text', key: 'title', label: 'Title' }, { kind: 'textarea', key: 'description', label: 'Description' }, { kind: 'text', key: 'image', label: 'Image address (blank uses the cover)' }] }],
+  },
+  {
     kind: 'group', label: 'Content blocks (build the story in any order)', open: false,
     help: 'Add headings, text, images, galleries, videos, reels, screenshots, links, quotes, metrics, charts, before and after, documents and more. Every block is optional.',
     fields: [{ kind: 'blocks', key: 'blocks', label: 'Blocks' }],
@@ -115,6 +120,12 @@ export const PROJECT_FIELDS: Field[] = [
         ] },
         { kind: 'textarea', key: 'confidentialResults', label: 'Approved wording if numbers are confidential' },
         { kind: 'group', label: 'Before and after (optional)', key: 'beforeAfter', open: false, fields: [{ kind: 'image', key: 'before', label: 'Before' }, { kind: 'image', key: 'after', label: 'After' }, { kind: 'text', key: 'caption', label: 'Caption' }] },
+      ] },
+      { kind: 'group', label: 'Highlight strip', key: 'caseStudy', open: false, fields: [
+        { kind: 'group', key: 'highlight', label: 'Headline result shown on the case study card', open: true, fields: [
+          { kind: 'select', key: 'metricIndex', label: 'Which measured result to feature', options: [{ value: '', label: 'None' }, ...[0, 1, 2, 3, 4, 5].map((n) => ({ value: String(n), label: `Result number ${n + 1} in the list above` }))], help: 'Only a result you have entered above can be featured.' },
+          { kind: 'text', key: 'headline', label: 'Headline (blank uses the result name)' },
+        ] },
       ] },
       { kind: 'group', label: 'My contribution and lessons', key: 'caseStudy', open: false, fields: [
         { kind: 'strings', key: 'contribution.personal', label: 'What I delivered personally' }, { kind: 'strings', key: 'contribution.team', label: 'What the wider team delivered' },
@@ -177,7 +188,7 @@ export const ENTITIES: Record<string, EntityDef> = {
     fields: [
       { kind: 'text', key: 'name', label: 'Name' }, { kind: 'text', key: 'title', label: 'Job title' }, { kind: 'text', key: 'company', label: 'Company' },
       { kind: 'textarea', key: 'quote', label: 'Testimonial', rows: 5 }, { kind: 'text', key: 'relationship', label: 'How you worked together' },
-      { kind: 'image', key: 'photo', label: 'Photo (optional)' }, { kind: 'number', key: 'order', label: 'Display order', nullable: true },
+      { kind: 'image', key: 'photo', label: 'Photo (optional)' }, { kind: 'file', key: 'video', label: 'Video recommendation (optional)', accept: 'video', help: 'Plays only when the visitor presses play. You can also paste a YouTube or Vimeo link in the page by using a link instead of a file.' }, { kind: 'number', key: 'order', label: 'Display order', nullable: true },
       { kind: 'bool', key: 'approved', label: 'I have permission to publish this' },
     ],
   },
@@ -405,7 +416,7 @@ export const PAGES: Record<string, PageForm> = {
     blocks: [{ base: 'portfolio.profile.social', fields: ['linkedin', 'instagram', 'tiktok', 'facebook', 'youtube', 'pinterest', 'website'].map((k) => ({ kind: 'url' as const, key: k, label: k[0].toUpperCase() + k.slice(1), placeholder: 'https://' })) }],
   },
   contact: {
-    title: 'Contact', intro: 'How visitors reach you, and what you are open to. The form opens their email app or WhatsApp with a drafted message; nothing is sent to a server.',
+    title: 'Contact', intro: 'How visitors reach you, and what you are open to. Choose below whether the form sends to your inbox on this server or drafts an email or WhatsApp message.',
     blocks: [
       { title: 'Contact details', base: 'portfolio.profile', fields: [{ kind: 'email', key: 'email', label: 'Email' }, { kind: 'tel', key: 'whatsapp', label: 'WhatsApp number (international format)' }, { kind: 'tel', key: 'phone', label: 'Phone' }] },
       { title: 'Recruitment and availability', base: 'portfolio.contact', fields: [
@@ -414,6 +425,8 @@ export const PAGES: Record<string, PageForm> = {
         { kind: 'strings', key: 'enquiryTypes', label: 'Enquiry types in the form' },
         { kind: 'select', key: 'recruiterType', label: 'Which type reveals the recruiter questions (company and role)', options: (c: SiteContent) => c.portfolio.contact.enquiryTypes },
         { kind: 'textarea', key: 'whatsappGreeting', label: 'Opening line for the WhatsApp button' },
+        { kind: 'select', key: 'delivery', label: 'How the contact form works', options: [{ value: 'client', label: 'Open the visitor email app or WhatsApp (nothing stored here)' }, { value: 'both', label: 'Send to my inbox here, or open email or WhatsApp' }, { value: 'server', label: 'Send to my inbox here (falls back to email if sending fails)' }], help: 'Messages sent here appear under Inbox. Email alerts need SMTP settings on the server.' },
+        { kind: 'text', key: 'successMessage', label: 'Message shown after sending' },
         { kind: 'bool', key: 'showBudget', label: 'Show the budget question for client enquiries' },
         { kind: 'list', key: 'budgetRanges', label: 'Budget ranges', item: (b: any) => `${b.min} to ${b.max ?? 'and above'}`, make: () => ({ min: 0, max: null }), fields: [{ kind: 'number', key: 'min', label: 'From', nullable: false }, { kind: 'number', key: 'max', label: 'To (empty means no upper limit)' }] },
       ] },
