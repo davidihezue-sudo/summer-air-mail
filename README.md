@@ -43,6 +43,7 @@ Other commands:
 | Command | What it does |
 | --- | --- |
 | `npm run dev:all` | API server (port 8787) and Vite dev server (port 5173) together |
+| `npm run dev:phone` | Same as `dev:all`, but also reachable from your phone on the same Wi-Fi (prints the addresses to open) |
 | `npm run dev` | Vite only. The site works with the built-in starter content; the admin needs the API server |
 | `npm run dev:server` | API server only, restarting on changes |
 | `npm run build` | Type-check and build the production site into `dist/` |
@@ -56,6 +57,8 @@ Other commands:
 | `npm run admin:hash` | Prints `ADMIN_USERNAME` and `ADMIN_PASSWORD_HASH` for hosts without a disk |
 
 Browser checks use the Chromium that Playwright installed. Point them at it with `CHROME=/path/to/chromium npm run smoke`.
+
+**On your phone.** Run `npm run dev:phone`, then open the address it prints (for example `http://192.168.1.20:5173`, and `/admin` after it) in your phone's browser. The phone must be on the same Wi-Fi. If Windows asks about the firewall, allow Node.js on private networks. Sign in to the admin with the same username and password.
 
 To preview every section with clearly labelled sample data while developing, open `http://localhost:5173/?sample=1`. Sample data exists only in the dev server and is never part of a production build.
 

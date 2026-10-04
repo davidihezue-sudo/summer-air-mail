@@ -20,7 +20,8 @@
     "admin:hash": "node scripts/admin-setup.mjs --hash",
     "smoke:admin": "node scripts/smoke-admin.mjs",
     "a11y": "node scripts/a11y.mjs",
-    "check": "npm run typecheck && npm run lint && npm test && npm run build"
+    "check": "npm run typecheck && npm run lint && npm test && npm run build",
+    "dev:phone": "node scripts/dev-all.mjs --host"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
