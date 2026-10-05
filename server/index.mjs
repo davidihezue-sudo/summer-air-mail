@@ -19,6 +19,7 @@ import { createBackups, backupStream } from './backup.mjs'
 import { createLimiter, parseContact } from './routes.mjs'
 import { s3FromEnv } from './s3.mjs'
 import { restoreBackup } from './restore.mjs'
+import { buildDigest, digestDue, localParts } from './digest.mjs'
 import { buildCsp, buildManifest, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
 
 function parseCookies(header = '') {
@@ -70,6 +71,19 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     void insights.prune(getPublished()?.content?.portfolio?.insights?.retentionDays ?? 365)
   }, 6 * 3600 * 1000)
   pruneTimer.unref?.()
+
+  /** The weekly summary. Checked every 15 minutes; sent once in the chosen week, only when it actually reached email or the webhook. */
+  async function sendDigest({ force = false } = {}) {
+    const st = settings.get()
+    const now = new Date()
+    if (!force && !digestDue(st.digest, now)) return null
+    const { subject, text } = buildDigest({ insights, enquiries, content: getPublished()?.content, now })
+    const delivered = await mailer.notify({ to: st.notifyEmail, subject, text })
+    if (!force && (delivered.email || delivered.webhook)) await settings.markDigestSent(localParts(now, st.digest.timezone).date)
+    return { delivered, subject, text }
+  }
+  const digestTimer = setInterval(() => { void sendDigest().catch((e) => console.error('Weekly summary failed:', e.message)) }, 15 * 60 * 1000)
+  digestTimer.unref?.()
 
   const app = express()
   app.disable('x-powered-by')
@@ -357,9 +371,16 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   })
 
   /* ---------- inbox, subscribers, insights ---------- */
-  admin.get('/enquiries', (_req, res) => res.json({ items: enquiries.list(), unread: enquiries.unread() }))
+  admin.get('/enquiries', (_req, res) => res.json({ items: enquiries.list(), unread: enquiries.unread(), due: enquiries.due().length }))
   admin.get('/enquiries.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="enquiries.csv"').send(enquiries.csv()))
-  admin.patch('/enquiries/:id', async (req, res) => ((await enquiries.mark(req.params.id, req.body?.read)) ? res.json({ ok: true, unread: enquiries.unread() }) : res.status(404).json({ error: 'Not found.' })))
+  admin.patch('/enquiries/:id', async (req, res) => {
+    const b = req.body ?? {}
+    const patch = {}
+    for (const k of ['read', 'stage', 'notes', 'followUp']) if (k in b) patch[k] = b[k]
+    const r = await enquiries.update(req.params.id, patch)
+    if (!r.ok) return res.status(r.status).json({ error: r.error })
+    res.json({ ok: true, item: r.item, unread: enquiries.unread(), due: enquiries.due().length })
+  })
   admin.delete('/enquiries/:id', async (req, res) => ((await enquiries.remove(req.params.id)) ? res.json({ ok: true }) : res.status(404).json({ error: 'Not found.' })))
   admin.get('/subscribers', (_req, res) => res.json({ items: subscribers.list() }))
   admin.get('/subscribers.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="subscribers.csv"').send(subscribers.csv()))
@@ -401,6 +422,10 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     const next = await settings.set(req.body?.settings ?? {})
     backups.schedule()
     res.json({ settings: next, env: envInfo() })
+  })
+  admin.post('/settings/test-digest', ownerOnly, async (_req, res) => {
+    const r = await sendDigest({ force: true })
+    res.json({ delivered: r.delivered, subject: r.subject, text: r.text })
   })
   admin.post('/settings/test-alert', ownerOnly, async (_req, res) => {
     const r = await mailer.notify({ to: settings.get().notifyEmail, subject: 'Test alert from your portfolio', text: 'If you can read this, alerts are working.' })
@@ -523,7 +548,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     res.status(500).json({ error: 'Something went wrong.' })
   })
 
-  return { app, store, auth, media, dataDir, kv, enquiries, subscribers, insights, settings, backups, snapshots, close: async () => { backups.stop(); clearInterval(pruneTimer); await kv.close() } }
+  return { app, store, auth, media, dataDir, kv, enquiries, subscribers, insights, settings, backups, snapshots, sendDigest, close: async () => { backups.stop(); clearInterval(pruneTimer); clearInterval(digestTimer); await kv.close() } }
 }
 
 export async function start(env = process.env) {

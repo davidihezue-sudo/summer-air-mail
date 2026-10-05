@@ -26,23 +26,43 @@ const csvCell = (v) => { const s = String(v ?? ''); const safe = /^[=+\-@\t\r]/.
 export const toCsv = (rows, cols) => [cols.join(','), ...rows.map((r) => cols.map((c) => csvCell(r[c])).join(','))].join('\r\n') + '\r\n'
 
 /* ---------- enquiries ---------- */
+export const STAGES = ['new', 'replied', 'interview', 'won', 'closed']
+const OPEN_STAGES = new Set(['new', 'replied', 'interview'])
+const DATE = /^\d{4}-\d{2}-\d{2}$/
+const withPipeline = (x) => ({ ...x, stage: STAGES.includes(x.stage) ? x.stage : 'new', notes: String(x.notes ?? ''), followUp: DATE.test(String(x.followUp ?? '')) ? x.followUp : '' })
+
 export function createEnquiries(dir) {
   const f = jsonFile(dir, 'enquiries.json', { items: [] })
   return {
     init: f.init, flush: f.flush,
     async add(fields) {
-      const item = { id: id(), at: new Date().toISOString(), read: false, ...fields }
+      const item = { id: id(), at: new Date().toISOString(), read: false, stage: 'new', notes: '', followUp: '', ...fields }
       f.get().items.unshift(item)
       f.get().items = f.get().items.slice(0, 5000)
       await f.save()
       return item
     },
-    list: () => f.get().items,
+    list: () => f.get().items.map(withPipeline),
     unread: () => f.get().items.filter((x) => !x.read).length,
+    /** Messages that still need an answer and have a follow-up date that has arrived. */
+    due: (today = new Date().toISOString().slice(0, 10)) => f.get().items.map(withPipeline).filter((x) => OPEN_STAGES.has(x.stage) && x.followUp && x.followUp <= today),
     async mark(idv, read) { const x = f.get().items.find((i) => i.id === idv); if (!x) return false; x.read = !!read; await f.save(); return true },
+    /** Change the stage, the private notes or the follow-up date. Anything invalid is refused, never half applied. */
+    async update(idv, patch) {
+      const x = f.get().items.find((i) => i.id === idv)
+      if (!x) return { ok: false, status: 404, error: 'Not found.' }
+      if ('stage' in patch && !STAGES.includes(patch.stage)) return { ok: false, status: 400, error: 'That is not a stage.' }
+      if ('followUp' in patch && patch.followUp !== '' && !DATE.test(String(patch.followUp))) return { ok: false, status: 400, error: 'The follow-up must be a date.' }
+      if ('stage' in patch) x.stage = patch.stage
+      if ('notes' in patch) x.notes = String(patch.notes ?? '').slice(0, 4000)
+      if ('followUp' in patch) x.followUp = patch.followUp
+      if ('read' in patch) x.read = !!patch.read
+      await f.save()
+      return { ok: true, item: withPipeline(x) }
+    },
     async remove(idv) { const n = f.get().items.length; f.get().items = f.get().items.filter((i) => i.id !== idv); await f.save(); return f.get().items.length < n },
     async prune(days) { if (!days) return 0; const cut = Date.now() - days * 864e5; const n = f.get().items.length; f.get().items = f.get().items.filter((i) => Date.parse(i.at) >= cut); if (f.get().items.length < n) await f.save(); return n - f.get().items.length },
-    csv: () => toCsv(f.get().items, ['at', 'name', 'email', 'type', 'budget', 'company', 'message', 'read']),
+    csv: () => toCsv(f.get().items.map(withPipeline), ['at', 'name', 'email', 'type', 'budget', 'company', 'message', 'read', 'stage', 'followUp', 'notes']),
   }
 }
 
@@ -146,12 +166,13 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
     },
     days: () => f.get().days,
     summary(range = 30, now = new Date()) {
-      const out = { views: 0, visitors: 0, series: [], paths: {}, refs: {}, events: {}, items: {}, own: { views: 0, visitors: 0, daysSeen: 0, series: [], paths: {} }, homeNetworks: Object.keys(f.get().home).length }
+      const out = { views: 0, visitors: 0, series: [], paths: {}, pathLast: {}, refs: {}, events: {}, items: {}, own: { views: 0, visitors: 0, daysSeen: 0, series: [], paths: {} }, homeNetworks: Object.keys(f.get().home).length }
       for (let i = range - 1; i >= 0; i--) {
         const d = day(new Date(now.getTime() - i * 864e5))
         const r = f.get().days[d]
         out.series.push({ day: d, views: r?.views ?? 0, visitors: r?.visitors ?? 0 })
         out.own.series.push({ day: d, views: r?.own?.views ?? 0, visitors: r?.own?.visitors ?? 0 })
+        for (const k of Object.keys(r?.paths ?? {})) out.pathLast[k] = d // the days run oldest to newest, so the last write is the latest day
         if (r?.own) {
           out.own.views += r.own.views; out.own.visitors += r.own.visitors
           if (r.own.views) out.own.daysSeen++
@@ -207,7 +228,10 @@ export const DEFAULT_SETTINGS = {
   notifyEmail: '', notifyOnEnquiry: true, notifyOnSubscriber: false, enquiryRetentionDays: 0,
   editorsCanPublish: false,
   backups: { enabled: true, everyHours: 24, keep: 7, s3: false },
+  digest: { enabled: false, day: 1, hour: 8, timezone: 'UTC', lastSent: '' },
 }
+function validZone(z) { try { new Intl.DateTimeFormat('en', { timeZone: String(z) }); return !!z } catch { return false } }
+
 export function createSettings(dir) {
   const f = jsonFile(dir, 'settings.json', structuredClone(DEFAULT_SETTINGS))
   const clean = (s) => ({
@@ -221,10 +245,19 @@ export function createSettings(dir) {
       keep: Math.max(1, Math.min(60, Math.round(Number(s.backups?.keep) || 7))),
       s3: !!s.backups?.s3,
     },
+    digest: {
+      enabled: !!s.digest?.enabled,
+      day: Math.max(0, Math.min(6, Math.round(Number(s.digest?.day ?? 1)))),
+      hour: Math.max(0, Math.min(23, Math.round(Number(s.digest?.hour ?? 8)))),
+      timezone: validZone(s.digest?.timezone) ? String(s.digest.timezone) : 'UTC',
+      lastSent: /^\d{4}-\d{2}-\d{2}$/.test(String(s.digest?.lastSent ?? '')) ? s.digest.lastSent : '',
+    },
   })
   return {
     init: f.init, flush: f.flush,
     get: () => clean(f.get()),
-    async set(next) { Object.assign(f.get(), clean({ ...f.get(), ...next, backups: { ...f.get().backups, ...(next.backups ?? {}) } })); await f.save(); return clean(f.get()) },
+    async set(next) { Object.assign(f.get(), clean({ ...f.get(), ...next, backups: { ...f.get().backups, ...(next.backups ?? {}) }, digest: { ...f.get().digest, ...(next.digest ?? {}), lastSent: f.get().digest?.lastSent ?? '' } })); await f.save(); return clean(f.get()) },
+    /** Remember the week a summary went out (a date inside it), so it is sent once. Not editable from the admin. */
+    async markDigestSent(day) { f.get().digest = { ...(f.get().digest ?? {}), lastSent: day }; await f.save() },
   }
 }

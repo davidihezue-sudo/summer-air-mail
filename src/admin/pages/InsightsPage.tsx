@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { api, type InsightsSummary } from '../api'
 import { useAdmin } from '../store'
-import { Card, PageHead } from '../ui'
+import { Badge, Card, PageHead } from '../ui'
 import { Fields } from '../fields'
 import { INSIGHT_FIELDS, STATS_FIELDS } from '../schemaExtra'
 
@@ -23,6 +23,27 @@ function Bars({ title, data }: { title: string; data: [string, number][] }) {
       {data.length === 0 ? <p className="ahelp">Nothing yet.</p> : (
         <ul className="abars">{data.map(([k, v]) => <li key={k}><span className="abars__k">{k}</span><span className="abars__bar" style={{ width: `${(v / max) * 100}%` }} /><span className="abars__v">{v}</span></li>)}</ul>
       )}
+    </Card>
+  )
+}
+
+/** Who opened the tailored link you sent them, and when. Your own previews are counted under "You and home", not here. */
+function ApplicationLinks({ data }: { data: InsightsSummary }) {
+  const { content } = useAdmin()
+  const apps = content.applications
+  if (!apps.length) return null
+  const rows = apps.map((a) => ({ a, views: data.paths[`/for/${a.slug}`] ?? 0, last: data.pathLast?.[`/for/${a.slug}`] ?? '' })).sort((x, y) => y.views - x.views || x.a.slug.localeCompare(y.a.slug))
+  return (
+    <Card title="Application links">
+      <ul className="arows">
+        {rows.map(({ a, views, last }) => (
+          <li key={a.id} className="arow-item">
+            <span className="arow-item__main"><span className="arow-item__text"><strong>{a.company || a.label || a.slug}</strong><span className="ahelp">/for/{a.slug}{a.enabled === false ? ' · switched off' : ''}</span></span></span>
+            <span className="arow-item__badges">{views > 0 ? <Badge tone="good">Opened {views} time{views === 1 ? '' : 's'}{last ? `, last on ${last}` : ''}</Badge> : <Badge>Not opened yet</Badge>}</span>
+          </li>
+        ))}
+      </ul>
+      <p className="ahelp">Counted once per page view in the period above, with no cookies. A link opened by the same person several times counts each time, and your own previews are not included. Which projects someone looked at is not tracked per person.</p>
     </Card>
   )
 }
@@ -66,7 +87,8 @@ export function InsightsPage() {
           </>
         )}
       </Card>
- {data && (
+ {data && <ApplicationLinks data={data} />}
+      {data && (
         <>
           <Bars title="Pages" data={top(data.paths)} />
           <Bars title="Where visitors came from" data={top(data.refs)} />

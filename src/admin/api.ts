@@ -39,15 +39,16 @@ export interface Status {
 }
 
 export interface Me { username: string; role: 'owner' | 'editor' | 'viewer' | ''; canPublish: boolean; storage: 'file' | 'postgres' }
-export interface Enquiry { id: string; at: string; read: boolean; name: string; email: string; type: string; budget: string; company: string; message: string }
+import type { Stage } from './pipeline'
+export interface Enquiry { id: string; at: string; read: boolean; name: string; email: string; type: string; budget: string; company: string; message: string; stage: Stage; notes: string; followUp: string }
 export interface Subscriber { id: string; at: string; email: string; consent: string }
 export interface InsightsSummary {
-  views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>>
+  views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; pathLast: Record<string, string>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>>
   /** Visits by the owner: a signed-in browser, or the home network. Kept apart from everyone else. */
   own: { views: number; visitors: number; daysSeen: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number> }
   homeNetworks: number
 }
-export interface ServerSettings { notifyEmail: string; notifyOnEnquiry: boolean; notifyOnSubscriber: boolean; enquiryRetentionDays: number; editorsCanPublish: boolean; backups: { enabled: boolean; everyHours: number; keep: number; s3: boolean } }
+export interface ServerSettings { notifyEmail: string; notifyOnEnquiry: boolean; notifyOnSubscriber: boolean; enquiryRetentionDays: number; editorsCanPublish: boolean; backups: { enabled: boolean; everyHours: number; keep: number; s3: boolean }; digest: { enabled: boolean; day: number; hour: number; timezone: string; lastSent: string } }
 export interface EnvInfo { dataDir?: string; emailConfigured: boolean; webhookConfigured: boolean; s3Configured: boolean; storage: string }
 export interface UserRow { username: string; role: 'owner' | 'editor' | 'viewer'; managedByEnv: boolean }
 export interface BackupStatus { at: string | null; ok: boolean | null; file: string; uploaded: boolean; error: string; s3Configured: boolean }
@@ -97,7 +98,8 @@ export const api = {
   updateMedia: (id: string, patch: Partial<Pick<MediaAsset, 'alt' | 'caption' | 'tags' | 'projectIds'>>) =>
     request<{ asset: MediaAsset }>(`/media/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   deleteMedia: (id: string) => request<{ ok: true }>(`/media/${id}`, { method: 'DELETE' }),
-  enquiries: () => request<{ items: Enquiry[]; unread: number }>('/enquiries'),
+  enquiries: () => request<{ items: Enquiry[]; unread: number; due: number }>('/enquiries'),
+  updateEnquiry: (id: string, patch: Partial<Pick<Enquiry, 'read' | 'stage' | 'notes' | 'followUp'>>) => request<{ ok: true; item: Enquiry; unread: number; due: number }>(`/enquiries/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   markEnquiry: (id: string, read: boolean) => request<{ ok: true; unread: number }>(`/enquiries/${id}`, { method: 'PATCH', body: JSON.stringify({ read }) }),
   deleteEnquiry: (id: string) => request<{ ok: true }>(`/enquiries/${id}`, { method: 'DELETE' }),
   subscribers: () => request<{ items: Subscriber[] }>('/subscribers'),
@@ -108,6 +110,7 @@ export const api = {
   restoreItem: (collection: string, id: string, index: number) => request<{ draft: SiteContent; rev: number } & Status>(`/history/item/${collection}/${id}/restore`, { method: 'POST', body: JSON.stringify({ index }) }),
   settings: () => request<{ settings: ServerSettings; env: EnvInfo }>('/settings'),
   saveSettings: (settings: Partial<ServerSettings>) => request<{ settings: ServerSettings; env: EnvInfo }>('/settings', { method: 'PUT', body: JSON.stringify({ settings }) }),
+  testDigest: () => request<{ delivered: { email: boolean; webhook: boolean }; subject: string; text: string }>('/settings/test-digest', { method: 'POST', body: '{}' }),
   testAlert: () => request<{ email: boolean; webhook: boolean }>('/settings/test-alert', { method: 'POST', body: '{}' }),
   users: () => request<{ users: UserRow[] }>('/users'),
   addUser: (username: string, password: string, role: string) => request<{ users: UserRow[] }>('/users', { method: 'POST', body: JSON.stringify({ username, password, role }) }),

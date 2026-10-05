@@ -11,6 +11,7 @@ export function ServerPage() {
   const [backups, setBackups] = useState<{ name: string; size: number }[]>([])
   const [bs, setBs] = useState<BackupStatus | null>(null)
   const [msg, setMsg] = useState('')
+  const [preview, setPreview] = useState('')
   const [busy, setBusy] = useState(false)
   const restoreInput = useRef<HTMLInputElement>(null)
   const [pending, setPending] = useState<File | null>(null)
@@ -43,6 +44,21 @@ export function ServerPage() {
           <p className="ahelp">Email sending: {env.emailConfigured ? <Badge tone="good">SMTP configured</Badge> : <Badge tone="warn">Not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS)</Badge>} · Webhook (Slack, Discord, Zapier): {env.webhookConfigured ? <Badge tone="good">Configured</Badge> : <Badge tone="neutral">Not set (ALERT_WEBHOOK_URL)</Badge>}</p>
           <button type="button" className="abtn" onClick={async () => { const r = await api.testAlert(); setMsg(`Test sent. Email: ${r.email ? 'delivered to the mail server' : 'not sent'}. Webhook: ${r.webhook ? 'delivered' : 'not sent'}.`) }}>Send a test alert</button>
           <label className="afield"><span className="alabel">Delete messages older than (days, 0 keeps them)</span><input type="number" min={0} max={3650} value={s.enquiryRetentionDays} onChange={(e) => setS({ ...s, enquiryRetentionDays: Number(e.target.value) })} onBlur={() => void save({ enquiryRetentionDays: s.enquiryRetentionDays })} /></label>
+        </div>
+      </Card>
+      <Card title="Weekly summary">
+        <div className="aform">
+          <Switch checked={s.digest.enabled} onChange={(v) => void save({ digest: { ...s.digest, enabled: v } })} label="Email me a summary every week" help="Visitors compared with the week before, what was read, which application links were opened, new messages and who you are due to chase. Sent to the alert address above." />
+          <label className="afield"><span className="alabel">Day</span>
+            <select value={s.digest.day} onChange={(e) => void save({ digest: { ...s.digest, day: Number(e.target.value) } })}>{['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map((d, i) => <option key={d} value={i}>{d}</option>)}</select>
+          </label>
+          <label className="afield"><span className="alabel">From this hour</span>
+            <select value={s.digest.hour} onChange={(e) => void save({ digest: { ...s.digest, hour: Number(e.target.value) } })}>{Array.from({ length: 24 }, (_, h) => <option key={h} value={h}>{String(h).padStart(2, '0')}:00</option>)}</select>
+          </label>
+          <label className="afield"><span className="alabel">Time zone</span><input value={s.digest.timezone} onChange={(e) => setS({ ...s, digest: { ...s.digest, timezone: e.target.value } })} onBlur={() => void save({ digest: s.digest })} placeholder="America/Toronto" /><span className="ahelp">A name like America/Toronto or Europe/London. Anything else is treated as UTC.</span></label>
+          <p className="ahelp">Needs email set up: {env.emailConfigured ? <Badge tone="good">SMTP configured</Badge> : <Badge tone="warn">Not configured (set SMTP_HOST, SMTP_USER, SMTP_PASS)</Badge>} It is sent once a week, from the chosen hour on the chosen day, only when it actually reaches your email or webhook.</p>
+          <button type="button" className="abtn" onClick={async () => { try { const r = await api.testDigest(); setMsg(`Sent now. Email: ${r.delivered.email ? 'delivered to the mail server' : 'not sent'}. Webhook: ${r.delivered.webhook ? 'delivered' : 'not sent'}.`); setPreview(r.text) } catch (e) { setMsg((e as Error).message) } }}>Send me a summary now</button>
+          {preview && <pre className="apreview" tabIndex={0}>{preview}</pre>}
         </div>
       </Card>
       <Card title="Team">
