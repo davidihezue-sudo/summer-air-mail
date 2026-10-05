@@ -69,13 +69,15 @@ function Row({ tool }: { tool: Tool }) {
   )
 }
 
-/** In the scrolling strip, logos on and names off means just the logo: no pill around it. */
+/** True when the scrolling strip shows only the logos, in their own colours: no name, no pill, no tile. */
+const logosOnly = (ui: { layout: string; marquee?: string; showLogos: boolean }) => ui.layout === 'marquee' && ui.marquee !== 'chips' && ui.showLogos
+
 function Chip({ tool, hidden }: { tool: Tool; hidden?: boolean }) {
   const { ui, mono } = useUi()
-  if (ui.showLogos && !ui.showNames) {
+  if (logosOnly(ui)) {
     return (
       <li className="toolchip toolchip--icon" style={accent(tool)} aria-hidden={hidden || undefined} title={tool.name}>
-        <ToolLogo tool={tool} size={ui.logoSize} mono={mono} />
+        <ToolLogo tool={tool} size={ui.logoSize} />
         <span className="sr-only">{tool.name}</span>
       </li>
     )
@@ -138,7 +140,7 @@ export function Tools({ config }: { config: SectionConfig }) {
   }
 
   return (
-    <Section config={config} tone="var(--c-sea-deep)" dark eyebrow="Tools and platforms" title={copy.toolsTitle} intro={intro} className={`tools tools--${ui.layout} tools--tile-${ui.tile}${logoPx ? ' tools--px' : ''}`}>
+    <Section config={config} tone="var(--c-sea-deep)" dark eyebrow="Tools and platforms" title={copy.toolsTitle} intro={intro} className={`tools tools--${ui.layout} tools--tile-${ui.tile}${logoPx ? ' tools--px' : ''}${logosOnly(ui) ? ` tools--strip-logos${ui.logosBand ? ' tools--band' : ''}` : ''}`}>
       {useTabs && (
         <div className="filters toolfilters" role="group" aria-label="Filter tools by category">
           <button type="button" className="chip" aria-pressed={!cat} onClick={() => setCat('')}>All <span className="toolfilters__n">{all.length}</span></button>

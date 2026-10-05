@@ -304,6 +304,10 @@ export interface Tool {
 export interface ToolsUi {
   /** cards: logo, name, category and how it is used. wall: logos only. list: tidy rows. compact: small chips. marquee: a slow scrolling strip. rings: the original flip rings. */
   layout: 'cards' | 'wall' | 'list' | 'compact' | 'marquee' | 'rings'
+  /** Scrolling strip only. logos: the true logos in their own colours, nothing else. chips: each logo with its name in a pill. */
+  marquee: 'logos' | 'chips'
+  /** Scrolling strip of logos only: show them on one light band so every colour, black included, reads clearly. Off puts them on the section itself. */
+  logosBand: boolean
   showLogos: boolean
   showNames: boolean
   showUsage: boolean

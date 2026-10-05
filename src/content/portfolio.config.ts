@@ -116,7 +116,7 @@ export const portfolio: Portfolio = {
   },
   extras: { backToTop: true, availabilityBadge: true, projectNav: true, copyEmail: true, clientStrip: false, readingTime: true },
   media: { cardFit: 'smart', fill: 'blur', cardShape: 'auto', screenshots: 'masonry', screenshotSize: 'large' },
-  toolsUi: { layout: 'cards', showLogos: true, showNames: true, showUsage: true, showCategory: true, logoSize: 'md', logoPx: 0, logoStyle: 'color', tile: 'white', tabs: true, group: true, glow: true },
+  toolsUi: { layout: 'cards', marquee: 'logos', logosBand: true, showLogos: true, showNames: true, showUsage: true, showCategory: true, logoSize: 'md', logoPx: 0, logoStyle: 'color', tile: 'white', tabs: true, group: true, glow: true },
   cursor: {
     enabled: true, style: 'bubbles', size: 28, color: '', opacity: 0.85, smoothing: 0.35, trail: 20,
     blend: 'normal', scope: 'page', hideNativeCursor: false, growOnLinks: true, emoji: '', image: null,

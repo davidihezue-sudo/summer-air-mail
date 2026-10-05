@@ -210,3 +210,15 @@ describe('insights: outside visitors and home', () => {
     done()
   })
 })
+
+describe('tools strip', () => {
+  it('defaults to true logos only, and the admin offers both styles', async () => {
+    const { portfolio } = await import('../src/content/portfolio.config')
+    expect(portfolio.toolsUi).toMatchObject({ marquee: 'logos', logosBand: true })
+    const { PAGES } = await import('../src/admin/schema')
+    await import('../src/admin/schemaExtra')
+    const fields = PAGES.toolsDisplay.blocks.flatMap((b) => b.fields) as { key?: string; options?: { value: string }[] }[]
+    expect(fields.find((f) => f.key === 'marquee')?.options?.map((o) => o.value)).toEqual(['logos', 'chips'])
+    expect(fields.some((f) => f.key === 'logosBand')).toBe(true)
+  })
+})

@@ -130,11 +130,16 @@ Object.assign(PAGES, {
           { value: 'marquee', label: 'Scrolling strip: logos drift past slowly' },
           { value: 'rings', label: 'Rings: flip to read (the original look)' },
         ] },
+        { kind: 'select', key: 'marquee', label: 'Scrolling strip style', showIf: (u: any) => u.layout === 'marquee', options: [
+          { value: 'logos', label: 'True logos only: their real colours, no name, no pill, no tile' },
+          { value: 'chips', label: 'Logo with its name in a pill' },
+        ] },
+        { kind: 'bool', key: 'logosBand', label: 'Show the logos on a light band', showIf: (u: any) => u.layout === 'marquee' && u.marquee !== 'chips', help: 'One plain light strip behind the whole row, so every colour (black logos too) reads clearly. Off puts the logos straight on the dark section and any black logo is drawn in white.' },
         { kind: 'bool', key: 'tabs', label: 'Category tabs with counts', help: 'Visitors pick a category. Off shows everything, grouped or in one list.' },
         { kind: 'bool', key: 'group', label: 'Group by category when there are no tabs' },
       ] },
       { title: 'What shows', base: 'portfolio.toolsUi', fields: [
-        { kind: 'bool', key: 'showLogos', label: 'Logos' }, { kind: 'bool', key: 'showNames', label: 'Names with the logos', help: 'Turn this off with Logos on and the scrolling strip shows just the logos, with no pill around them.' },
+        { kind: 'bool', key: 'showLogos', label: 'Logos' }, { kind: 'bool', key: 'showNames', label: 'Names with the logos', help: 'Not used by the scrolling strip when it is set to true logos only.' },
         { kind: 'bool', key: 'showUsage', label: 'How I use each tool (the description)' }, { kind: 'bool', key: 'showCategory', label: 'Category on each card' },
       ] },
       { title: 'Look', base: 'portfolio.toolsUi', fields: [
