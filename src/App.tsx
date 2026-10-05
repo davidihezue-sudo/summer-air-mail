@@ -13,6 +13,7 @@ import { ClientStrip } from './components/layout/ClientStrip'
 import { useT } from './i18n/useT'
 import { Decor } from './components/layout/Decor'
 import { Festive } from './components/layout/Festive'
+import { SearchLauncher } from './components/search/SearchLauncher'
 import { Hero } from './components/hero/Hero'
 import { Footer } from './components/footer/Footer'
 import { ViewerProvider } from './components/projects/Viewer'
@@ -66,6 +67,7 @@ export default function App() {
       <Header />
       <Decor />
       <Festive />
+      <SearchLauncher />
       <main id="main">
         {sections.map(({ config, visible }) => {
           if (!visible) return null

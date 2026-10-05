@@ -4,7 +4,7 @@ import { unzipSync } from 'fflate'
 import { mkdir, writeFile } from 'node:fs/promises'
 import { join } from 'node:path'
 
-export const RESTORE_FILES = ['content.json', 'settings.json', 'enquiries.json', 'subscribers.json', 'insights.json', 'snapshots.json', 'media.json']
+export const RESTORE_FILES = ['content.json', 'settings.json', 'enquiries.json', 'endorsements.json', 'subscribers.json', 'insights.json', 'snapshots.json', 'media.json']
 const SAFE_UPLOAD = /^uploads\/[A-Za-z0-9][A-Za-z0-9._-]{0,200}$/
 
 /** Only these names are read out of the zip, so a crafted archive cannot write anywhere else. */

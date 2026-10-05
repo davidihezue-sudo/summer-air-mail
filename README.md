@@ -185,6 +185,19 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 
 | Feature | Where to find it | What it does |
 | --- | --- | --- |
+| Faster loading | Automatic | The home page loads only what is on screen. Sections and pages load as they are reached, the animation library loads in pieces, and React sits in its own cached file, so the first load is about a third of its old size. |
+| Interactive results | Analytics & Results > Results Display | Visitors can switch between cards, a compare chart and a sortable table, and download the numbers as CSV. Each switch is optional and defaults are yours to set. |
+| Flow diagrams, queries, dashboards, metric trees | Projects > a project > add a block | Click through a CRM or automation flow with branches, show the SQL or code behind a number with highlighting and a copy button, embed a live report, and draw a metric tree. Dashboards open only after a visitor clicks, and only from Looker Studio, Power BI, Tableau Public, Metabase, Grafana or Google Sheets. |
+| This site, in numbers | Visit Insights > Show some of this publicly, then Sections & Visibility | A section with real visit counts for the last 7 to 90 days. Off by default. It never includes your own visits, application links or the admin. |
+| Enquiry pipeline | Inbox | Messages move across New, Replied, Interview, Won and Closed, with notes and a follow-up date. Follow-ups that are due are flagged. |
+| Weekly summary email | Server & Backups > Weekly summary | A short email with visits, messages and follow-ups due, on the day and hour you choose, in your time zone. Needs SMTP. It is marked sent only once it has actually been delivered. |
+| Application link views | Visit Insights > Application links | How many times each private `/for/<code>` link was opened and when it was last opened. Your own previews are not counted. |
+| Business card | Identity > Contact > Business card page, then `/card` | A page for events with a QR code to your site and an Add to contacts button (vCard). Built only from your profile. |
+| Visitor search | Look and layout > Extras, magnifier in the header or Ctrl+K | Finds your projects, notes, tools and sections. Arrow keys and Enter, Esc to close. |
+| Reel hover preview | Look and layout > Extras | Videos in the content wall play a short preview on hover. |
+| Recommendations | Testimonials > Recommendations from visitors | A form visitors can use to send a recommendation. It is held in the Inbox under Recommendations until you approve it, and only then shown. Needs nothing; SMTP only adds an alert. |
+| Case study PDF | Look and layout > Extras | A Save as PDF button on each case study, using the browser's print dialog and print layout. |
+| Share preview cards | Automatic, `/og/...png` | Every project, note and your home page gets a generated preview image in your own fonts and colours, using the project's picture when it has one. Hidden and draft items never get one. Needs the public website address. |
 | Tools with logos | Capabilities > Tools & Platforms, Tools Display | Every tool you switch on shows its logo, name, category and how you use it, with no clicking. Well known tools get their logo automatically; otherwise upload one, paste a link, or choose a built-in mark. Cards, compact chips or the original flip rings; sizes, brand or single colour, grouping. Logos also show in the admin list where you switch tools on and off. |
 | Admin search | Top bar of the admin (press `/` or Ctrl+K) | Start typing and matches appear: pages, individual settings, and the things you wrote (projects, tools, notes...). It understands everyday words ("dark mode", "logo", "backup", "password"). Pick with the arrow keys and Enter; for a setting it opens the page, scrolls to the setting and highlights it. |
 | Toolkit redesign | Capabilities > Tools Display | Six layouts: cards, logo wall (logos only, names on hover or shown), list (logo with description beside it), compact, a slow scrolling strip, and the original rings. Category tabs with counts, logo size (small, medium, large or an exact size in pixels) and tile (white, frosted or none), brand or single colour logos, hover glow in each brand's colour. The scrolling strip has a **true logos only** style (the default): each logo in its own real colours, with no name, no pill and no tile, optionally on one light band behind the whole row so every colour reads clearly (off puts them straight on the section, with black logos drawn in white). Choose **Logo with its name in a pill** for the old look. Official marks for ChatGPT, Canva, Adobe, LinkedIn, Slack, CapCut, Midjourney and more are built in; a tool with no built-in mark gets a plain letter tile until you upload its logo. |
@@ -327,6 +340,9 @@ Everything below is optional unless marked, and none of it can be done from insi
 | Social profile addresses | Each platform (Admin > Social Links) | The social icons |
 | Logos for tools with no built-in mark | The tool's brand page (upload in Tools & Platforms) | Sprout Social, Later, Klaviyo and similar show a letter tile until you add the real logo |
 | Visit Insights switched on | Admin > Visit Insights > Settings, then Publish | Counting visits (off by default). Sign in once from home so your home network is recognised |
+| SMTP, for the weekly summary and recommendation alerts | Same SMTP settings as above | Without it the weekly summary is never sent (the Send test button tells you why) |
+| Public website address, for share preview cards and the business card QR code | Admin > SEO | Cards need a real address to point at. Without it the QR code falls back to the address you opened the page from |
+| Dashboard hosts | Looker Studio, Power BI, Tableau Public, Metabase, Grafana, Google Sheets | Live dashboard blocks. The report itself must be shared as "anyone with the link can view". Other hosts are refused on purpose |
 
 ## Deploying
 

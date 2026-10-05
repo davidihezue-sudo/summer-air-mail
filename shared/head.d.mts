@@ -6,6 +6,7 @@ export function injectHead(html: string, p: any): string
 export function buildRobots(p: any): string
 export function buildSitemap(p: any): string
 export function buildCsp(p: any): string
+export function ogCardUrl(p: any, key: string): string
 export const DASHBOARD_HOSTS: string[]
 export function dashboardEmbedUrl(url: unknown): string
 export function buildFeed(content: unknown): string

@@ -75,7 +75,9 @@ describe('pure helpers', () => {
     expect(feed).not.toContain('Draft')
     expect(pageSeo(c, '/notes/hello')).toMatchObject({ canonical: 'https://example.com/notes/hello' })
     expect(pageSeo(c, '/notes/draft')).toEqual({ missing: true })
-    expect(pageSeo(c, '/work/p1')).toMatchObject({ image: '/uploads/a.webp' })
+    expect(pageSeo(c, '/work/p1')).toMatchObject({ image: 'https://example.com/og/work-p1.png' }) // the automatic card, which carries the project picture
+    c.projects[0].seo = { title: '', description: '', image: 'https://cdn.example.com/own.png' }
+    expect(pageSeo(c, '/work/p1')).toMatchObject({ image: 'https://cdn.example.com/own.png' }) // an image the owner chose wins
     expect(pageSeo(c, '/')).toBeNull()
   })
 })

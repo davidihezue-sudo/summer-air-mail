@@ -12,6 +12,12 @@ function baseUrl(p) {
   return String(p?.site?.url ?? '').replace(/\/$/, '')
 }
 
+/** The automatic share preview card for a page, when the site has a public address to serve it from. */
+export function ogCardUrl(p, key) {
+  const base = baseUrl(p)
+  return base ? `${base}/og/${encodeURIComponent(key)}.png` : ''
+}
+
 function absolute(p, path) {
   if (!path) return ''
   if (isHttp(path)) return path
@@ -32,7 +38,7 @@ export function buildMeta(p) {
     ogTitle: clean(seo.ogTitle) || title,
     ogDescription: clean(seo.ogDescription) || description,
     url: isHttp(seo.canonical) ? seo.canonical : base ? `${base}/` : '/',
-    image: absolute(p, seo.ogImage),
+    image: absolute(p, seo.ogImage) || ogCardUrl(p, 'home'),
     robots: seo.robots === 'noindex' ? 'noindex, nofollow' : 'index, follow',
   }
 }
@@ -200,12 +206,12 @@ export function pageSeo(c, path) {
   if ((m = /^\/notes\/([^/]+)\/?$/.exec(path))) {
     const n = visibleNotes(c).find((x) => x.slug === decodeURIComponent(m[1]))
     if (!n) return { missing: true }
-    return { title: clean(n.seoTitle) || `${n.title} | ${clean(p.profile?.fullName)}`, description: clean(n.seoDescription) || clean(n.summary), image: n.cover?.src ?? '', canonical: base ? `${base}/notes/${n.slug}` : '' }
+    return { title: clean(n.seoTitle) || `${n.title} | ${clean(p.profile?.fullName)}`, description: clean(n.seoDescription) || clean(n.summary), image: ogCardUrl(p, `note-${n.slug}`) || n.cover?.src || '', canonical: base ? `${base}/notes/${n.slug}` : '' }
   }
   if ((m = /^\/work\/([^/]+)\/?$/.exec(path))) {
     const x = (c.projects ?? []).find((q) => q.id === decodeURIComponent(m[1]) && q.hidden !== true)
     if (!x) return { missing: true }
-    return { title: clean(x.seo?.title) || `${x.title} | ${clean(p.profile?.fullName)}`, description: clean(x.seo?.description) || clean(x.description).slice(0, 200), image: x.seo?.image || x.thumbnail?.src || '', canonical: base ? `${base}/work/${x.id}` : '' }
+    return { title: clean(x.seo?.title) || `${x.title} | ${clean(p.profile?.fullName)}`, description: clean(x.seo?.description) || clean(x.description).slice(0, 200), image: x.seo?.image || ogCardUrl(p, `work-${x.id}`) || x.thumbnail?.src || '', canonical: base ? `${base}/work/${x.id}` : '' }
   }
   if (/^\/card\/?$/.test(path)) return p.card?.enabled === true ? { title: `${clean(p.profile?.fullName)} | Business card`, description: clean(p.profile?.title), image: p.seo?.ogImage ?? '', canonical: base ? `${base}/card` : '' } : { missing: true }
   if (/^\/profile\/?$/.test(path)) return p.profilePage?.enabled === false ? { missing: true } : { title: clean(p.profilePage?.title) || `${clean(p.profile?.fullName)} | Profile`, description: clean(p.seo?.description), image: p.seo?.ogImage ?? '', canonical: base ? `${base}/profile` : '' }

@@ -5,7 +5,7 @@ import multer from 'multer'
 import { readFile } from 'node:fs/promises'
 import { existsSync } from 'node:fs'
 import { homedir } from 'node:os'
-import { join, resolve } from 'node:path'
+import { join, resolve, sep } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { createStore } from './store.mjs'
 import { createAuth } from './auth.mjs'
@@ -13,12 +13,13 @@ import { createMedia } from './media.mjs'
 import { validateContent } from './validate.mjs'
 import { publicView } from './publicView.mjs'
 import { createKv } from './kv.mjs'
-import { createEnquiries, createSubscribers, createInsights, createSnapshots, createSettings } from './records.mjs'
+import { createEnquiries, createEndorsements, createSubscribers, createInsights, createSnapshots, createSettings } from './records.mjs'
 import { createMailer } from './mailer.mjs'
 import { createBackups, backupStream } from './backup.mjs'
-import { createLimiter, parseContact } from './routes.mjs'
+import { createLimiter, parseContact, parseEndorsement } from './routes.mjs'
 import { s3FromEnv } from './s3.mjs'
 import { restoreBackup } from './restore.mjs'
+import { renderCard, readPicture } from './ogcard.mjs'
 import { buildDigest, digestDue, localParts } from './digest.mjs'
 import { buildCsp, buildManifest, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
 
@@ -59,11 +60,12 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   }
   const media = createMedia(dataDir, kv)
   const enquiries = createEnquiries(kv)
+  const endorsements = createEndorsements(kv)
   const subscribers = createSubscribers(kv)
   const insights = createInsights(kv)
   const settings = createSettings(kv)
   const mailer = createMailer(env, deps)
-  await Promise.all([store.init(), media.init(), snapshots.init(), enquiries.init(), subscribers.init(), insights.init(), settings.init()])
+  await Promise.all([store.init(), media.init(), snapshots.init(), enquiries.init(), endorsements.init(), subscribers.init(), insights.init(), settings.init()])
   const backups = createBackups({ dataDir, kv, env, getSettings: settings.get, fetchImpl: deps.fetchImpl })
   backups.schedule()
   const pruneTimer = setInterval(() => {
@@ -123,6 +125,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   const publicJson = express.json({ limit: '32kb' })
   const published = () => getPublished()?.content ?? null
   const contactLimit = createLimiter({ max: 5, windowMs: 3600 * 1000 })
+  const endorseLimit = createLimiter({ max: 3, windowMs: 3600 * 1000 })
   const subscribeLimit = createLimiter({ max: 5, windowMs: 3600 * 1000 })
   const trackLimit = createLimiter({ max: 120, windowMs: 60 * 1000 })
   const MIN_FILL_MS = 2500
@@ -144,6 +147,20 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
       })
     }
     res.json({ ok: true, id: item.id })
+  })
+
+  app.post('/api/endorse', publicJson, async (req, res) => {
+    const e = published()?.portfolio?.endorsements
+    if (!e?.enabled) return res.status(404).json({ error: 'Not available.' })
+    if (!endorseLimit(req.ip ?? 'x')) return res.status(429).json({ error: 'Too many attempts from this connection. Please try again later.' })
+    const r = parseEndorsement(req.body)
+    if (r.error) return res.status(400).json({ error: r.error })
+    if (r.honeypot) return res.json({ ok: true })
+    if (r.elapsed < MIN_FILL_MS) return res.status(400).json({ error: 'Please take a moment and send again.' })
+    await endorsements.add(r.value)
+    const st = settings.get()
+    if (st.notifyOnEnquiry) void mailer.notify({ to: st.notifyEmail, subject: `New recommendation from ${r.value.name}`, text: `${r.value.quote}\n\nIt is waiting for your approval in the Inbox, under Recommendations.` })
+    res.json({ ok: true })
   })
 
   app.post('/api/subscribe', publicJson, async (req, res) => {
@@ -372,6 +389,12 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
 
   /* ---------- inbox, subscribers, insights ---------- */
   admin.get('/enquiries', (_req, res) => res.json({ items: enquiries.list(), unread: enquiries.unread(), due: enquiries.due().length }))
+  admin.get('/endorsements', (_req, res) => res.json({ items: endorsements.list(), pending: endorsements.pending() }))
+  admin.patch('/endorsements/:id', async (req, res) => {
+    const r = await endorsements.setStatus(req.params.id, req.body?.status)
+    return r.ok ? res.json({ ok: true, item: r.item, pending: endorsements.pending() }) : res.status(r.status).json({ error: r.error })
+  })
+  admin.delete('/endorsements/:id', async (req, res) => ((await endorsements.remove(req.params.id)) ? res.json({ ok: true, pending: endorsements.pending() }) : res.status(404).json({ error: 'Not found.' })))
   admin.get('/enquiries.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="enquiries.csv"').send(enquiries.csv()))
   admin.patch('/enquiries/:id', async (req, res) => {
     const b = req.body ?? {}
@@ -442,7 +465,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     if (!Buffer.isBuffer(req.body) || !req.body.length) return res.status(400).json({ error: 'Choose a backup zip to restore.' })
     try {
       const r = await restoreBackup(req.body, { kv, dataDir })
-      await Promise.all([store.init(), media.init(), snapshots.init(), enquiries.init(), subscribers.init(), insights.init(), settings.init()])
+      await Promise.all([store.init(), media.init(), snapshots.init(), enquiries.init(), endorsements.init(), subscribers.init(), insights.init(), settings.init()])
       backups.schedule()
       res.json({ ok: true, ...r })
     } catch (e) {
@@ -467,6 +490,52 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     return tplCache
   }
   const fallbackCsp = async () => buildCsp({})
+
+  /** The automatic share preview card for a page. Drawn once per published version and kept in memory. */
+  const cardCache = new Map()
+  const filePath = (src) => {
+    const roots = [['/uploads/', media.uploads], ['/images/', join(distDir, 'images')]]
+    for (const [prefix, root] of roots) {
+      if (!String(src).startsWith(prefix)) continue
+      const full = resolve(root, decodeURIComponent(String(src).slice(prefix.length).split('?')[0]))
+      if (full.startsWith(resolve(root) + sep)) return full
+    }
+    return ''
+  }
+  app.get(/^\/og\/([\w%.-]{1,160})\.png$/, async (req, res) => {
+    try {
+      const pub = getPublished()
+      const c = pub?.content
+      if (!c) return res.status(404).end()
+      const key = decodeURIComponent(req.params[0])
+      const p = c.portfolio
+      const host = (p.site?.url ? new URL(p.site.url).host : req.hostname) || ''
+      const name = p.profile?.preferredName || p.profile?.fullName || ''
+      let card
+      let m
+      if (key === 'home') card = { title: p.profile?.fullName || p.seo?.title || '', kicker: 'Portfolio', subtitle: p.profile?.title || p.seo?.description || '', src: p.profile?.profilePhoto?.src }
+      else if ((m = /^work-(.+)$/.exec(key))) {
+        const x = (c.projects ?? []).find((q) => q.id === m[1] && q.hidden !== true)
+        if (x) card = { title: x.title, kicker: x.caseStudy ? 'Case study' : x.category || 'Project', subtitle: x.description || x.client, src: x.thumbnail?.src }
+      } else if ((m = /^note-(.+)$/.exec(key))) {
+        const n = (c.notes ?? []).find((q) => q.slug === m[1] && q.hidden !== true && q.title)
+        if (n) card = { title: n.title, kicker: 'Note', subtitle: n.summary, src: n.cover?.src }
+      }
+      if (!card) return res.status(404).end()
+      const stamp = `${key}|${pub.rev}|${host}`
+      let png = cardCache.get(stamp)
+      if (!png) {
+        const file = card.src ? filePath(card.src) : ''
+        png = await renderCard({ title: card.title, kicker: card.kicker, subtitle: card.subtitle, name, host, image: file ? await readPicture(file) : null })
+        cardCache.set(stamp, png)
+        if (cardCache.size > 100) cardCache.delete(cardCache.keys().next().value)
+      }
+      res.set({ 'Content-Type': 'image/png', 'Cache-Control': 'public, max-age=3600' }).send(png)
+    } catch (e) {
+      console.error('Preview card failed:', e.message)
+      res.status(500).end()
+    }
+  })
 
   app.get('/robots.txt', async (_req, res) => {
     const p = portfolioNow()
@@ -548,7 +617,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     res.status(500).json({ error: 'Something went wrong.' })
   })
 
-  return { app, store, auth, media, dataDir, kv, enquiries, subscribers, insights, settings, backups, snapshots, sendDigest, close: async () => { backups.stop(); clearInterval(pruneTimer); clearInterval(digestTimer); await kv.close() } }
+  return { app, store, auth, media, dataDir, kv, enquiries, endorsements, subscribers, insights, settings, backups, snapshots, sendDigest, close: async () => { backups.stop(); clearInterval(pruneTimer); clearInterval(digestTimer); await kv.close() } }
 }
 
 export async function start(env = process.env) {

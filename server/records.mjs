@@ -66,6 +66,33 @@ export function createEnquiries(dir) {
   }
 }
 
+/* ---------- recommendations left by visitors, waiting for the owner ---------- */
+export const ENDORSEMENT_STATUS = ['pending', 'approved', 'dismissed']
+export function createEndorsements(dir) {
+  const f = jsonFile(dir, 'endorsements.json', { items: [] })
+  return {
+    init: f.init, flush: f.flush,
+    async add({ name, role, company, quote }) {
+      const item = { id: id(), at: new Date().toISOString(), status: 'pending', name, role, company, quote }
+      f.get().items.unshift(item)
+      f.get().items = f.get().items.slice(0, 2000)
+      await f.save()
+      return item
+    },
+    list: () => f.get().items,
+    pending: () => f.get().items.filter((x) => x.status === 'pending').length,
+    async setStatus(idv, status) {
+      if (!ENDORSEMENT_STATUS.includes(status)) return { ok: false, status: 400, error: 'That is not a status.' }
+      const x = f.get().items.find((i) => i.id === idv)
+      if (!x) return { ok: false, status: 404, error: 'Not found.' }
+      x.status = status
+      await f.save()
+      return { ok: true, item: x }
+    },
+    async remove(idv) { const n = f.get().items.length; f.get().items = f.get().items.filter((i) => i.id !== idv); await f.save(); return f.get().items.length < n },
+  }
+}
+
 /* ---------- subscribers ---------- */
 export function createSubscribers(dir) {
   const f = jsonFile(dir, 'subscribers.json', { items: [] })

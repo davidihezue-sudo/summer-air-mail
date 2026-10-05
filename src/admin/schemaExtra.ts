@@ -114,6 +114,9 @@ Object.assign(PAGES, {
       { kind: 'bool', key: 'copyEmail', label: 'Copy button beside your email address' },
       { kind: 'bool', key: 'clientStrip', label: 'Strip of brands I have worked with', help: 'Built from the client names on your published projects, so it only ever shows real work. Needs at least two clients.' },
       { kind: 'bool', key: 'readingTime', label: 'Minutes to read on notes' },
+      { kind: 'bool', key: 'siteSearch', label: 'Search box for visitors', help: 'Visitors press Ctrl+K (Command+K on a Mac) or use the magnifier in the header to jump straight to a project, service, tool or note.' },
+      { kind: 'bool', key: 'reelPreview', label: 'Silent video preview when hovering over a reel', help: 'Only for videos you uploaded, on devices with a mouse. Nothing loads until the visitor hovers.' },
+      { kind: 'bool', key: 'casePdf', label: '"Save as PDF" button on case studies', help: 'Opens the print dialog with a clean version of the case study, which visitors can save as a PDF.' },
     ] }],
   },
   mediaDisplay: {
@@ -230,6 +233,11 @@ Object.assign(PAGES, {
       { title: 'Booking link', base: 'portfolio.booking', fields: [
         { kind: 'bool', key: 'enabled', label: 'Show a booking button' }, { kind: 'text', key: 'label', label: 'Button text' }, { kind: 'url', key: 'url', label: 'Booking page (Calendly, Cal.com, Google Calendar)' },
         { kind: 'multi', key: 'showIn', label: 'Where it appears', options: [{ value: 'hero', label: 'Hero' }, { value: 'header', label: 'Header' }, { value: 'contact', label: 'Contact section' }, { value: 'profile', label: 'One page profile' }] },
+      ] },
+      { title: 'Recommendations from visitors', base: 'portfolio.endorsements', fields: [
+        { kind: 'bool', key: 'enabled', label: 'Let people you have worked with leave a recommendation', help: 'Adds a form to your Testimonials section. What people write goes to your Inbox, under Recommendations, and appears on the site only after you approve it and publish.' },
+        { kind: 'text', key: 'heading', label: 'Heading' }, { kind: 'textarea', key: 'text', label: 'Text above the button' }, { kind: 'text', key: 'buttonLabel', label: 'Button text' },
+        { kind: 'textarea', key: 'consentText', label: 'Consent wording', help: 'Shown next to a required tick box.' }, { kind: 'text', key: 'successMessage', label: 'Thank you message' },
       ] },
       { title: 'Newsletter signup', base: 'portfolio.newsletter', fields: [
         { kind: 'bool', key: 'enabled', label: 'Show the signup section' },

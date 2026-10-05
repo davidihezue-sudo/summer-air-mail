@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { ArrowUpRight, ChevronLeft, ChevronRight, Maximize2 } from 'lucide-react'
+import { ArrowUpRight, ChevronLeft, ChevronRight, FileDown, Maximize2 } from 'lucide-react'
 import type { MediaItem, Project } from '../../content/types'
 import { useContent } from '../../hooks/useContent'
 import { getAiSkills, getContentItems, getProjects, getResults, getScreenshots, getTools, relatedProjects } from '../../content/selectors'
@@ -42,6 +42,16 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
   const go = (d: number) => setI((n) => (n + d + media.length) % media.length)
   const link = safeHref(project.externalLink)
   const current = media[i]
+  const { profile, site, extras } = content.portfolio
+
+  /** Opens the print dialog on a clean version of this case study. The visitor chooses "Save as PDF" there. */
+  const savePdf = () => {
+    const root = document.documentElement
+    const done = () => { root.classList.remove('print-case'); window.removeEventListener('afterprint', done) }
+    root.classList.add('print-case')
+    window.addEventListener('afterprint', done)
+    window.setTimeout(() => window.print(), 60)
+  }
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -71,6 +81,10 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
 
   return (
     <div className="project" ref={root}>
+      <div className="project__print">
+        <strong>{project.title}</strong><br />
+        {[profile.fullName, profile.title].filter(hasValue).join(', ')}{site.url ? ` | ${site.url.replace(/\/$/, '')}${workUrl(project.id)}` : ''}
+      </div>
       {media.length > 0 && (
         <figure
           ref={stage}
@@ -126,6 +140,7 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
         <PlatformIcons platforms={project.platforms} />
         <div className="project__actions">
           <ShareButton path={workUrl(project.id)} title={project.title} />
+          {project.caseStudy && extras.casePdf && <button type="button" className="btn btn--ghost sharebtn" onClick={savePdf}><FileDown size={16} aria-hidden /> Save as PDF</button>}
           {content.portfolio.extras.projectNav && siblings.length > 1 && (
             <>
               <button type="button" className="btn btn--ghost sharebtn" onClick={() => onOpen(siblings[(pos - 1 + siblings.length) % siblings.length].id)}><ChevronLeft size={16} aria-hidden /> Previous project</button>

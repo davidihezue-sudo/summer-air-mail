@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { useMotion } from '../../hooks/useMotion'
 import { ExternalLink } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { useTheme } from '../../hooks/useTheme'
@@ -12,12 +13,20 @@ import { platformLabel } from '../ui/Icons'
 import { hasValue, parseVideo, safeHref } from '../../utils/text'
 
 export function ContentCard({ item }: { item: ContentItem }) {
-  const mediaUi = useContent().content.portfolio.media
-  const isVideo = parseVideo(item.video).kind !== 'none'
+  const { content } = useContent()
+  const mediaUi = content.portfolio.media
+  const { reduced, finePointer } = useMotion()
+  const source = parseVideo(item.video)
+  const isVideo = source.kind !== 'none'
   const link = safeHref(item.link)
+  // A silent preview on hover, for uploaded files only: nothing loads until the pointer arrives, and touch screens and reduced motion never see it.
+  const preview = content.portfolio.extras.reelPreview && finePointer && !reduced && source.kind === 'file' ? source.src : ''
+  const [hover, setHover] = useState(false)
+  const [played, setPlayed] = useState(false)
   return (
     <li className="vcard">
-      <div className={`vcard__media ${isVideo ? 'vcard__media--video' : 'vcard__media--image'}`}>
+      <div className={`vcard__media ${isVideo ? 'vcard__media--video' : 'vcard__media--image'}`} onPointerEnter={preview ? () => setHover(true) : undefined} onPointerLeave={preview ? () => setHover(false) : undefined} onClickCapture={preview ? () => setPlayed(true) : undefined}>
+        {preview && hover && !played && <video className="vcard__preview" src={preview} muted loop playsInline autoPlay preload="auto" aria-hidden tabIndex={-1} />}
         {isVideo ? <VideoPlayer src={item.video} poster={item.thumbnail?.src} title={item.title} vertical /> : item.thumbnail?.src ? <FitImage image={item.thumbnail} fallbackRatio={guessRatio([item.platform])} fit={mediaUi.cardFit} fill={mediaUi.fill} sizes="(min-width: 900px) 22vw, 60vw" /> : null}
         <span className="vcard__tag">{item.format}</span>
       </div>

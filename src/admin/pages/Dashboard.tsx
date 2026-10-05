@@ -16,6 +16,8 @@ export function Dashboard() {
   const season = resolveSeason(p.seasons)
   const [unread, setUnread] = useState<number | null>(null)
   const [due, setDue] = useState(0)
+  const [recs, setRecs] = useState(0)
+  useEffect(() => { api.endorsements().then((r) => setRecs(r.pending)).catch(() => {}) }, [])
   useEffect(() => { api.enquiries().then((r) => { setUnread(r.unread); setDue(r.due) }).catch(() => setUnread(null)) }, [])
   const q = useMemo(() => quality(c), [c])
 
@@ -77,6 +79,7 @@ export function Dashboard() {
         </Card>
         <Card title="Inbox and quality">
           <p>Messages: <strong>{unread === null ? 'not available' : `${unread} unread`}</strong> · <Link to="inbox">Open inbox</Link></p>
+          {recs > 0 && <p><Badge tone="info">{recs} recommendation{recs === 1 ? '' : 's'} waiting</Badge> <Link to="inbox">Review</Link></p>}
           {due > 0 && <p><Badge tone="warn">{due} follow-up{due === 1 ? '' : 's'} due</Badge> <Link to="inbox">See who to chase</Link></p>}
           <p>Quality score: <strong>{q.overall} / 100</strong> · <Link to="qualityScore">See what to improve</Link></p>
         </Card>

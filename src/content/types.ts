@@ -190,6 +190,12 @@ export interface Extras {
   clientStrip: boolean
   /** Minutes to read, on notes. */
   readingTime: boolean
+  /** A search box for visitors: Ctrl+K or the magnifier in the header jumps to any project, service, tool or note. */
+  siteSearch: boolean
+  /** Videos in the content section play a silent preview when a visitor hovers over them. */
+  reelPreview: boolean
+  /** A "Save as PDF" button on case studies. */
+  casePdf: boolean
 }
 
 export interface MediaSettings {
@@ -327,6 +333,16 @@ export interface Tool {
   color?: string
   /** Where the tool's own site is. Makes the card a link. */
   link?: string
+}
+
+/** A form that lets people you have worked with write a recommendation. Nothing appears on the site until you approve it. */
+export interface Endorsements {
+  enabled: boolean
+  heading: string
+  text: string
+  buttonLabel: string
+  consentText: string
+  successMessage: string
 }
 
 export interface ResultsUi {
@@ -889,6 +905,7 @@ export interface Portfolio {
   media: MediaSettings
   toolsUi: ToolsUi
   resultsUi: ResultsUi
+  endorsements: Endorsements
   publicStats: PublicStats
   card: BusinessCard
   cursor: CursorSettings

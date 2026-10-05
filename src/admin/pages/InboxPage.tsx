@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { Download, Trash2 } from 'lucide-react'
-import { api, type Enquiry } from '../api'
+import { api, type Endorsement, type Enquiry } from '../api'
+import { useAdmin } from '../store'
+import { newTestimonial } from '../../content/factories'
 import { Badge, Card, Confirm, PageHead } from '../ui'
 import { Modal } from '../../components/ui/Modal'
 import { STAGES, STAGE_HELP, STAGE_LABEL, addDays, followUpState, todayLocal, type Stage } from '../pipeline'
@@ -55,6 +57,59 @@ function Detail({ e, onChange, onDelete, onClose }: { e: Enquiry; onChange: (nex
   )
 }
 
+/** What visitors wrote through the recommendation form. Approving adds it to your Testimonials as a draft change; it is public only after you publish. */
+function Recommendations({ onCount }: { onCount: (n: number) => void }) {
+  const { edit } = useAdmin()
+  const [items, setItems] = useState<Endorsement[] | null>(null)
+  const [error, setError] = useState('')
+  const [note, setNote] = useState('')
+  useEffect(() => { api.endorsements().then((r) => { setItems(r.items); onCount(r.pending) }).catch((e: Error) => setError(e.message)) }, [onCount])
+  const set = async (e: Endorsement, status: Endorsement['status']) => {
+    try { const r = await api.setEndorsementStatus(e.id, status); setItems((l) => l?.map((x) => (x.id === e.id ? r.item : x)) ?? null); onCount(r.pending) } catch (x) { setError((x as Error).message) }
+  }
+  const approve = async (e: Endorsement) => {
+    edit((c) => { c.testimonials.push({ ...newTestimonial(), name: e.name, title: e.role, company: e.company, quote: e.quote, relationship: 'Left through this website', approved: true }) })
+    await set(e, 'approved')
+    setNote(`${e.name}'s recommendation was added to your Testimonials. Press Publish to show it on the site.`)
+  }
+  const remove = async (e: Endorsement) => { try { const r = await api.deleteEndorsement(e.id); setItems((l) => l?.filter((x) => x.id !== e.id) ?? null); onCount(r.pending) } catch (x) { setError((x as Error).message) } }
+  const pending = items?.filter((x) => x.status === 'pending') ?? []
+  const done = items?.filter((x) => x.status !== 'pending') ?? []
+  return (
+    <>
+      {error && <p className="abanner" role="alert">{error}</p>}
+      {note && <p className="abanner" role="status">{note}</p>}
+      <Card title={items ? `${pending.length} waiting for you` : 'Loading'}>
+        {items?.length === 0 && <p className="ahelp">Nothing yet. Turn on the form under Booking &amp; Newsletter, and people you have worked with can leave a recommendation. Nothing appears on your site until you approve it.</p>}
+        <ul className="arows">
+          {pending.map((e) => (
+            <li key={e.id} className="arow-item arow-item--block">
+              <div className="ainbox__body">
+                <p><strong>{e.name}</strong> <span className="ahelp">{[e.role, e.company].filter(Boolean).join(', ')} · {new Date(e.at).toLocaleDateString()}</span></p>
+                <blockquote style={{ whiteSpace: 'pre-wrap', margin: '0 0 .6rem' }}>{e.quote}</blockquote>
+                <span className="arow-item__actions">
+                  <button type="button" className="abtn abtn--primary" onClick={() => void approve(e)}>Approve and add to Testimonials</button>
+                  <button type="button" className="abtn" onClick={() => void set(e, 'dismissed')}>Dismiss</button>
+                  <button type="button" className="abtn abtn--danger" onClick={() => void remove(e)}><Trash2 size={14} aria-hidden /> Delete</button>
+                </span>
+              </div>
+            </li>
+          ))}
+        </ul>
+      </Card>
+      {done.length > 0 && (
+        <Card title="Already dealt with">
+          <ul className="arows">{done.map((e) => (
+            <li key={e.id} className="arow-item"><span className="arow-item__main"><span className="arow-item__text"><strong>{e.name}</strong><span className="ahelp">{e.quote.slice(0, 90)}{e.quote.length > 90 ? '...' : ''}</span></span></span>
+              <span className="arow-item__badges"><Badge tone={e.status === 'approved' ? 'good' : 'neutral'}>{e.status === 'approved' ? 'Approved' : 'Dismissed'}</Badge></span>
+              <button type="button" className="abtn abtn--danger" aria-label={`Delete the recommendation from ${e.name}`} onClick={() => void remove(e)}><Trash2 size={14} aria-hidden /></button></li>
+          ))}</ul>
+        </Card>
+      )}
+    </>
+  )
+}
+
 export function InboxPage() {
   const [items, setItems] = useState<Enquiry[] | null>(null)
   const [error, setError] = useState('')
@@ -62,6 +117,9 @@ export function InboxPage() {
   const [del, setDel] = useState<string | null>(null)
   const [view, setView] = useState<'board' | 'list'>('board')
   const [onlyDue, setOnlyDue] = useState(false)
+  const [tab, setTab] = useState<'messages' | 'recommendations'>('messages')
+  const [pendingRecs, setPendingRecs] = useState(0)
+  useEffect(() => { api.endorsements().then((r) => setPendingRecs(r.pending)).catch(() => {}) }, [])
   const load = useCallback(() => api.enquiries().then((r) => setItems(r.items)).catch((e: Error) => setError(e.message)), [])
   useEffect(() => { void load() }, [load])
   const today = todayLocal()
@@ -77,6 +135,11 @@ export function InboxPage() {
     <>
       <PageHead title="Inbox" intro="Messages sent through your contact form, laid out like a simple pipeline so nothing goes cold: where each one stands, when to chase it, and your own notes. Only you and your team can see any of it." actions={<a className="abtn" href="/api/admin/enquiries.csv" download><Download size={14} aria-hidden /> Export CSV</a>} />
       {error && <p className="abanner" role="alert">{error}</p>}
+      <div className="arow" role="group" aria-label="What to look at" style={{ marginBottom: '.8rem' }}>
+        <button type="button" aria-pressed={tab === 'messages'} className={`abtn ${tab === 'messages' ? 'abtn--primary' : ''}`} onClick={() => setTab('messages')}>Messages</button>
+        <button type="button" aria-pressed={tab === 'recommendations'} className={`abtn ${tab === 'recommendations' ? 'abtn--primary' : ''}`} onClick={() => setTab('recommendations')}>Recommendations{pendingRecs > 0 ? ` (${pendingRecs} waiting)` : ''}</button>
+      </div>
+      {tab === 'recommendations' ? <Recommendations onCount={setPendingRecs} /> : (<>
       <Card title={items ? `${items.length} message${items.length === 1 ? '' : 's'}, ${unread} unread` : 'Loading'}>
         <div className="atoolbar">
           <div className="arow" role="group" aria-label="How to view messages">
@@ -125,6 +188,7 @@ export function InboxPage() {
           </ul>
         )}
       </Card>
+      </>)}
       <Modal open={!!current} onClose={() => setOpen(null)} label={current ? `Message from ${current.name}` : 'Message'} className="dialog dialog--narrow adialog">
         {current && <Detail e={current} onChange={(next) => replace(next)} onDelete={() => setDel(current.id)} onClose={() => setOpen(null)} />}
       </Modal>

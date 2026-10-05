@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { Menu } from 'lucide-react'
+import { Menu, Search } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { useActiveSection } from '../../hooks/useActiveSection'
 import { goTo } from '../../utils/nav'
@@ -62,6 +62,7 @@ export function Header() {
           <div className="header__tools">
             <AvailabilityBadge />
             <BookingButton place="header" className="btn btn--solid header__book" />
+            {content.portfolio.extras.siteSearch && <button type="button" className="header__icon" onClick={() => window.dispatchEvent(new CustomEvent('sam-search'))} aria-label="Search this site" aria-keyshortcuts="Control+K Meta+K"><Search aria-hidden size={20} /></button>}
             <span className="header__lang"><LangSwitcher /></span>
             <SchemeToggle />
             <button type="button" className="header__burger" onClick={() => setOpen(true)} aria-label={t('menu.open')} aria-haspopup="dialog">

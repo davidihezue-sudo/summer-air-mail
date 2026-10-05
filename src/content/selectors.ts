@@ -51,7 +51,7 @@ export function sectionHasContent(type: SectionType, c: SiteContent, cfg?: Secti
     case 'screenshots': return getScreenshots(c).length > 0
     case 'strategy': return p.strategy.steps.length > 0
     case 'websites': return getWebsites(c).length > 0
-    case 'testimonials': return getTestimonials(c).length > 0
+    case 'testimonials': return getTestimonials(c).length > 0 || p.endorsements.enabled
     case 'mentoring': return hasValue(p.mentoring.overview)
     case 'journey': return c.journey.some((x) => !x.hidden && hasValue(x.title))
     case 'resources': return c.resources.some((x) => !x.hidden && hasValue(x.title) && hasValue(x.file))

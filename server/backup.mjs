@@ -5,7 +5,7 @@ import { join } from 'node:path'
 import { PassThrough } from 'node:stream'
 import { putObject, s3FromEnv } from './s3.mjs'
 
-const INCLUDE_FILES = ['content.json', 'settings.json', 'enquiries.json', 'subscribers.json', 'insights.json', 'snapshots.json', 'media.json']
+const INCLUDE_FILES = ['content.json', 'settings.json', 'enquiries.json', 'endorsements.json', 'subscribers.json', 'insights.json', 'snapshots.json', 'media.json']
 
 /** Streams a zip of everything the owner would need to restore the site. Credentials are never included. */
 export function backupStream(dataDir, kv) {

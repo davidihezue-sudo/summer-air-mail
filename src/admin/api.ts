@@ -41,6 +41,7 @@ export interface Status {
 export interface Me { username: string; role: 'owner' | 'editor' | 'viewer' | ''; canPublish: boolean; storage: 'file' | 'postgres' }
 import type { Stage } from './pipeline'
 export interface Enquiry { id: string; at: string; read: boolean; name: string; email: string; type: string; budget: string; company: string; message: string; stage: Stage; notes: string; followUp: string }
+export interface Endorsement { id: string; at: string; status: 'pending' | 'approved' | 'dismissed'; name: string; role: string; company: string; quote: string }
 export interface Subscriber { id: string; at: string; email: string; consent: string }
 export interface InsightsSummary {
   views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; pathLast: Record<string, string>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>>
@@ -99,6 +100,9 @@ export const api = {
     request<{ asset: MediaAsset }>(`/media/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   deleteMedia: (id: string) => request<{ ok: true }>(`/media/${id}`, { method: 'DELETE' }),
   enquiries: () => request<{ items: Enquiry[]; unread: number; due: number }>('/enquiries'),
+  endorsements: () => request<{ items: Endorsement[]; pending: number }>('/endorsements'),
+  setEndorsementStatus: (id: string, status: Endorsement['status']) => request<{ ok: true; item: Endorsement; pending: number }>(`/endorsements/${id}`, { method: 'PATCH', body: JSON.stringify({ status }) }),
+  deleteEndorsement: (id: string) => request<{ ok: true; pending: number }>(`/endorsements/${id}`, { method: 'DELETE' }),
   updateEnquiry: (id: string, patch: Partial<Pick<Enquiry, 'read' | 'stage' | 'notes' | 'followUp'>>) => request<{ ok: true; item: Enquiry; unread: number; due: number }>(`/enquiries/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
   markEnquiry: (id: string, read: boolean) => request<{ ok: true; unread: number }>(`/enquiries/${id}`, { method: 'PATCH', body: JSON.stringify({ read }) }),
   deleteEnquiry: (id: string) => request<{ ok: true }>(`/enquiries/${id}`, { method: 'DELETE' }),
