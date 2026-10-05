@@ -245,3 +245,21 @@ describe('pop-up transitions', () => {
     expect(css).toContain('prefers-reduced-motion: reduce')
   })
 })
+
+describe('button shapes', () => {
+  const shapes = ['pill', 'rounded', 'soft', 'square', 'pebble', 'tab', 'cut', 'slanted', 'ticket', 'perforated', 'airmail', 'hard', 'outlined', 'glass', 'arrow', 'underline']
+  it('offers every shape in the admin', async () => {
+    const { PAGES } = await import('../src/admin/schema')
+    await import('../src/admin/schemaExtra')
+    const fields = PAGES.design.blocks.flatMap((b) => b.fields) as { key?: string; options?: { value: string }[] }[]
+    expect(fields.find((f) => f.key === 'buttons')?.options?.map((o) => o.value).sort()).toEqual([...shapes].sort())
+  })
+  it('gives every shape CSS, either a corner radius or its own rules, and keeps pill as the default', async () => {
+    const { readFileSync } = await import('node:fs')
+    const css = readFileSync(join(__dirname, '..', 'src/styles/base.css'), 'utf8')
+    const theme = readFileSync(join(__dirname, '..', 'src/utils/theme.ts'), 'utf8')
+    for (const s of shapes) expect(theme, s).toMatch(new RegExp(`\\b${s}:`))
+    for (const s of ['slanted', 'cut', 'ticket', 'perforated', 'airmail', 'hard', 'outlined', 'glass', 'arrow', 'underline']) expect(css, s).toContain(`[data-buttons='${s}']`)
+    expect(baseContent.portfolio.design.buttons).toBe('pill')
+  })
+})

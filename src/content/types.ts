@@ -484,6 +484,10 @@ export interface SeasonSettings {
   overrides: Record<SeasonName, SeasonOverride>
 }
 
+export type ButtonShape =
+  | 'pill' | 'rounded' | 'square' | 'soft' | 'slanted' | 'perforated' | 'outlined' | 'underline'
+  | 'airmail' | 'hard' | 'cut' | 'pebble' | 'tab' | 'ticket' | 'glass' | 'arrow'
+
 export type DialogTransition = 'none' | 'fade' | 'scale' | 'zoom' | 'slide-up' | 'slide-down' | 'flip'
 
 /** A celebration changes the look of the site for a few days: its own colours, falling decorations and a greeting. */
@@ -634,7 +638,7 @@ export interface CursorSettings {
 
 export interface DesignSettings {
   radius: 'sharp' | 'soft' | 'round'
-  buttons: 'pill' | 'rounded' | 'square'
+  buttons: ButtonShape
   density: 'compact' | 'comfortable' | 'spacious'
   /** Scales all text. 1 is normal. */
   fontScale: number

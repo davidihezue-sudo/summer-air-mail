@@ -21,7 +21,11 @@ export function toneValue(value: string | undefined): string {
 }
 
 const RADIUS = { sharp: '4px', soft: '18px', round: '30px' }
-const BUTTON = { pill: '999px', rounded: '12px', square: '2px' }
+/** The corner radius for each button shape. Shapes that are drawn with clipping or masks (slanted, cut, ticket, perforated) are handled in base.css. */
+const BUTTON: Record<string, string> = {
+  pill: '999px', rounded: '12px', square: '2px', soft: '6px', slanted: '0', perforated: '2px', outlined: '999px', underline: '0',
+  airmail: '3px', hard: '8px', cut: '0', pebble: '28px 12px 28px 12px', tab: '14px 14px 0 0', ticket: '6px', glass: '999px', arrow: '999px',
+}
 const DENSITY = { compact: 0.78, comfortable: 1, spacious: 1.28 }
 const BORDER = { thin: '1px', normal: '1.5px', bold: '3px' }
 const SHADOW = { none: 'none', soft: '0 18px 40px -18px rgb(23 50 63 / 0.45)', strong: '0 24px 50px -14px rgb(23 50 63 / 0.7)' }
@@ -77,6 +81,7 @@ export function applyTheme(resolved: ResolvedTheme, portfolio: Portfolio, plan: 
   root.dataset.heroDecor = String(portfolio.hero.decorativeElements)
   root.dataset.headingCase = d.headingCase
   root.dataset.dialogTransition = d.dialogTransition
+  root.dataset.buttons = d.buttons
   root.dataset.dialogSpeed = d.dialogSpeed
   root.dataset.cards = d.cards
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors.sand)

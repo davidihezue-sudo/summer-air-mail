@@ -156,7 +156,13 @@ Object.assign(PAGES, {
     blocks: [
       { title: 'Shape and feel', base: 'portfolio.design', fields: [
         { kind: 'select', key: 'radius', label: 'Corner roundness', options: [{ value: 'sharp', label: 'Sharp' }, { value: 'soft', label: 'Soft' }, { value: 'round', label: 'Very round' }] },
-        { kind: 'select', key: 'buttons', label: 'Button shape', options: [{ value: 'pill', label: 'Pill' }, { value: 'rounded', label: 'Rounded' }, { value: 'square', label: 'Square' }] },
+        { kind: 'select', key: 'buttons', label: 'Button shape', help: 'Applies to every button on the site.', options: [
+          { value: 'pill', label: 'Pill (fully rounded)' }, { value: 'rounded', label: 'Rounded' }, { value: 'soft', label: 'Soft square (small corner)' }, { value: 'square', label: 'Square' },
+          { value: 'pebble', label: 'Pebble (uneven, organic corners)' }, { value: 'tab', label: 'Tab (rounded on top only)' }, { value: 'cut', label: 'Cut corners (angled, like a badge)' },
+          { value: 'slanted', label: 'Slanted (a leaning ticket)' }, { value: 'ticket', label: 'Ticket (notch on each side)' }, { value: 'perforated', label: 'Perforated (stamp edge)' },
+          { value: 'airmail', label: 'Airmail border (red and blue stripes)' }, { value: 'hard', label: 'Hard shadow (flat offset shadow)' }, { value: 'outlined', label: 'Outlined only (fills on hover)' },
+          { value: 'glass', label: 'Frosted glass' }, { value: 'arrow', label: 'Pill with arrow' }, { value: 'underline', label: 'Underlined text (no box)' },
+        ] },
         { kind: 'select', key: 'density', label: 'Spacing', options: [{ value: 'compact', label: 'Compact' }, { value: 'comfortable', label: 'Comfortable' }, { value: 'spacious', label: 'Spacious' }] },
         { kind: 'range', key: 'fontScale', label: 'Text size', min: 0.85, max: 1.3, step: 0.05, help: '1 is normal. Visitors can still zoom.' },
         { kind: 'select', key: 'shadow', label: 'Shadows', options: [{ value: 'none', label: 'None' }, { value: 'soft', label: 'Soft' }, { value: 'strong', label: 'Strong' }] },

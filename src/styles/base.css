@@ -215,6 +215,42 @@ html:not([data-dialog-transition='none']) dialog.drawer[open] .modal__panel { an
 @media (prefers-reduced-motion: reduce) { dialog.modal[open] .modal__panel, dialog.modal[open]::backdrop { animation: none !important; } }
 [data-motion='none'] dialog.modal[open] .modal__panel, [data-motion='none'] dialog.modal[open]::backdrop { animation: none !important; }
 [data-radius] .btn { border-radius: var(--btn-radius); }
+/* ---------- Button shapes (Design > Button shape). Pill, rounded, soft square, square, pebble and tab only change the corner radius above. ---------- */
+[data-buttons='outlined'] .btn--solid { background: transparent; color: var(--c-ink); }
+[data-buttons='outlined'] .btn--solid:hover { background: var(--c-ink); color: var(--c-paper); border-color: var(--c-ink); }
+[data-buttons='underline'] .btn { background: none; border-width: 0 0 2px; border-radius: 0; min-height: 0; padding: .35rem .1rem; color: var(--c-ink); }
+[data-buttons='underline'] .btn--light { color: var(--c-paper); }
+[data-buttons='underline'] .btn:hover { transform: none; background: none; color: var(--c-red-text); border-color: var(--c-red-text); }
+[data-buttons='underline'] .btn--light:hover { color: var(--c-paper); border-color: var(--c-paper); opacity: .8; }
+[data-buttons='hard'] .btn { overflow: visible; box-shadow: 4px 4px 0 var(--c-red); transition: transform .15s, box-shadow .15s, background .2s, color .2s; }
+[data-buttons='hard'] .btn--ghost { box-shadow: 4px 4px 0 var(--c-ink); }
+[data-buttons='hard'] .btn--light { box-shadow: 4px 4px 0 var(--c-paper); }
+[data-buttons='hard'] .btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 currentColor; }
+[data-buttons='glass'] .btn { background: color-mix(in srgb, var(--c-ink) 26%, transparent); border-color: color-mix(in srgb, var(--c-ink) 40%, transparent); color: var(--c-ink); backdrop-filter: blur(6px); }
+[data-buttons='glass'] .btn--ghost { background: color-mix(in srgb, var(--c-ink) 12%, transparent); }
+[data-buttons='glass'] .btn--light { color: var(--c-paper); border-color: color-mix(in srgb, var(--c-paper) 55%, transparent); background: color-mix(in srgb, var(--c-paper) 14%, transparent); }
+[data-buttons='glass'] .btn:hover { background: color-mix(in srgb, var(--c-ink) 40%, transparent); color: var(--c-paper); }
+/* Slanted, cut corners, ticket and perforated are clipped, so a border would be cut off: the ghost kind is a tinted fill instead. */
+[data-buttons='slanted'] .btn, [data-buttons='cut'] .btn, [data-buttons='ticket'] .btn, [data-buttons='perforated'] .btn { border-width: 0; }
+[data-buttons='slanted'] .btn--ghost, [data-buttons='cut'] .btn--ghost, [data-buttons='ticket'] .btn--ghost, [data-buttons='perforated'] .btn--ghost,
+[data-buttons='slanted'] .btn--light, [data-buttons='cut'] .btn--light, [data-buttons='ticket'] .btn--light, [data-buttons='perforated'] .btn--light { background: color-mix(in srgb, currentColor 14%, transparent); }
+[data-buttons='slanted'] .btn--ghost:hover, [data-buttons='cut'] .btn--ghost:hover, [data-buttons='ticket'] .btn--ghost:hover, [data-buttons='perforated'] .btn--ghost:hover { background: var(--c-ink); color: var(--c-paper); }
+[data-buttons='slanted'] .btn { clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); padding-inline: 1.9rem; }
+[data-buttons='cut'] .btn { clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 10px, 100% calc(100% - 10px), calc(100% - 10px) 100%, 10px 100%, 0 calc(100% - 10px), 0 10px); }
+[data-buttons='ticket'] .btn { padding-inline: 1.8rem; -webkit-mask: radial-gradient(circle 6px at 0 50%, #0000 97%, #000), radial-gradient(circle 6px at 100% 50%, #0000 97%, #000); -webkit-mask-composite: source-in; mask: radial-gradient(circle 6px at 0 50%, #0000 97%, #000), radial-gradient(circle 6px at 100% 50%, #0000 97%, #000); mask-composite: intersect; }
+[data-buttons='perforated'] .btn { -webkit-mask: radial-gradient(circle 4px at 6px 0, #0000 97%, #000) 0 0 / 12px 100% repeat-x, radial-gradient(circle 4px at 6px 100%, #0000 97%, #000) 0 0 / 12px 100% repeat-x, radial-gradient(circle 4px at 0 6px, #0000 97%, #000) 0 0 / 100% 12px repeat-y, radial-gradient(circle 4px at 100% 6px, #0000 97%, #000) 0 0 / 100% 12px repeat-y; -webkit-mask-composite: source-in; mask: radial-gradient(circle 4px at 6px 0, #0000 97%, #000) 0 0 / 12px 100% repeat-x, radial-gradient(circle 4px at 6px 100%, #0000 97%, #000) 0 0 / 12px 100% repeat-x, radial-gradient(circle 4px at 0 6px, #0000 97%, #000) 0 0 / 100% 12px repeat-y, radial-gradient(circle 4px at 100% 6px, #0000 97%, #000) 0 0 / 100% 12px repeat-y; mask-composite: intersect; }
+/* Airmail: the red and blue slanted stripes of an airmail envelope, drawn as a ring around the button. */
+[data-buttons='airmail'] .btn { border-width: 0; padding: calc(.7rem + 5px) calc(1.4rem + 5px); min-height: 0; }
+[data-buttons='airmail'] .btn::before { content: ''; position: absolute; inset: 0; border-radius: inherit; padding: 5px; background: repeating-linear-gradient(135deg, var(--c-red) 0 10px, var(--c-paper) 10px 20px, var(--c-sea) 20px 30px, var(--c-paper) 30px 40px); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); mask-composite: exclude; pointer-events: none; }
+[data-buttons='airmail'] .btn--ghost { background: var(--c-paper); }
+[data-buttons='airmail'] .btn--light { background: var(--c-ink); }
+/* Pill with arrow: a round arrow badge after the text. Buttons that already carry an icon keep just that. */
+[data-buttons='arrow'] .btn { padding-right: .55rem; }
+[data-buttons='arrow'] .btn::before { content: '\2192'; order: 2; display: grid; place-items: center; width: 28px; height: 28px; margin-left: .25rem; border-radius: 50%; background: var(--c-paper); color: var(--c-ink); font-weight: 800; }
+[data-buttons='arrow'] .btn--ghost::before { background: var(--c-ink); color: var(--c-paper); }
+[data-buttons='arrow'] .btn:has(svg)::before { display: none; }
+[data-buttons='arrow'] .btn:has(svg) { padding-right: 1.4rem; }
+@media (prefers-reduced-motion: reduce) { [data-buttons='hard'] .btn:hover { transform: none; } }
 .result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric, .related button, .field input, .field select, .field textarea, .shot button { border-radius: var(--radius); }
 .dialog .modal__panel { border-radius: var(--radius); }
 
