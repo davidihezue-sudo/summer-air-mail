@@ -114,7 +114,9 @@ dialog.modal { border: 0; padding: 0; background: transparent; color: var(--c-in
 dialog.modal::backdrop { background: rgb(23 50 63 / .6); backdrop-filter: blur(3px); }
 .modal__panel { position: relative; }
 .modal__close { position: absolute; top: 10px; right: 10px; z-index: 5; width: 48px; height: 48px; border-radius: 50%; border: 0; background: var(--c-paper); display: grid; place-items: center; box-shadow: var(--shadow); }
-.drawer { margin: 0 0 0 auto; height: 100dvh; width: max(190px, min(50vw, 320px)); }
+.drawer { margin: 0 0 0 auto; height: 100dvh; width: max(190px, min(50vw, 320px)); background: var(--c-sand); overflow: hidden; }
+/* iPhone Safari can fail to paint a panel that sits under a blurred, animated backdrop, so the phone menu uses a plain dim. */
+dialog.drawer::backdrop { -webkit-backdrop-filter: none; backdrop-filter: none; }
 .drawer .modal__panel { height: 100dvh; background: var(--c-sand); padding: 3.6rem 1rem 1.4rem; overflow: auto; overscroll-behavior: contain; }
 .drawer .modal__close { top: 6px; right: 6px; width: 44px; height: 44px; }
 .drawer__nav { display: grid; gap: .1rem; }
@@ -211,7 +213,7 @@ html[data-dialog-transition='slide-up'] dialog.modal[open] .modal__panel { anima
 html[data-dialog-transition='slide-down'] dialog.modal[open] .modal__panel { animation: modal-slide-down var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
 html[data-dialog-transition='flip'] dialog.modal[open] .modal__panel { animation: modal-flip var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; transform-origin: 50% 0; }
 /* The phone menu always slides in from its edge, in the chosen speed. */
-html:not([data-dialog-transition='none']) dialog.drawer[open] .modal__panel { animation: modal-drawer var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
+html:not([data-dialog-transition='none']) dialog.drawer[open] .modal__panel { animation: modal-drawer var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) backwards; }
 @media (prefers-reduced-motion: reduce) { dialog.modal[open] .modal__panel, dialog.modal[open]::backdrop { animation: none !important; } }
 [data-motion='none'] dialog.modal[open] .modal__panel, [data-motion='none'] dialog.modal[open]::backdrop { animation: none !important; }
 [data-radius] .btn { border-radius: var(--btn-radius); }
