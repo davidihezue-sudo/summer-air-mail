@@ -316,3 +316,7 @@ main { overflow-x: clip; }
   .toolfilters::-webkit-scrollbar { display: none; }
   .toolfilters .chip { flex: none; }
 }
+
+/* A looping clip used as a picture never shows the browser's own play button or controls, even when autoplay is held back. */
+video[muted][loop][playsinline]::-webkit-media-controls, video[muted][loop][playsinline]::-webkit-media-controls-start-playback-button,
+video[muted][loop][playsinline]::-webkit-media-controls-overlay-play-button, video[muted][loop][playsinline]::-webkit-media-controls-panel { display: none !important; -webkit-appearance: none; opacity: 0; pointer-events: none; }
