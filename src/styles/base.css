@@ -215,7 +215,9 @@ html[data-dialog-transition='slide-up'] dialog.modal[open] .modal__panel { anima
 html[data-dialog-transition='slide-down'] dialog.modal[open] .modal__panel { animation: modal-slide-down var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
 html[data-dialog-transition='flip'] dialog.modal[open] .modal__panel { animation: modal-flip var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; transform-origin: 50% 0; }
 /* The phone menu always slides in from its edge, in the chosen speed. */
-html:not([data-dialog-transition='none']) dialog.drawer[open] .modal__panel { animation: modal-drawer var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) backwards; }
+/* The phone menu fades in. Sliding a full-height layer made iPhone Safari show a blurry stand-in that slid across before the menu painted. */
+html:not([data-dialog-transition='none']) dialog.drawer[open] .modal__panel { animation: modal-fade 160ms ease-out backwards; }
+dialog.drawer[open]::backdrop { animation: none !important; }
 @media (prefers-reduced-motion: reduce) { dialog.modal[open] .modal__panel, dialog.modal[open]::backdrop { animation: none !important; } }
 [data-motion='none'] dialog.modal[open] .modal__panel, [data-motion='none'] dialog.modal[open]::backdrop { animation: none !important; }
 [data-radius] .btn { border-radius: var(--btn-radius); }
