@@ -186,7 +186,7 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 | Feature | Where to find it | What it does |
 | --- | --- | --- |
 | Faster loading | Automatic | The home page loads only what is on screen. Sections and pages load as they are reached, the animation library loads in pieces, and React sits in its own cached file, so the first load is about a third of its old size. |
-| Interactive results | Analytics & Results > Results Display | Visitors can switch between cards, a compare chart and a sortable table, and download the numbers as CSV. Each switch is optional and defaults are yours to set. |
+| Interactive results | Results Display (next to Analytics & Results) | Visitors can switch between cards, a compare chart and a sortable table, and download the numbers as CSV. Each switch is optional and defaults are yours to set. |
 | Flow diagrams, queries, dashboards, metric trees | Projects > a project > add a block | Click through a CRM or automation flow with branches, show the SQL or code behind a number with highlighting and a copy button, embed a live report, and draw a metric tree. Dashboards open only after a visitor clicks, and only from Looker Studio, Power BI, Tableau Public, Metabase, Grafana or Google Sheets. |
 | This site, in numbers | Visit Insights > Show some of this publicly, then Sections & Visibility | A section with real visit counts for the last 7 to 90 days. Off by default. It never includes your own visits, application links or the admin. |
 | Enquiry pipeline | Inbox | Messages move across New, Replied, Interview, Won and Closed, with notes and a follow-up date. Follow-ups that are due are flagged. |
