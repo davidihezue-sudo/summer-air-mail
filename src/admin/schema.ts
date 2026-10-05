@@ -72,7 +72,7 @@ export const PROJECT_FIELDS: Field[] = [
   },
   {
     kind: 'group', label: 'Cover image and gallery', fields: [
-      { kind: 'image', key: 'thumbnail', label: 'Cover image', help: 'Shown on the Polaroid card.' },
+      { kind: 'image', video: true, key: 'thumbnail', label: 'Cover image', help: 'Shown on the Polaroid card.' },
       { kind: 'list', key: 'media', label: 'Lead gallery (images or videos shown at the top)', item: (m: any) => m.caption || m.alt || m.src, make: () => ({ type: 'image', src: '', alt: '', caption: '' }), addLabel: 'Add item', fields: mediaItem() },
     ],
   },
@@ -331,7 +331,7 @@ export const PAGES: Record<string, PageForm> = {
         { kind: 'text', key: 'tagline', label: 'Tagline' }, { kind: 'textarea', key: 'intro', label: 'Professional summary (one or two sentences)' },
         { kind: 'text', key: 'location', label: 'Location' },
         { kind: 'text', key: 'signature', label: 'Handwritten signature text (defaults to your professional name)' },
-        { kind: 'image', key: 'profilePhoto', label: 'Profile photo' },
+        { kind: 'image', video: true, key: 'profilePhoto', label: 'Profile photo' },
         { kind: 'number', key: 'yearsExperience', label: 'Years of experience', min: 0 },
         { kind: 'text', key: 'availability', label: 'Availability message' }, { kind: 'text', key: 'employmentType', label: 'Employment preference' },
         { kind: 'strings', key: 'targetJobs', label: 'Roles you are looking for' },
@@ -369,8 +369,8 @@ export const PAGES: Record<string, PageForm> = {
         { kind: 'list', key: 'ctas', label: 'Buttons (up to three; links to hidden sections are skipped)', item: (c: any) => c.label, make: () => ({ label: '', target: 'contact' }), addLabel: 'Add button', fields: [{ kind: 'text', key: 'label', label: 'Button text' }, { kind: 'select', key: 'target', label: 'Goes to', options: SECTION_TARGETS }] },
       ] },
       { title: 'Hero images', base: 'portfolio.profile', fields: [
-        { kind: 'image', key: 'heroCutout', label: 'Portrait cut-out (transparent PNG or WebP of you)', help: 'Your real photograph is used as supplied.' },
-        { kind: 'image', key: 'heroFlowers', label: 'Decorative image (optional, transparent)', help: 'Leave empty to use the built-in artwork for each season.' },
+        { kind: 'image', video: true, key: 'heroCutout', label: 'Portrait cut-out (transparent PNG or WebP of you)', help: 'Your real photograph is used as supplied.' },
+        { kind: 'image', video: true, key: 'heroFlowers', label: 'Decorative image (optional, transparent)', help: 'Leave empty to use the built-in artwork for each season.' },
       ] },
       { title: 'Stamp', base: 'portfolio.theme', fields: [{ kind: 'text', key: 'stampNumeral', label: 'Stamp number (shown in red)', maxLength: 4 }] },
     ],
@@ -483,7 +483,7 @@ export const PAGES: Record<string, PageForm> = {
     title: 'Mentoring & Training', intro: 'Optional. Turn the section on under Sections & Visibility once this is filled in.',
     blocks: [{ base: 'portfolio.mentoring', fields: [
       { kind: 'text', key: 'heading', label: 'Heading' }, { kind: 'rich', key: 'overview', label: 'Course overview' }, { kind: 'strings', key: 'topics', label: 'Topics' }, { kind: 'strings', key: 'outcomes', label: 'Learning outcomes' },
-      { kind: 'text', key: 'format', label: 'Format' }, { kind: 'image', key: 'instructorPhoto', label: 'Instructor photo' }, { kind: 'bool', key: 'showLiveBadge', label: 'Show a Live badge (only when a real session is on)' },
+      { kind: 'text', key: 'format', label: 'Format' }, { kind: 'image', video: true, key: 'instructorPhoto', label: 'Instructor photo' }, { kind: 'bool', key: 'showLiveBadge', label: 'Show a Live badge (only when a real session is on)' },
     ] }],
   },
 }

@@ -1,4 +1,5 @@
 import { useId, useState, type ReactNode } from 'react'
+import { isVideoSrc } from '../utils/media'
 import { ArrowDown, ArrowUp, ChevronDown, Copy, ImagePlus, Plus, Trash2, X } from 'lucide-react'
 import type { ImageRef, SiteContent } from '../content/types'
 import { ICON_NAMES } from '../components/ui/iconMap'
@@ -22,7 +23,7 @@ export type Field =
   | (Base & { kind: 'select'; key: string; options: Opt[] | ((root: SiteContent) => Opt[]); custom?: boolean })
   | (Base & { kind: 'multi'; key: string; options: Opt[] | ((root: SiteContent) => Opt[]); custom?: boolean })
   | (Base & { kind: 'strings'; key: string; placeholder?: string; multiline?: boolean })
-  | (Base & { kind: 'image'; key: string })
+  | (Base & { kind: 'image'; key: string; /** Also accept a short video, shown as a silent looping clip. */ video?: boolean })
   | (Base & { kind: 'images'; key: string })
   | (Base & { kind: 'file'; key: string; accept: Accept })
   | (Base & { kind: 'tone'; key: string })
@@ -221,16 +222,17 @@ function ImageField({ f, base }: { f: Extract<Field, { kind: 'image' }>; base: s
   const { pick } = useMediaPicker()
   const img = value as ImageRef | null | undefined
   const choose = async () => {
-    const [a] = await pick({ accept: 'image' })
-    if (a) set(path, { src: a.url, alt: a.alt || img?.alt || '', width: a.width, height: a.height })
+    const [a] = await pick({ accept: f.video ? 'visual' : 'image' })
+    if (a) set(path, { src: a.url, alt: a.alt || img?.alt || '', width: a.width, height: a.height, ...(a.type === 'video' && a.poster ? { poster: a.poster } : {}) })
   }
   return (
     <Shell label={f.label} help={f.help}>
       {img?.src ? (
         <div className="aimage">
-          <img src={img.src} alt={img.alt} />
+          {isVideoSrc(img.src) ? <video src={img.src} poster={img.poster} muted loop playsInline autoPlay aria-label={img.alt} /> : <img src={img.src} alt={img.alt} />}
           <div className="aimage__body">
-            <label className="afield"><span>Alt text (describe the image)</span><input value={img.alt ?? ''} onChange={(e) => set(`${path}.alt`, e.target.value)} /></label>
+            {isVideoSrc(img.src) && <p className="ahelp">Short video: plays silently on a loop, like a living photo.</p>}
+            <label className="afield"><span>Alt text (describe the {isVideoSrc(img.src) ? 'video' : 'image'})</span><input value={img.alt ?? ''} onChange={(e) => set(`${path}.alt`, e.target.value)} /></label>
             <div className="arow">
               <button type="button" className="abtn" onClick={() => void choose()}>Replace</button>
               <button type="button" className="abtn abtn--danger" onClick={() => set(path, null)}>Remove</button>
@@ -238,7 +240,7 @@ function ImageField({ f, base }: { f: Extract<Field, { kind: 'image' }>; base: s
           </div>
         </div>
       ) : (
-        <button type="button" className="abtn" onClick={() => void choose()}><ImagePlus size={16} aria-hidden /> Choose or upload an image</button>
+        <button type="button" className="abtn" onClick={() => void choose()}><ImagePlus size={16} aria-hidden /> {f.video ? 'Choose or upload an image or short video' : 'Choose or upload an image'}</button>
       )}
     </Shell>
   )

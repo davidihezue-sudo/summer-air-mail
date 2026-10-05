@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import type { ImageRef, MediaSettings } from '../../content/types'
 import { clampRatio, ratioOf } from '../../utils/media'
+import { Visual } from './Visual'
 
 interface Props {
   image: ImageRef | null | undefined
@@ -29,10 +30,10 @@ export function FitImage({ image, ratio, fallbackRatio = 4 / 5, fit = 'smart', f
   const contain = fit === 'contain' || (fit === 'smart' && Math.abs(Math.log(n / frame)) > 0.12)
   return (
     <span className={`fit ${className}`} style={{ aspectRatio: String(frame) }} data-fill={fill}>
-      {contain && fill === 'blur' && <img className="fit__bg" src={image.src} alt="" aria-hidden loading="lazy" decoding="async" draggable={false} />}
-      <img
-        className="fit__img" data-fit={contain ? 'contain' : 'cover'} src={image.src} alt={image.alt} sizes={sizes} loading={eager ? 'eager' : 'lazy'} decoding="async" draggable={false}
-        onLoad={(e) => { if (!natural) setMeasured(e.currentTarget.naturalWidth / (e.currentTarget.naturalHeight || 1)) }}
+      {contain && fill === 'blur' && <Visual className="fit__bg" src={image.src} poster={image.poster} hidden />}
+      <Visual
+        className={`fit__img${contain ? " fit__img--contain" : ""}`} src={image.src} alt={image.alt} poster={image.poster} sizes={sizes} eager={eager}
+        onRatio={(r) => { if (!natural) setMeasured(r) }}
       />
     </span>
   )

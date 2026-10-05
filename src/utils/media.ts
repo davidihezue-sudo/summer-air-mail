@@ -13,6 +13,9 @@ const PLATFORM_SHAPE: Record<string, number> = {
 /** The text to show under a picture or video: its caption, or for a video with no caption the description written for it (a video has no alt text to hide it in). */
 export const mediaCaption = (m: { type: string; alt?: string; caption?: string }): string => (m.caption ?? '').trim() || (m.type === 'video' ? (m.alt ?? '').trim() : '')
 
+/** A short clip used where a picture goes: judged by the file name, which the upload always ends in .mp4, .webm or similar. */
+export const isVideoSrc = (src?: string | null): boolean => /\.(mp4|webm|mov|m4v|ogv)$/i.test((src ?? '').split(/[?#]/)[0])
+
 export const MIN_RATIO = 9 / 16
 export const MAX_RATIO = 2.4
 export const clampRatio = (r: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, Number.isFinite(r) && r > 0 ? r : 1))

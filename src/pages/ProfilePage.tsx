@@ -1,4 +1,5 @@
 import { useEffect } from 'react'
+import { Visual } from '../components/ui/Visual'
 import { Printer } from 'lucide-react'
 import { useContent } from '../hooks/useContent'
 import { getResults, getTools, getProjects } from '../content/selectors'
@@ -52,7 +53,7 @@ export function ProfilePage() {
               </p>
             )}
           </div>
-          {pp.showPhoto && pr.profilePhoto?.src && <img src={pr.profilePhoto.src} alt={pr.profilePhoto.alt || ''} className="pf__photo" />}
+          {pp.showPhoto && pr.profilePhoto?.src && <Visual src={pr.profilePhoto.src} poster={pr.profilePhoto.poster} alt={pr.profilePhoto.alt || ''} className="pf__photo" />}
         </header>
 
         {inc.summary && (hasValue(pr.intro) || pr.highlights.length > 0) && (

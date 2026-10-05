@@ -1,4 +1,6 @@
 import { ArrowUpRight, Download, FileText } from 'lucide-react'
+import { Visual } from '../ui/Visual'
+import { isVideoSrc } from '../../utils/media'
 import type { Block } from '../../content/types'
 import { useContent } from '../../hooks/useContent'
 import { AnimatedNumber } from '../ui/AnimatedNumber'
@@ -49,9 +51,13 @@ function BlockView({ b }: { b: Block }) {
       if (!b.image?.src) return null
       return (
         <figure className={`blk-fig ${b.type === 'screenshot' ? 'blk-fig--shot' : ''}`}>
-          <button type="button" onClick={() => zoomable([{ ...b.image!, caption: b.caption }], 0)} aria-label={`View full size: ${b.caption || b.image.alt || 'image'}`}>
-            <img src={b.image.src} alt={b.image.alt} width={b.image.width} height={b.image.height} loading="lazy" decoding="async" />
-          </button>
+          {isVideoSrc(b.image.src)
+            ? <Visual src={b.image.src} alt={b.image.alt} poster={b.image.poster} width={b.image.width} height={b.image.height} />
+            : (
+              <button type="button" onClick={() => zoomable([{ ...b.image!, caption: b.caption }], 0)} aria-label={`View full size: ${b.caption || b.image.alt || 'image'}`}>
+                <img src={b.image.src} alt={b.image.alt} width={b.image.width} height={b.image.height} loading="lazy" decoding="async" />
+              </button>
+            )}
           {b.caption && <figcaption>{b.caption}</figcaption>}
         </figure>
       )

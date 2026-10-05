@@ -7,8 +7,9 @@ import { useAdmin } from './store'
 import { Confirm } from './ui'
 import { RedactTool } from './RedactTool'
 
-export type Accept = 'image' | 'video' | 'pdf' | 'any'
-const matches = (a: MediaAsset, accept: Accept) => accept === 'any' || a.type === accept
+export type Accept = 'image' | 'video' | 'pdf' | 'any' | 'visual'
+/** 'visual' is a picture or a short video, for places that take either. */
+const matches = (a: MediaAsset, accept: Accept) => accept === 'any' || (accept === 'visual' ? a.type === 'image' || a.type === 'video' : a.type === accept)
 const fmtSize = (n: number) => (n > 1048576 ? `${(n / 1048576).toFixed(1)} MB` : `${Math.max(1, Math.round(n / 1024))} KB`)
 
 interface PickOptions { accept?: Accept; multiple?: boolean }
@@ -47,9 +48,20 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
   const [redact, setRedact] = useState<{ src: string; name: string; resolve: (b: Blob | null) => void } | null>(null)
   const [review, setReview] = useState(true)
   const [confirmDelete, setConfirmDelete] = useState<MediaAsset | null>(null)
+  const [unusedOnly, setUnusedOnly] = useState(false)
+  const [confirmBulk, setConfirmBulk] = useState(false)
+  const { content } = useAdmin()
   const input = useRef<HTMLInputElement>(null)
 
-  const list = useMemo(() => media.filter((a) => matches(a, type) && (!q || [a.filename, a.alt, a.caption, ...a.tags].join(' ').toLowerCase().includes(q.toLowerCase()))), [media, type, q])
+  // A file counts as used when saved content mentions it, or when it is the cover of a video that is used. The server checks again before deleting.
+  const used = useMemo(() => {
+    const text = JSON.stringify(content)
+    const set = new Set(media.filter((a) => text.includes(a.url)).map((a) => a.id))
+    for (const a of media) if (a.type === 'video' && a.poster && set.has(a.id)) { const c = media.find((x) => x.url === a.poster); if (c) set.add(c.id) }
+    return set
+  }, [content, media])
+  const unused = useMemo(() => media.filter((a) => !used.has(a.id) && matches(a, type)), [media, used, type])
+  const list = useMemo(() => media.filter((a) => matches(a, type) && (!unusedOnly || !used.has(a.id)) && (!q || [a.filename, a.alt, a.caption, ...a.tags].join(' ').toLowerCase().includes(q.toLowerCase()))), [media, type, q, unusedOnly, used])
 
   const uploadFiles = async (files: FileList | File[]) => {
     setError('')
@@ -101,10 +113,14 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
       <div className="amedia__bar">
         <input type="search" aria-label="Search media" placeholder="Search by name, description or tag" value={q} onChange={(e) => setQ(e.target.value)} />
         <select aria-label="File type" value={type} onChange={(e) => setType(e.target.value as Accept)} disabled={accept !== 'any'}>
-          <option value="any">All files</option><option value="image">Images</option><option value="video">Videos</option><option value="pdf">PDFs</option>
+          <option value="any">All files</option>{accept === 'visual' && <option value="visual">Images and videos</option>}<option value="image">Images</option><option value="video">Videos</option><option value="pdf">PDFs</option>
         </select>
         <button type="button" className="abtn abtn--primary" onClick={() => input.current?.click()}><Upload size={16} aria-hidden /> Upload</button>
-        <input ref={input} type="file" hidden multiple accept={accept === 'image' ? 'image/*' : accept === 'video' ? 'video/*' : accept === 'pdf' ? 'application/pdf' : 'image/*,video/*,application/pdf'} onChange={(e) => { if (e.target.files) void uploadFiles(e.target.files); e.target.value = '' }} />
+        <input ref={input} type="file" hidden multiple accept={accept === 'image' ? 'image/*' : accept === 'visual' ? 'image/*,video/*' : accept === 'video' ? 'video/*' : accept === 'pdf' ? 'application/pdf' : 'image/*,video/*,application/pdf'} onChange={(e) => { if (e.target.files) void uploadFiles(e.target.files); e.target.value = '' }} />
+      </div>
+      <div className="amedia__tools">
+        <label className="acheck"><input type="checkbox" checked={unusedOnly} onChange={(e) => setUnusedOnly(e.target.checked)} /> Show only files not used anywhere ({unused.length})</label>
+        {unused.length > 0 && <button type="button" className="abtn abtn--danger" onClick={() => setConfirmBulk(true)}><Trash2 size={14} aria-hidden /> Delete all {unused.length} unused</button>}
       </div>
       <label className="acheck"><input type="checkbox" checked={review} onChange={(e) => setReview(e.target.checked)} /> Review images for sensitive information before uploading (blur or cover names, numbers and faces)</label>
       <div
@@ -119,12 +135,13 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
       {list.length === 0 ? <p className="ahelp">No files yet.</p> : (
         <ul className="amedia__grid">
           {list.map((a) => (
-            <li key={a.id}>
+            <li key={a.id} className="amedia__cell">
               <button type="button" className={`amedia__item ${selected.includes(a.id) || detail?.id === a.id ? 'is-selected' : ''}`} onClick={() => toggle(a)} aria-pressed={selected.includes(a.id)} aria-label={`${a.filename}${a.alt ? `: ${a.alt}` : ''}`}>
                 {a.type === 'image' || a.poster ? <img src={a.type === 'image' ? a.url : a.poster} alt="" loading="lazy" /> : <span className="amedia__icon">{a.type === 'video' ? <Film size={32} aria-hidden /> : <FileText size={32} aria-hidden />}</span>}
                 <span className="amedia__name">{a.filename}</span>
-                <span className="amedia__meta">{a.type} · {fmtSize(a.size)}</span>
+                <span className="amedia__meta">{a.type} · {fmtSize(a.size)}{used.has(a.id) ? ' · in use' : ''}</span>
               </button>
+              <button type="button" className="amedia__del" onClick={() => setConfirmDelete(a)} disabled={used.has(a.id)} aria-label={used.has(a.id) ? `${a.filename} is in use and cannot be deleted` : `Delete ${a.filename}`} title={used.has(a.id) ? 'In use. Remove it from your content first.' : 'Delete this file'}><Trash2 size={15} aria-hidden /></button>
             </li>
           ))}
         </ul>
@@ -142,6 +159,20 @@ export function MediaLibrary({ accept = 'any', multiple, onChoose }: { accept?: 
         />
       )}
       {redact && <RedactTool src={redact.src} name={redact.name} onDone={(b) => redact.resolve(b)} />}
+      <Confirm
+        open={confirmBulk} title={`Delete ${unused.length} unused file${unused.length === 1 ? '' : 's'}?`} body="These files are not used by any of your content. They are removed from the library and from the server, and this cannot be undone. Files used by saved content, including the published site, are kept."
+        onCancel={() => setConfirmBulk(false)}
+        onConfirm={async () => {
+          setConfirmBulk(false); setError('')
+          let kept = 0
+          for (const a of unused) {
+            setBusy(`Deleting ${a.filename}`)
+            try { await api.deleteMedia(a.id); setMedia((m) => m.filter((x) => x.id !== a.id)) } catch { kept += 1 }
+          }
+          setBusy(''); void refreshMedia()
+          if (kept) setError(`${kept} file${kept === 1 ? ' was' : 's were'} kept because saved content still uses ${kept === 1 ? 'it' : 'them'}.`)
+        }}
+      />
       <Confirm
         open={!!confirmDelete} title="Delete this file?" body="It will be removed from the library and from the server. Files used by saved content cannot be deleted."
         onCancel={() => setConfirmDelete(null)}

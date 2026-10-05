@@ -14,7 +14,7 @@ import { Img } from '../ui/Img'
 import { hasValue, safeHref } from '../../utils/text'
 import { ShareButton } from '../layout/ShareButton'
 import { workUrl } from '../../utils/route'
-import { mediaCaption } from '../../utils/media'
+import { isVideoSrc, mediaCaption } from '../../utils/media'
 
 interface Props {
   project: Project | null
@@ -34,7 +34,7 @@ export function ProjectView({ project, focusCase, onClose, onOpen }: Props) {
 function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boolean; onOpen: (id: string) => void }) {
   const { content } = useContent()
   const locale = content.portfolio.site.locale
-  const media: MediaItem[] = project.media?.length ? project.media : project.thumbnail?.src ? [{ type: 'image', src: project.thumbnail.src, alt: project.thumbnail.alt }] : []
+  const media: MediaItem[] = project.media?.length ? project.media : project.thumbnail?.src ? [{ type: isVideoSrc(project.thumbnail.src) ? 'video' : 'image', src: project.thumbnail.src, alt: project.thumbnail.alt, ...(project.thumbnail.poster ? { poster: project.thumbnail.poster } : {}) }] : []
   const [i, setI] = useState(0)
   const stage = useRef<HTMLElement>(null)
   const root = useRef<HTMLDivElement>(null)

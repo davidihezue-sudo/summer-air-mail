@@ -1,4 +1,5 @@
 import type { ImageRef } from '../../content/types'
+import { Visual } from './Visual'
 
 interface Props {
   image: ImageRef | null | undefined
@@ -11,16 +12,6 @@ interface Props {
 export function Img({ image, className, eager, sizes }: Props) {
   if (!image?.src) return null
   return (
-    <img
-      className={className}
-      src={image.src}
-      alt={image.alt}
-      width={image.width}
-      height={image.height}
-      sizes={sizes}
-      loading={eager ? 'eager' : 'lazy'}
-      decoding="async"
-      draggable={false}
-    />
+    <Visual className={className} src={image.src} alt={image.alt} poster={image.poster} width={image.width} height={image.height} sizes={sizes} eager={eager} />
   )
 }

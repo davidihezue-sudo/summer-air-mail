@@ -176,9 +176,12 @@ export function createMedia(dir, kvIn) {
       const a = items.find((x) => x.id === id)
       if (!a) return { ok: false, status: 404, error: 'Not found.' }
       if (isUsed(a.url)) return { ok: false, status: 409, error: 'This file is used by saved content. Remove it from the content first.' }
-      items = items.filter((x) => x.id !== id)
+      const cover = a.type === 'video' && a.poster ? items.find((x) => x.url === a.poster) : null
+      const dropCover = cover && !isUsed(cover.url)
+      items = items.filter((x) => x.id !== id && !(dropCover && x.id === cover.id))
       await persist()
       await rm(join(uploads, a.url.replace('/uploads/', '')), { force: true })
+      if (dropCover) await rm(join(uploads, cover.url.replace('/uploads/', '')), { force: true })
       return { ok: true }
     },
     extname,

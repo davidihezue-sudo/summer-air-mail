@@ -12,6 +12,8 @@ export interface ImageRef {
   alt: string
   width?: number
   height?: number
+  /** Set when src is a short video: the still picture shown while it loads and where a video cannot play (share cards). */
+  poster?: string
 }
 
 export interface MediaItem {

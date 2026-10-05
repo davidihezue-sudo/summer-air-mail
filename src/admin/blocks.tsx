@@ -15,7 +15,7 @@ const caption: Field = { kind: 'text', key: 'caption', label: 'Caption (optional
 export const BLOCK_FIELDS: Record<BlockType, Field[]> = {
   heading: [{ kind: 'text', key: 'text', label: 'Heading' }, { kind: 'select', key: 'level', label: 'Size', options: [{ value: '2', label: 'Large' }, { value: '3', label: 'Small' }] }],
   paragraph: [{ kind: 'rich', key: 'text', label: 'Text' }],
-  image: [{ kind: 'image', key: 'image', label: 'Image' }, caption],
+  image: [{ kind: 'image', video: true, key: 'image', label: 'Image or short video' }, caption],
   gallery: [{ kind: 'images', key: 'images', label: 'Images' }, caption],
   video: [{ kind: 'file', key: 'src', label: 'Video', accept: 'video', help: 'Upload an MP4 or WebM, or paste a YouTube or Vimeo link. It never autoplays.' }, { kind: 'file', key: 'poster', label: 'Cover image', accept: 'image' }, { kind: 'text', key: 'title', label: 'Title' }, caption],
   reel: [{ kind: 'file', key: 'src', label: 'Reel or short video', accept: 'video', help: 'Vertical 9:16 works best. Paste a YouTube Shorts link or upload an MP4.' }, { kind: 'file', key: 'poster', label: 'Cover image', accept: 'image' }, { kind: 'text', key: 'title', label: 'Title' }, caption],

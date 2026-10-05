@@ -508,18 +508,20 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
       const c = pub?.content
       if (!c) return res.status(404).end()
       const key = decodeURIComponent(req.params[0])
+      /** A short video cannot go on a share card, so its still cover is used. With no cover the card has no picture. */
+      const still = (im) => (/\.(mp4|webm|mov|m4v|ogv)$/i.test(im?.src ?? '') ? im?.poster : im?.src)
       const p = c.portfolio
       const host = (p.site?.url ? new URL(p.site.url).host : req.hostname) || ''
       const name = p.profile?.preferredName || p.profile?.fullName || ''
       let card
       let m
-      if (key === 'home') card = { title: p.profile?.fullName || p.seo?.title || '', kicker: 'Portfolio', subtitle: p.profile?.title || p.seo?.description || '', src: p.profile?.profilePhoto?.src }
+      if (key === 'home') card = { title: p.profile?.fullName || p.seo?.title || '', kicker: 'Portfolio', subtitle: p.profile?.title || p.seo?.description || '', src: still(p.profile?.profilePhoto) }
       else if ((m = /^work-(.+)$/.exec(key))) {
         const x = (c.projects ?? []).find((q) => q.id === m[1] && q.hidden !== true)
-        if (x) card = { title: x.title, kicker: x.caseStudy ? 'Case study' : x.category || 'Project', subtitle: x.description || x.client, src: x.thumbnail?.src }
+        if (x) card = { title: x.title, kicker: x.caseStudy ? 'Case study' : x.category || 'Project', subtitle: x.description || x.client, src: still(x.thumbnail) }
       } else if ((m = /^note-(.+)$/.exec(key))) {
         const n = (c.notes ?? []).find((q) => q.slug === m[1] && q.hidden !== true && q.title)
-        if (n) card = { title: n.title, kicker: 'Note', subtitle: n.summary, src: n.cover?.src }
+        if (n) card = { title: n.title, kicker: 'Note', subtitle: n.summary, src: still(n.cover) }
       }
       if (!card) return res.status(404).end()
       const stamp = `${key}|${pub.rev}|${host}`

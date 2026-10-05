@@ -36,7 +36,7 @@ const defs: EntityDef[] = [
     fields: [
       { kind: 'text', key: 'title', label: 'Title' }, { kind: 'text', key: 'slug', label: 'Address (letters, numbers, dashes)', help: 'Becomes /notes/<this>. Notes without an address stay hidden.', maxLength: 80 },
       { kind: 'date', key: 'date', label: 'Date' }, { kind: 'textarea', key: 'summary', label: 'Summary (shown on cards and in the feed)' },
-      { kind: 'rich', key: 'body', label: 'Body', rows: 14 }, { kind: 'image', key: 'cover', label: 'Cover image' }, { kind: 'strings', key: 'tags', label: 'Tags' },
+      { kind: 'rich', key: 'body', label: 'Body', rows: 14 }, { kind: 'image', video: true, key: 'cover', label: 'Cover image' }, { kind: 'strings', key: 'tags', label: 'Tags' },
       { kind: 'group', label: 'Search and sharing', open: false, fields: [{ kind: 'text', key: 'seoTitle', label: 'Page title' }, { kind: 'textarea', key: 'seoDescription', label: 'Description' }] },
     ],
   },
