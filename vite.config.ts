@@ -3,7 +3,7 @@ import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
 import { portfolio } from './src/content/portfolio.config'
 import { THEMES } from './src/themes'
-import { buildCsp, buildRobots, buildSitemap, injectHead } from './shared/head.mjs'
+import { buildCsp, buildManifest, buildRobots, buildSitemap, injectHead } from './shared/head.mjs'
 
 /** Static fallback: bakes SEO tags from the bundled defaults. The Node server regenerates them from published content. */
 function seoPlugin(): Plugin {
@@ -16,6 +16,9 @@ function seoPlugin(): Plugin {
       this.emitFile({ type: 'asset', fileName: 'robots.txt', source: buildRobots(portfolio) })
       const map = buildSitemap(portfolio)
       if (map) this.emitFile({ type: 'asset', fileName: 'sitemap.xml', source: map })
+      // Colours are the design tokens the page already uses for theme-color; the server swaps in the published names.
+      const sand = THEMES.summer.colors.sand
+      this.emitFile({ type: 'asset', fileName: 'manifest.webmanifest', source: JSON.stringify(buildManifest(portfolio, { theme: sand, background: sand }), null, 2) })
       this.emitFile({ type: 'asset', fileName: 'csp.txt', source: buildCsp(portfolio) })
     },
   }

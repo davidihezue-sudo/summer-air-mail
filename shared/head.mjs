@@ -55,11 +55,41 @@ export function buildJsonLd(p) {
   }
 }
 
+/** Names for the home-screen app, from settings the owner already edits: the SEO title and the profile name. */
+export function appNames(p) {
+  const person = clean(p?.profile?.preferredName) || clean(p?.profile?.fullName)
+  const name = clean(p?.seo?.title) || person || 'Portfolio'
+  return { name, shortName: person || name }
+}
+
+/** Web app manifest for "Add to Home Screen". Colours come from the design tokens, passed in by the caller. */
+export function buildManifest(p, colors = {}) {
+  const { name, shortName } = appNames(p)
+  return {
+    id: '/',
+    name,
+    short_name: shortName,
+    description: clean(p?.seo?.description) || undefined,
+    lang: String(p?.site?.locale ?? 'en-GB'),
+    start_url: '/',
+    scope: '/',
+    display: 'standalone',
+    ...(colors.background ? { background_color: colors.background } : {}),
+    ...(colors.theme ? { theme_color: colors.theme } : {}),
+    icons: [
+      { src: '/icon-192.png', sizes: '192x192', type: 'image/png', purpose: 'any' },
+      { src: '/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'any' },
+      { src: '/icon-maskable-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+    ],
+  }
+}
+
 /** The SEO block placed between the head markers in index.html. */
 export function buildHeadTags(p) {
   const m = buildMeta(p)
   const tags = [
     `<title>${esc(m.title)}</title>`,
+    `<meta name="apple-mobile-web-app-title" content="${esc(appNames(p).shortName)}" />`,
     `<meta name="description" content="${esc(m.description)}" />`,
     m.keywords ? `<meta name="keywords" content="${esc(m.keywords)}" />` : '',
     `<meta name="robots" content="${m.robots}" />`,

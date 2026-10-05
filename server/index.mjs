@@ -19,7 +19,7 @@ import { createBackups, backupStream } from './backup.mjs'
 import { createLimiter, parseContact } from './routes.mjs'
 import { s3FromEnv } from './s3.mjs'
 import { restoreBackup } from './restore.mjs'
-import { buildCsp, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
+import { buildCsp, buildManifest, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
 
 function parseCookies(header = '') {
   const out = {}
@@ -436,10 +436,24 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     else res.status(404).end()
   })
 
+  // Names follow the published settings; colours come from the manifest the build wrote from the design tokens.
+  app.get('/manifest.webmanifest', async (_req, res) => {
+    let built = {}
+    try { built = JSON.parse(await readFile(join(distDir, 'manifest.webmanifest'), 'utf8')) } catch { /* not built yet */ }
+    const p = portfolioNow()
+    const manifest = p ? buildManifest(p, { theme: built.theme_color, background: built.background_color }) : built
+    if (!p && !Object.keys(built).length) return res.status(404).end()
+    res.set('Cache-Control', 'no-cache').type('application/manifest+json').send(JSON.stringify(manifest))
+  })
+
   if (existsSync(distDir)) {
     app.use(express.static(distDir, {
       index: false, dotfiles: 'deny',
-      setHeaders: (res, path) => { if (path.includes(`${join(distDir, 'assets')}`)) res.set('Cache-Control', 'public, max-age=31536000, immutable') },
+      setHeaders: (res, path) => {
+        if (path.includes(`${join(distDir, 'assets')}`)) res.set('Cache-Control', 'public, max-age=31536000, immutable')
+        // Home-screen icons keep their names, so a week is long enough to save requests and short enough to pick up a new icon.
+        else if (/(^|[\\/])(apple-touch-icon|icon-\d+|icon-maskable-\d+)\.png$/.test(path)) res.set('Cache-Control', 'public, max-age=604800')
+      },
     }))
     app.get(/^(?!\/(api|uploads)\/).*/, async (req, res) => {
       try {

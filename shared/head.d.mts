@@ -10,3 +10,5 @@ export function buildFeed(content: unknown): string
 export function buildFullSitemap(content: unknown): string
 export function pageSeo(content: unknown, path: string): null | { missing: true } | { missing?: false; title: string; description: string; image: string; canonical: string }
 export function withSeo(portfolio: any, seo: { title: string; description: string; image: string; canonical: string }): any // eslint-disable-line @typescript-eslint/no-explicit-any
+export function appNames(p: any): { name: string; shortName: string }
+export function buildManifest(p: any, colors?: { theme?: string; background?: string }): Record<string, unknown>

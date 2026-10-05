@@ -12,6 +12,7 @@
     "lint": "eslint src server shared scripts",
     "test": "vitest run",
     "images": "node scripts/optimize-images.mjs",
+    "icons": "node scripts/gen-icons.mjs",
     "smoke": "node scripts/smoke.mjs",
     "dev:server": "node --watch server/index.mjs",
     "dev:all": "node scripts/dev-all.mjs",

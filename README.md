@@ -57,6 +57,7 @@ Other commands:
 | `npm run check` | Type-check, lint, unit tests and build |
 | `npm test` | Unit and server tests |
 | `npm run images` | Convert JPG/PNG in `public/images` to WebP |
+| `npm run icons` | Redraw the home-screen icons in `public/` from `public/favicon.svg` (only needed if you change that file) |
 | `npm run smoke` | Browser checks of the public site (needs `npm run build` and `npm run dev` running) |
 | `npm run smoke:admin` | Browser checks of the whole admin workflow (needs `npm run build`) |
 | `npm run a11y` | axe-core accessibility audit of the site and the admin (needs `npm run build` and `npm run dev`) |
@@ -283,6 +284,8 @@ It stores the username and password (hashed) in the database, so the live site r
 **5. Move your content up.** On your computer: Admin > Server & Backups > **Download a backup now**. Then open `https://kidochukwuihezue.ca/admin`, sign in, and under Server & Backups use **Restore from a backup** with that zip. Your content, images, messages and settings appear on the live site. Press Publish if the draft says it is unpublished.
 
 **6. Check it.** In the admin open **SEO** and confirm the website address is `https://kidochukwuihezue.ca` (the server already supplies it until you do), then look at the live site on your phone.
+
+**Add to Home Screen.** Visitors can add the site to their iPhone or Android home screen and it opens full screen like an app. The icon is `public/favicon.svg`, drawn at the sizes phones need (`apple-touch-icon.png`, `icon-192.png`, `icon-512.png` and a `icon-maskable-512.png` with extra margin so Android can crop it). The app name is your SEO title and the label under the icon is your preferred name (or full name), so both change when you edit them in the admin and publish. Colours match the site's cream. On iPhone: Share, then Add to Home Screen. On Android: the browser menu, then Install app.
 
 **After that.** Every time you `git push` to GitHub, Render rebuilds and updates the site by itself. Your content is in the database and your images are on the disk, so deploying never changes them. Daily backups are on; download one now and then.
 
