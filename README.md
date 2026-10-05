@@ -383,7 +383,7 @@ tests/              Unit and server tests
 
 **Storage.** Content is stored in one JSON file (`data/content.json`) with atomic writes, a backup copy and the last 20 published versions. That is reliable for one server and one editor. See [Known limits](#known-limits) for moving to a database.
 
-**Performance.** Lighthouse on the production build (throttled mobile / desktop): Performance 93 / 99, Accessibility 100 / 100, Best Practices 100 / 100, SEO 100 / 100. Responses are gzip compressed, sections below the first screen are code split, project views and the image viewer load on first use, fonts are self-hosted, uploaded photos are resized and converted to WebP, and videos load only when played.
+**Performance.** The main script is about 150 KB (55 KB compressed), down from 510 KB: the animation engine loads after the first screen, React is its own cached file, and every section below the first screen and every page other than the home page loads on demand. Lighthouse on an earlier build of the production site (throttled mobile / desktop): Performance 93 / 99, Accessibility 100 / 100, Best Practices 100 / 100, SEO 100 / 100. Responses are gzip compressed, sections below the first screen are code split, project views and the image viewer load on first use, fonts are self-hosted, uploaded photos are resized and converted to WebP, and videos load only when played.
 
 **Fonts.** Italiana, Pinyon Script and Figtree, self-hosted through Fontsource.
 

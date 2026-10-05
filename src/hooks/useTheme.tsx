@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
-import { MotionConfig } from 'framer-motion'
+import { LazyMotion, MotionConfig } from 'framer-motion'
 import { useContent } from './useContent'
 import { useMediaQuery } from './useMediaQuery'
 import { resolveSeason, resolveTheme, type ResolvedTheme } from '../themes/seasonManager'
@@ -9,6 +9,8 @@ import { resolveMotion, type MotionPlan } from '../motion/motion'
 import { applyTheme } from '../utils/theme'
 import type { Level, ProfessionalIntensity, SeasonName } from '../content/types'
 import type { SeasonCopy } from '../themes/types'
+
+const loadMotionFeatures = () => import('../motion/features').then((m) => m.default)
 
 const NEUTRAL: SeasonCopy = {
   servicesTitle: 'Services',
@@ -110,7 +112,9 @@ export function ThemeProvider({ preview, children }: { preview?: ThemePreview; c
 
   return (
     <Ctx.Provider value={state}>
-      <MotionConfig reducedMotion={state.plan.reduced ? 'always' : 'never'}>{children}</MotionConfig>
+      <LazyMotion features={loadMotionFeatures} strict>
+        <MotionConfig reducedMotion={state.plan.reduced ? 'always' : 'never'}>{children}</MotionConfig>
+      </LazyMotion>
     </Ctx.Provider>
   )
 }

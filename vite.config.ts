@@ -26,7 +26,16 @@ function seoPlugin(): Plugin {
 
 export default defineConfig({
   plugins: [react(), seoPlugin()],
-  build: { target: 'es2022', sourcemap: false },
+  build: {
+    target: 'es2022',
+    sourcemap: false,
+    rolldownOptions: {
+      output: {
+        // React is its own file so it stays cached across deploys of the site's own code.
+        codeSplitting: { groups: [{ name: 'react', test: /node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 20 }] },
+      },
+    },
+  },
   // Object form on purpose: the string shorthand sets changeOrigin, which rewrites Host and breaks the admin origin check.
   server: { proxy: { '/api': { target: 'http://127.0.0.1:8787', changeOrigin: false }, '/uploads': { target: 'http://127.0.0.1:8787', changeOrigin: false } } },
   preview: { proxy: { '/api': { target: 'http://127.0.0.1:8787', changeOrigin: false }, '/uploads': { target: 'http://127.0.0.1:8787', changeOrigin: false } } },

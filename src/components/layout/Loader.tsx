@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { motion } from 'framer-motion'
+import * as mo from 'framer-motion/m'
 import { PostMark } from '../ui/art'
 
 const KEY = 'sam-intro-seen'
@@ -35,7 +35,7 @@ export function Loader({ name, label, skip }: { name: string; label: string; ski
   if (!show) return null
   return (
     <div className={`loader ${leaving ? 'is-leaving' : ''}`} aria-hidden>
-      <motion.div
+      <mo.div
         className="loader__mark"
         initial={{ scale: 1.8, rotate: -16, opacity: 0 }}
         animate={{ scale: 1, rotate: -6, opacity: 1 }}
@@ -45,7 +45,7 @@ export function Loader({ name, label, skip }: { name: string; label: string; ski
         <span className="loader__name">{name}</span>
         <svg className="loader__lines" viewBox="0 0 300 60" aria-hidden>
           {[10, 24, 38, 52].map((y, i) => (
-            <motion.path
+            <mo.path
               key={y}
               d={`M0 ${y}c25-8 50 8 75 0s50-8 75 0 50 8 75 0 50-8 75 0`}
               stroke="var(--c-red)"
@@ -57,7 +57,7 @@ export function Loader({ name, label, skip }: { name: string; label: string; ski
             />
           ))}
         </svg>
-      </motion.div>
+      </mo.div>
     </div>
   )
 }

@@ -9,10 +9,13 @@ import { useAnalytics } from './utils/analytics'
 import { configureTracking, track } from './utils/track'
 import { LangProvider } from './i18n/useT'
 import { parseRoute, isPreviewMode } from './utils/route'
-import { ProfilePage } from './pages/ProfilePage'
-import { NotePage } from './pages/NotePage'
+import { Suspense, lazy } from 'react'
 import { NotFound } from './pages/NotFound'
-import { Maintenance } from './pages/Maintenance'
+
+// Pages other than the home page load only when someone goes to them.
+const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const NotePage = lazy(() => import('./pages/NotePage').then((m) => ({ default: m.NotePage })))
+const Maintenance = lazy(() => import('./pages/Maintenance').then((m) => ({ default: m.Maintenance })))
 import type { SeasonName, SiteContent } from './content/types'
 
 const SEASONS: SeasonName[] = ['spring', 'summer', 'autumn', 'winter']
@@ -118,7 +121,7 @@ export default function Root({ initial }: { initial: LoadedContent }) {
       <LangProvider pack={pack} languages={languages} lang={pack ? lang : ''} setLang={setLang}>
         <ThemeProvider preview={preview}>
           <Shell source={initial.source} preview={isPreview} greeting={appState.status === 'ok' && appState.app.greeting.enabled ? appState.app.greeting.text : ''}>
-            {page}
+            <Suspense fallback={null}>{page}</Suspense>
           </Shell>
         </ThemeProvider>
       </LangProvider>

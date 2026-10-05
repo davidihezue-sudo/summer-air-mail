@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import * as mo from 'framer-motion/m'
 import type { Metric } from '../../content/types'
 import { useMotion } from '../../hooks/useMotion'
 
@@ -9,7 +9,7 @@ export function MetricBar({ metric, locale, bare }: { metric: Metric; locale: st
   const change = metric.baseline && metric.baseline > 0 ? ((metric.result - metric.baseline) / metric.baseline) * 100 : null
   const bar = (value: number, cls: string) => (
     <div className="metric__track">
-      <motion.div
+      <mo.div
         className={`metric__bar ${cls}`}
         initial={reduced ? false : { width: 0 }}
         whileInView={{ width: `${(value / max) * 100}%` }}

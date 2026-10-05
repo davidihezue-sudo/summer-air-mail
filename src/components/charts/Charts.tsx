@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import * as mo from 'framer-motion/m'
 import type { ChartPoint } from '../../content/types'
 import { useMotion } from '../../hooks/useMotion'
 
@@ -40,7 +40,7 @@ export function LineChart(props: ChartProps) {
       <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label={summary} className="chart__svg">
         <line x1={padL} x2={W - padR} y1={H - padB} y2={H - padB} stroke="currentColor" opacity=".25" />
         <path d={area} fill="var(--c-green)" opacity=".1" />
-        <motion.path
+        <mo.path
           d={d} fill="none" stroke="var(--c-green)" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"
           initial={reduced ? false : { pathLength: 0 }} whileInView={{ pathLength: 1 }} viewport={{ once: true }} transition={{ duration: 1.2, ease: 'easeOut' }}
         />
@@ -76,7 +76,7 @@ export function BarChart(props: ChartProps) {
           const cx = 16 + slot * i + slot / 2
           return (
             <g key={p.label}>
-              <motion.rect
+              <mo.rect
                 x={cx - bw / 2} width={bw} rx="4" fill={i === points.length - 1 ? 'var(--c-green)' : 'var(--c-stone)'}
                 initial={reduced ? false : { height: 0, y: H - padB }} whileInView={{ height: h, y: H - padB - h }} viewport={{ once: true }} transition={{ duration: 0.9, delay: i * 0.08 }}
                 {...(reduced ? { y: H - padB - h, height: h } : {})}

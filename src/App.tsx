@@ -14,10 +14,6 @@ import { useT } from './i18n/useT'
 import { Decor } from './components/layout/Decor'
 import { Festive } from './components/layout/Festive'
 import { Hero } from './components/hero/Hero'
-import { RecruiterOverview } from './components/about/RecruiterOverview'
-import { About } from './components/about/About'
-import { Services } from './components/services/Services'
-import { Contact } from './components/contact/Contact'
 import { Footer } from './components/footer/Footer'
 import { ViewerProvider } from './components/projects/Viewer'
 
@@ -28,10 +24,10 @@ const lazySection = <K extends string>(load: () => Promise<Record<K, SectionComp
 // Everything below the first screen is code split.
 const REGISTRY: Record<SectionType, SectionComponent> = {
   hero: Hero,
-  overview: RecruiterOverview,
-  about: About,
-  services: Services,
-  contact: Contact,
+  overview: lazySection(() => import('./components/about/RecruiterOverview'), 'RecruiterOverview'),
+  about: lazySection(() => import('./components/about/About'), 'About'),
+  services: lazySection(() => import('./components/services/Services'), 'Services'),
+  contact: lazySection(() => import('./components/contact/Contact'), 'Contact'),
   skills: lazySection(() => import('./components/skills/Skills'), 'Skills'),
   platforms: lazySection(() => import('./components/skills/Platforms'), 'Platforms'),
   process: lazySection(() => import('./components/strategy/Process'), 'Process'),

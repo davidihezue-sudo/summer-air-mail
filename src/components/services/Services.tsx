@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react'
-import { motion } from 'framer-motion'
+import * as mo from 'framer-motion/m'
 import { useContent } from '../../hooks/useContent'
 import { useMotion } from '../../hooks/useMotion'
 import { useTheme } from '../../hooks/useTheme'
@@ -58,7 +58,7 @@ export function Services({ config }: { config: SectionConfig }) {
                   {reduced ? (
                     <button type="button" className="towel__item" style={{ ...style, rotate: `${rot}deg` }} onClick={() => setActive(s)}>{body}</button>
                   ) : (
-                    <motion.button
+                    <mo.button
                       type="button" className="towel__item" style={style}
                       initial={{ y: -320, opacity: 0, rotate: rot * 4 }}
                       whileInView={{ y: 0, opacity: 1, rotate: rot }}
@@ -71,7 +71,7 @@ export function Services({ config }: { config: SectionConfig }) {
                       onClick={() => { if (!dragged.current) setActive(s) }}
                     >
                       {body}
-                    </motion.button>
+                    </mo.button>
                   )}
                 </li>
               )
