@@ -484,6 +484,8 @@ export interface SeasonSettings {
   overrides: Record<SeasonName, SeasonOverride>
 }
 
+export type DialogTransition = 'none' | 'fade' | 'scale' | 'zoom' | 'slide-up' | 'slide-down' | 'flip'
+
 /** A celebration changes the look of the site for a few days: its own colours, falling decorations and a greeting. */
 export interface Celebration {
   id: string
@@ -642,7 +644,10 @@ export interface DesignSettings {
   colorMode: 'light' | 'dark' | 'system'
   /** Show a light and dark switch to visitors. */
   colorToggle: boolean
-  dialogAnimation: boolean
+  /** How every pop-up (project, image viewer, service details, menu) opens. */
+  dialogTransition: DialogTransition
+  /** How long the opening takes. */
+  dialogSpeed: 'fast' | 'normal' | 'slow'
   readingProgress: boolean
   /** Look of cards across the site. */
   cards: 'soft' | 'flat' | 'outlined' | 'glass'

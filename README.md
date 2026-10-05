@@ -95,6 +95,7 @@ Edits save automatically as a **private draft**. Nothing is public until you pre
 | Resume / CV | Upload your CV. The Download CV buttons appear only when a file is set and enabled |
 | Social Links, Contact | Links; your email, phone and WhatsApp (only on Contact, so there is one place to change them); availability (full-time, contract, remote and so on), recruiter questions |
 | Appearance | Professional intensity, maximum animation, fonts |
+| Design | Corner roundness, spacing, shadows, cards, text size, and **how pop-ups open** (grow, fade, zoom, slide up or down, tilt, or none) and how fast |
 | Seasons, Celebrations | Season mode, start dates, colours, decorations, fonts, images and a live preview. Celebrations (Christmas, Boxing Day, New Year and your own) change the look for a few days a year |
 | Sections & Visibility | Drag to reorder, switch on or off, rename, change headings, colours and images, duplicate, add text sections |
 | Navigation | Automatic or custom menu with your own labels, order and links |
@@ -194,7 +195,7 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 | Per card customization | Portfolio, Testimonials, Results, Design | Each project has a card label and accent colour; testimonials and results have an accent colour; Design > Cards switches every card between soft, flat, outlined and frosted glass. |
 | Cursor effect | Look and layout > Cursor effect | 14 styles (bubbles, water drop, ripples, ring, circle, blob, spotlight, halo, comet, sparkles, crosshair, seasonal, emoji, your own image), size, colour, opacity, smoothing, trail length, blend, where it shows, which professional modes allow it, tap ripple on touch screens. Also sets the hero reveal circle size. Live preview as you edit. |
 | Clickable strategy notes | Capabilities > Strategy Framework | Each sticky note says "Tap to open", with an Open all button and an editable hint line. |
-| Design | Look and layout > Design | Corner roundness, button shape, spacing, text size, shadows, outline weight, heading case, pop-up animation, scroll progress. |
+| Design | Look and layout > Design | Corner roundness, button shape, spacing, text size, shadows, outline weight, heading case, how pop-ups open and how fast, scroll progress. |
 | Dark mode | Design > Light and dark | Always light, always dark, or follow the visitor's device, with an optional visitor switch. Every season gets a dark version derived from its own colours, and every pairing is contrast tested. |
 | Section styling | Sections & Visibility > any section | Spacing, edge shape, background pattern, width, and the arrangement (grid, list, carousel) for testimonials, notes and journey. |
 | Saved looks | Look and layout > Saved Looks | Save the current professional intensity, season setting, design and hero layout; apply in one click. |

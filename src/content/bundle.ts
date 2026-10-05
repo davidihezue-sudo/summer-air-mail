@@ -72,6 +72,9 @@ export function normalizeSections(stored: unknown): SectionConfig[] {
 export function normalizeContent(raw: unknown): SiteContent {
   const r = isObj(raw) ? raw : {}
   const p = mergeDefaults(baseContent.portfolio, r.portfolio)
+  // The old on/off switch "Animate pop-ups" became a choice of transition. Someone who had it off keeps pop-ups plain.
+  const oldDesign = isObj(r.portfolio) && isObj(r.portfolio.design) ? r.portfolio.design : null
+  if (oldDesign && oldDesign.dialogAnimation === false && oldDesign.dialogTransition === undefined) p.design.dialogTransition = 'none'
   p.sections = normalizeSections(isObj(r.portfolio) ? r.portfolio.sections : undefined)
   const has = (k: string) => Array.isArray(r[k])
   return {

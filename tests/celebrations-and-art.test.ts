@@ -222,3 +222,26 @@ describe('tools strip', () => {
     expect(fields.some((f) => f.key === 'logosBand')).toBe(true)
   })
 })
+
+describe('pop-up transitions', () => {
+  const choices = ['none', 'fade', 'scale', 'zoom', 'slide-up', 'slide-down', 'flip']
+  it('defaults to a gentle grow, at normal speed', () => {
+    expect(baseContent.portfolio.design).toMatchObject({ dialogTransition: 'scale', dialogSpeed: 'normal' })
+  })
+  it('keeps pop-ups plain for someone who had the old switch off, and leaves everyone else on the default', () => {
+    expect(normalizeContent({ portfolio: { design: { dialogAnimation: false } } }).portfolio.design.dialogTransition).toBe('none')
+    expect(normalizeContent({ portfolio: { design: { dialogAnimation: true } } }).portfolio.design.dialogTransition).toBe('scale')
+    expect(normalizeContent({ portfolio: { design: { dialogAnimation: false, dialogTransition: 'fade' } } }).portfolio.design.dialogTransition).toBe('fade')
+  })
+  it('offers every transition in the admin and has CSS for each one', async () => {
+    const { PAGES } = await import('../src/admin/schema')
+    await import('../src/admin/schemaExtra')
+    const fields = PAGES.design.blocks.flatMap((b) => b.fields) as { key?: string; options?: { value: string }[] }[]
+    expect(fields.find((f) => f.key === 'dialogTransition')?.options?.map((o) => o.value).sort()).toEqual([...choices].sort())
+    expect(fields.find((f) => f.key === 'dialogSpeed')?.options?.map((o) => o.value)).toEqual(['fast', 'normal', 'slow'])
+    const { readFileSync } = await import('node:fs')
+    const css = readFileSync(join(__dirname, '..', 'src/styles/base.css'), 'utf8')
+    for (const c of choices.filter((x) => x !== 'none')) expect(css, c).toContain(`[data-dialog-transition='${c}'] dialog.modal[open] .modal__panel`)
+    expect(css).toContain('prefers-reduced-motion: reduce')
+  })
+})

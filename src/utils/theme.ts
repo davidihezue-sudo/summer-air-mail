@@ -76,7 +76,8 @@ export function applyTheme(resolved: ResolvedTheme, portfolio: Portfolio, plan: 
   root.dataset.heroBg = portfolio.hero.background
   root.dataset.heroDecor = String(portfolio.hero.decorativeElements)
   root.dataset.headingCase = d.headingCase
-  root.dataset.dialogAnim = String(d.dialogAnimation)
+  root.dataset.dialogTransition = d.dialogTransition
+  root.dataset.dialogSpeed = d.dialogSpeed
   root.dataset.cards = d.cards
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', colors.sand)
 }

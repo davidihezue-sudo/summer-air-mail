@@ -163,7 +163,12 @@ Object.assign(PAGES, {
         { kind: 'select', key: 'borderWeight', label: 'Outline weight', options: [{ value: 'thin', label: 'Thin' }, { value: 'normal', label: 'Normal' }, { value: 'bold', label: 'Bold' }] },
         { kind: 'select', key: 'headingCase', label: 'Headings', options: [{ value: 'normal', label: 'As written' }, { value: 'upper', label: 'Capitals' }] },
         { kind: 'select', key: 'cards', label: 'Cards', options: [{ value: 'soft', label: 'Soft shadow' }, { value: 'flat', label: 'Flat' }, { value: 'outlined', label: 'Outlined' }, { value: 'glass', label: 'Frosted glass' }] },
-        { kind: 'bool', key: 'dialogAnimation', label: 'Animate pop-ups' }, { kind: 'bool', key: 'readingProgress', label: 'Show the scroll progress surfer' },
+        { kind: 'select', key: 'dialogTransition', label: 'How pop-ups open', help: 'Applies to every pop-up: projects, pictures, service details and the phone menu. Visitors who prefer reduced motion see a plain appearance.', options: [
+          { value: 'scale', label: 'Grow gently (fade and scale up)' }, { value: 'fade', label: 'Fade in' }, { value: 'zoom', label: 'Zoom with a little bounce' },
+          { value: 'slide-up', label: 'Slide up' }, { value: 'slide-down', label: 'Slide down' }, { value: 'flip', label: 'Tilt forward' }, { value: 'none', label: 'No animation' },
+        ] },
+        { kind: 'select', key: 'dialogSpeed', label: 'How fast pop-ups open', options: [{ value: 'fast', label: 'Fast' }, { value: 'normal', label: 'Normal' }, { value: 'slow', label: 'Slow and smooth' }] },
+        { kind: 'bool', key: 'readingProgress', label: 'Show the scroll progress surfer' },
       ] },
       { title: 'Light and dark', base: 'portfolio.design', fields: [
         { kind: 'select', key: 'colorMode', label: 'Colour mode', options: [{ value: 'light', label: 'Always light' }, { value: 'dark', label: 'Always dark' }, { value: 'system', label: 'Follow the visitor device' }], help: 'Every season has a dark version made from its own colours.' },

@@ -191,7 +191,29 @@ dialog.modal::backdrop { background: rgb(23 50 63 / .6); backdrop-filter: blur(3
 
 /* ---------- Owner design settings ---------- */
 [data-heading-case='upper'] :is(.h1, .h2, .h3, .h4, .h5) { text-transform: uppercase; letter-spacing: .04em; }
-[data-dialog-anim='false'] .modal__panel, [data-dialog-anim='false'] dialog.modal { animation: none !important; transition: none !important; }
+/* How pop-ups open. The panel is created when the pop-up opens, so a keyframe on it plays on every open. */
+html { --dialog-ms: 300ms; }
+html[data-dialog-speed='fast'] { --dialog-ms: 180ms; }
+html[data-dialog-speed='slow'] { --dialog-ms: 520ms; }
+@keyframes modal-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modal-scale { from { opacity: 0; transform: scale(.92) translateY(8px); } to { opacity: 1; transform: none; } }
+@keyframes modal-zoom { 0% { opacity: 0; transform: scale(.6); } 60% { opacity: 1; } 100% { opacity: 1; transform: none; } }
+@keyframes modal-slide-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes modal-slide-down { from { opacity: 0; transform: translateY(-40px); } to { opacity: 1; transform: none; } }
+@keyframes modal-flip { from { opacity: 0; transform: perspective(900px) rotateX(-14deg) translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes modal-drawer { from { transform: translateX(100%); } to { transform: none; } }
+html:not([data-dialog-transition='none']) dialog.modal[open]::backdrop { animation: modal-backdrop-in var(--dialog-ms) ease both; }
+html[data-dialog-transition='fade'] dialog.modal[open] .modal__panel { animation: modal-fade var(--dialog-ms) ease both; }
+html[data-dialog-transition='scale'] dialog.modal[open] .modal__panel { animation: modal-scale var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
+html[data-dialog-transition='zoom'] dialog.modal[open] .modal__panel { animation: modal-zoom var(--dialog-ms) cubic-bezier(.2, 1.35, .4, 1) both; }
+html[data-dialog-transition='slide-up'] dialog.modal[open] .modal__panel { animation: modal-slide-up var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
+html[data-dialog-transition='slide-down'] dialog.modal[open] .modal__panel { animation: modal-slide-down var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
+html[data-dialog-transition='flip'] dialog.modal[open] .modal__panel { animation: modal-flip var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; transform-origin: 50% 0; }
+/* The phone menu always slides in from its edge, in the chosen speed. */
+html:not([data-dialog-transition='none']) dialog.drawer[open] .modal__panel { animation: modal-drawer var(--dialog-ms) cubic-bezier(.2, .8, .3, 1) both; }
+@media (prefers-reduced-motion: reduce) { dialog.modal[open] .modal__panel, dialog.modal[open]::backdrop { animation: none !important; } }
+[data-motion='none'] dialog.modal[open] .modal__panel, [data-motion='none'] dialog.modal[open]::backdrop { animation: none !important; }
 [data-radius] .btn { border-radius: var(--btn-radius); }
 .result, .skillgroup, .platform, .aicard, .step, .quote, .linkcard, .filecard, .notecard, .blk-metric, .related button, .field input, .field select, .field textarea, .shot button { border-radius: var(--radius); }
 .dialog .modal__panel { border-radius: var(--radius); }

@@ -112,7 +112,7 @@ export const portfolio: Portfolio = {
   celebrations: { enabled: true, items: DEFAULT_CELEBRATIONS },
   design: {
     radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal',
-    headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true, cards: 'soft',
+    headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogTransition: 'scale', dialogSpeed: 'normal', readingProgress: true, cards: 'soft',
   },
   extras: { backToTop: true, availabilityBadge: true, projectNav: true, copyEmail: true, clientStrip: false, readingTime: true },
   media: { cardFit: 'smart', fill: 'blur', cardShape: 'auto', screenshots: 'masonry', screenshotSize: 'large' },
