@@ -18,6 +18,8 @@
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; scroll-padding-top: calc(var(--header-h) + 8px); }
 html.is-locked { overflow: hidden; }
+/* iPhone Safari repaints big frosted layers (the hero bubble, the header) in patches while a pop-up opens. The page behind is dimmed anyway, so its blurs are switched off until the pop-up closes. */
+html.is-locked * { -webkit-backdrop-filter: none !important; backdrop-filter: none !important; }
 @media (prefers-reduced-motion: reduce), (prefers-reduced-motion: no-preference) {
   html[data-motion='off'] { scroll-behavior: auto; }
 }
