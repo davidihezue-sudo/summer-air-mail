@@ -11,19 +11,19 @@ interface Particle { kind: string; style: React.CSSProperties }
  */
 export function Decor() {
   const { resolved, plan, professional } = useTheme()
-  const kinds = resolved.decorations.filter((d) => d !== 'bubbles' && d !== 'glow' && d !== 'frost')
+  const kinds = resolved.decorations.filter((d) => d !== 'bubbles' && d !== 'glow' && d !== 'frost' && d !== 'lights' && d !== 'fireworks')
   const total = plan.particles
   const particles = useMemo<Particle[]>(() => {
     if (!total || !kinds.length) return []
     return Array.from({ length: total }, (_, i) => {
       const kind = kinds[i % kinds.length]
-      const size = kind === 'stars' || kind === 'glints' ? 8 + rnd(i, 1) * 10 : kind === 'snow' ? 4 + rnd(i, 1) * 6 : 12 + rnd(i, 1) * 14
+      const size = kind === 'stars' || kind === 'glints' ? 8 + rnd(i, 1) * 10 : kind === 'snow' ? 4 + rnd(i, 1) * 6 : kind === 'confetti' ? 6 + rnd(i, 1) * 5 : kind === 'hearts' ? 12 + rnd(i, 1) * 12 : 12 + rnd(i, 1) * 14
       return {
         kind,
         style: {
           left: `${rnd(i, 2) * 100}%`,
           width: size,
-          height: kind === 'petals' || kind === 'leaves' ? size * 1.35 : size,
+          height: kind === 'petals' || kind === 'leaves' ? size * 1.35 : kind === 'confetti' ? size * 1.7 : size,
           animationDuration: `${(kind === 'glints' || kind === 'stars' ? 5 + rnd(i, 3) * 5 : 14 + rnd(i, 3) * 14) / plan.speed}s`,
           animationDelay: `${-rnd(i, 4) * 24}s`,
           ['--sway' as string]: `${(rnd(i, 5) - 0.5) * 160}px`,

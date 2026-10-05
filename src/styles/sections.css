@@ -69,6 +69,8 @@
 .project__media { width: 100%; max-height: 74dvh; object-fit: contain; }
 .project__nav { position: absolute; top: 50%; translate: 0 -50%; width: 48px; height: 48px; border-radius: 50%; border: 0; background: color-mix(in srgb, var(--c-paper) 90%, transparent); display: grid; place-items: center; }
 .project__nav--prev { left: 8px; } .project__nav--next { right: 8px; }
+.project__cap { width: 100%; box-sizing: border-box; padding: .8rem 1.1rem 1rem; background: #0c1c25; color: var(--c-paper); font-size: .95rem; line-height: 1.5; text-align: left; white-space: pre-line; }
+.project__stage--cap .project__count { bottom: auto; top: 12px; }
 .project__count { position: absolute; left: 12px; bottom: 12px; background: rgb(23 50 63 / .8); color: var(--c-paper); padding: .15rem .7rem; border-radius: 999px; font-size: .8rem; }
 .project__full { position: absolute; right: 12px; bottom: 12px; width: 44px; height: 44px; border: 0; border-radius: 50%; background: color-mix(in srgb, var(--c-paper) 90%, transparent); display: grid; place-items: center; }
 .project__thumbs { display: flex; gap: .5rem; padding: .6rem; overflow-x: auto; background: #0c1c25; }
@@ -271,6 +273,8 @@ code, .prose, .lede { overflow-wrap: anywhere; }
 .blk-fig img { width: 100%; height: auto; border-radius: 10px; }
 .blk-fig--shot img { border: 1px solid rgb(23 50 63 / .25); box-shadow: var(--shadow); }
 .blk-gallery__grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr)); gap: .7rem; align-items: start; }
+.case__creative { margin: 0; display: grid; gap: .45rem; align-content: start; }
+.case__creative figcaption { font-size: .9rem; line-height: 1.45; white-space: pre-line; }
 .blk-gallery__grid img, .blk-gallery__grid video { width: 100%; height: auto; min-height: 96px; max-height: 520px; object-fit: contain; border-radius: 10px; background: color-mix(in srgb, var(--c-ink) 8%, transparent); }
 figcaption { font-size: .88rem; opacity: .85; }
 .blk-video--reel { max-width: 320px; }
@@ -499,7 +503,12 @@ html[dir='rtl'] .timeline__dot { left: auto; right: calc(-1.6rem - 7px); }
 .toolcard::before { content: ''; position: absolute; left: 0; top: 14px; bottom: 14px; width: 4px; border-radius: 0 4px 4px 0; background: var(--brand, var(--c-sea)); }
 [data-glow='true'] .toolcard:hover, [data-glow='true'] .toolrowitem:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--brand) 70%, transparent); box-shadow: 0 14px 34px -14px var(--brand), 0 0 0 1px color-mix(in srgb, var(--brand) 55%, transparent); }
 .tools--tile-glass .toollogo { background: color-mix(in srgb, #fff 16%, transparent); backdrop-filter: blur(8px); }
-.tools--tile-bare .toollogo { background: transparent; box-shadow: none; color: var(--c-paper); }
+.tools--tile-bare .toollogo { background: transparent; box-shadow: none; color: var(--c-paper); padding: 0; }
+.tools--tile-bare .toollogo[data-darkbrand] path { fill: var(--c-paper); } /* near-black marks would vanish on the dark section */
+/* An exact logo size set in the admin wins over the small, medium and large presets. */
+.tools--px .toollogo { width: var(--tool-logo); height: var(--tool-logo); padding: calc(var(--tool-logo) * .14); border-radius: calc(var(--tool-logo) * .22); }
+.tools--px.tools--tile-bare .toollogo { padding: 0; }
+.tools--px .toolwall__link { width: max(112px, calc(var(--tool-logo) + 36px)); }
 .toolwall { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 1.4rem 1.8rem; justify-content: flex-start; }
 .toolwall__item { position: relative; }
 .toolwall__link { display: grid; justify-items: center; gap: .55rem; width: 112px; padding: .4rem; border-radius: 16px; color: inherit; text-decoration: none; transition: transform .25s; }
@@ -512,6 +521,7 @@ html[dir='rtl'] .timeline__dot { left: auto; right: calc(-1.6rem - 7px); }
 .toolrowitem__use { margin: 0; font-size: .95rem; line-height: 1.4; }
 @media (max-width: 640px) { .toolrowitem { grid-template-columns: auto 1fr; } .toolrowitem__use { grid-column: 1 / -1; } }
 .toolchip { display: inline-flex; gap: .7rem; align-items: center; flex: none; padding: .5rem 1rem .5rem .6rem; border-radius: 999px; background: rgb(0 0 0 / .22); border: 1px solid color-mix(in srgb, var(--c-paper) 24%, transparent); }
+.toolchip--icon { padding: 0; gap: 0; background: none; border: 0; border-radius: 0; }
 .toolchip small { display: block; font-size: .75rem; max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .toolmarquee { overflow: hidden; mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); -webkit-mask: linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
 .toolmarquee__track { list-style: none; margin: 0; padding: .4rem 0; display: flex; gap: 1rem; width: max-content; animation: toolscroll 38s linear infinite; }

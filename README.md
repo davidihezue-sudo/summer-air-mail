@@ -14,15 +14,17 @@ A four-season social media and digital marketing portfolio with a built-in admin
 2. [Signing in to the admin](#signing-in-to-the-admin)
 3. [Using the admin](#using-the-admin)
 4. [Seasons](#seasons)
-5. [Professional intensity](#professional-intensity)
-6. [What is new in version 3](#what-is-new-in-version-3)
-7. [Keeping your work safe](#keeping-your-work-safe)
-8. [Putting the site online at your own address](#putting-the-site-online-at-your-own-address)
-9. [Deploying](#deploying)
-10. [How it is built](#how-it-is-built)
-11. [Security](#security)
-12. [Testing](#testing)
-13. [Known limits](#known-limits)
+5. [Celebrations](#celebrations)
+6. [Professional intensity](#professional-intensity)
+7. [What is new in version 3](#what-is-new-in-version-3)
+8. [Keeping your work safe](#keeping-your-work-safe)
+9. [Putting the site online at your own address](#putting-the-site-online-at-your-own-address)
+10. [What needs setting up outside the site](#what-needs-setting-up-outside-the-site)
+11. [Deploying](#deploying)
+12. [How it is built](#how-it-is-built)
+13. [Security](#security)
+14. [Testing](#testing)
+15. [Known limits](#known-limits)
 
 ---
 
@@ -87,17 +89,17 @@ Edits save automatically as a **private draft**. Nothing is public until you pre
 | Admin page | What you manage |
 | --- | --- |
 | Dashboard | Counts, publishing status, current theme, and a list of what still needs attention |
-| Personal Profile | Name, title, roles, summary, location, contact details, photo, availability, language and currency |
+| Personal Profile | Name, title, roles, summary, location, photo, availability, language and currency |
 | About & Recruiter Overview | Biography, highlights, statistics (empty ones stay hidden), competencies, education, certifications, employment |
 | Hero | Headline, supporting line, label, buttons, layout, alignment, scroll effect, portrait cut-out |
 | Resume / CV | Upload your CV. The Download CV buttons appear only when a file is set and enabled |
-| Social Links, Contact | Links, email, WhatsApp, availability (full-time, contract, remote and so on), recruiter questions |
+| Social Links, Contact | Links; your email, phone and WhatsApp (only on Contact, so there is one place to change them); availability (full-time, contract, remote and so on), recruiter questions |
 | Appearance | Professional intensity, maximum animation, fonts |
-| Seasons | Mode, season start dates, transition, per-season colours, decorations, fonts, images and a live preview |
+| Seasons, Celebrations | Season mode, start dates, colours, decorations, fonts, images and a live preview. Celebrations (Christmas, Boxing Day, New Year and your own) change the look for a few days a year |
 | Sections & Visibility | Drag to reorder, switch on or off, rename, change headings, colours and images, duplicate, add text sections |
 | Navigation | Automatic or custom menu with your own labels, order and links |
-| Portfolio, Case Studies, Campaigns | Projects with images, videos, links, metrics, charts, before and after, documents and a full case study |
-| Social Media Content, Videos & Reels | Posts, carousels, reels and videos (upload, YouTube or Vimeo) |
+| Portfolio | Projects with images, videos, links, metrics, charts, before and after, documents and a full case study. Use **Show** to see all projects, case studies only or campaigns only (they are the same records), and the Add buttons to start a project, a case study or a campaign |
+| Social Media Content | Posts, carousels, reels and videos in one list (upload, YouTube or Vimeo). Each item has a **Type**; use **Show** to filter |
 | Screenshots | Evidence gallery with zoom, captions, categories and before and after |
 | Analytics & Results | Metrics with start, end, period, platform, campaign, chart type and result label |
 | Websites & Digital Projects | Laptop mockups with screenshots |
@@ -106,17 +108,18 @@ Edits save automatically as a **private draft**. Nothing is public until you pre
 | Marketing Process, Strategy Framework | How you work |
 | Testimonials, Mentoring & Training | Shown only when approved or switched on |
 | Media Library | Every upload with alt text, caption, tags and project links |
-| SEO, Analytics Tracking, Footer, Advanced | Search and sharing, optional trackers, footer, password, backups |
+| SEO, Analytics Tracking, Footer, Advanced | Search and sharing, optional third party trackers (Google, Meta), footer, password, backups |
+| Visit Insights | Your own visit counts, with outside visitors and "You and home" apart, and the switches that control counting |
 
 ### How to...
 
 **Add a project.** Portfolio > Add project. Fill in the basics, choose a cover image, switch on **Published**. Add content blocks to tell the story: headings, text, images, galleries, videos, reels, screenshots, links, quotes, metrics, charts, before and after, PDFs and downloads, timelines, frameworks, skills and platforms. A project can be one image and a link, or a long story.
 
-**Write a case study.** Open a project and switch on **This project has a case study**. Fill in the sections you have: challenge, objectives, audience, strategy, execution, creative, distribution, paid media, results, your contribution and lessons. Empty sections are not shown. Always include the measurement period with results.
+**Write a case study.** Portfolio > Add case study, or open a project and switch on **This project has a case study**. Fill in the sections you have: challenge, objectives, audience, strategy, execution, creative, distribution, paid media, results, your contribution and lessons. Empty sections are not shown. Always include the measurement period with results.
 
 **Add a result.** Analytics & Results > Add result. Enter the metric, the starting value, the ending value and the period. A percentage appears only if you enter it or if both start and end exist; the card says which. Label it **Verified**, **Team**, **Individual**, **Confidential** or **Illustrative**. For confidential numbers, write approved wording and switch off **Show the numbers**.
 
-**Add a video or reel.** Videos & Reels > Add video. Upload an MP4 or WebM, or paste a YouTube or Vimeo link. Nothing autoplays and nothing loads until a visitor presses play. Instagram and TikTok links open as link cards, because those sites cannot be safely embedded.
+**Add a video or reel.** Social Media Content > Add video or reel (or Add post and set its Type to Video or reel). Upload an MP4 or WebM, or paste a YouTube or Vimeo link. Nothing autoplays and nothing loads until a visitor presses play. Instagram and TikTok links open as link cards, because those sites cannot be safely embedded.
 
 **Hide client details in a screenshot.** Leave **Review images for sensitive information before uploading** ticked in the Media Library. Drag over names, numbers or faces and choose Pixelate or Black box. The detail is destroyed in the saved pixels, not just covered on screen. For files already uploaded, open the file and choose **Hide parts**.
 
@@ -151,6 +154,18 @@ Each season has its own palette, stamp artwork, hero lighting, section divider s
 
 The seasonal themes live in `src/themes/` (`spring.ts`, `summer.ts`, `autumn.ts`, `winter.ts`, `seasonManager.ts`). They change design tokens; the layout and typography stay the same.
 
+## Celebrations
+
+Open **Celebrations** in the admin. For a few days each year the site can change its colours, let decorations fall (snow, hearts, confetti, petals, leaves, stars), hang string lights, set off fireworks, borrow another season's artwork and show a greeting across the top.
+
+- **Ready made:** Christmas (1 to 25 December), Boxing Day (26 December) and New Year (31 December to 2 January) are on. Valentine's Day, Easter (it moves with Easter Sunday), Canada Day and Halloween are there too, switched off until you turn them on.
+- **Yours to change:** every date, colour, decoration, greeting, how lively it is and which season's artwork it uses. Add your own (a launch, a birthday, Diwali, Eid) with **Add your own celebration**, remove any, or bring back the standard ones.
+- **Dates:** visitors see a celebration on their own calendar dates, like seasons. If two overlap, the one higher in the list wins. The master switch turns all of them off.
+- **Preview:** the preview on the page shows the site as it looks for any celebration, whatever today's date is.
+- **Calm by design:** visitors who prefer reduced motion see no moving decorations, and the Professional intensity setting removes decorations (the colours and greeting stay). An announcement banner, when one is showing, takes the place of the greeting.
+
+The definitions and date logic are in `src/themes/celebrations.ts`.
+
 ## Professional intensity
 
 Appearance > **Professional intensity** lets one portfolio serve different applications.
@@ -171,8 +186,8 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 | --- | --- | --- |
 | Tools with logos | Capabilities > Tools & Platforms, Tools Display | Every tool you switch on shows its logo, name, category and how you use it, with no clicking. Well known tools get their logo automatically; otherwise upload one, paste a link, or choose a built-in mark. Cards, compact chips or the original flip rings; sizes, brand or single colour, grouping. Logos also show in the admin list where you switch tools on and off. |
 | Admin search | Top bar of the admin (press `/` or Ctrl+K) | Start typing and matches appear: pages, individual settings, and the things you wrote (projects, tools, notes...). It understands everyday words ("dark mode", "logo", "backup", "password"). Pick with the arrow keys and Enter; for a setting it opens the page, scrolls to the setting and highlights it. |
-| Toolkit redesign | Capabilities > Tools Display | Six layouts: cards, logo wall (logos only, names on hover or shown), list (logo with description beside it), compact, a slow scrolling strip, and the original rings. Category tabs with counts, logo size and tile (white, frosted or none), brand or single colour logos, hover glow in each brand's colour. |
-| Pictures and screenshots | Portfolio > Pictures & Screenshots | Instagram, TikTok, YouTube, LinkedIn and Pinterest pictures are all different shapes. By default every card follows its own picture, so a tall phone screenshot is shown whole with a soft blurred fill. Force a shape for the whole site or per project, choose smart/whole/trim, and show screenshots as a masonry or even grid. Screenshot size (small, medium or large, for the whole site or per screenshot) only changes how big a picture appears. Its shape and sharpness stay the same, and visitors can still zoom in to the full picture. |
+| Toolkit redesign | Capabilities > Tools Display | Six layouts: cards, logo wall (logos only, names on hover or shown), list (logo with description beside it), compact, a slow scrolling strip, and the original rings. Category tabs with counts, logo size (small, medium, large or an exact size in pixels) and tile (white, frosted or none), brand or single colour logos, hover glow in each brand's colour. With Logos on and Names off, the scrolling strip shows just the logos, with no pill around them. Official marks for ChatGPT, Canva, Adobe, LinkedIn, Slack, CapCut, Midjourney and more are built in; a tool with no built-in mark gets a plain letter tile until you upload its logo. |
+| Pictures and screenshots | Portfolio > Picture Display | Instagram, TikTok, YouTube, LinkedIn and Pinterest pictures are all different shapes. By default every card follows its own picture, so a tall phone screenshot is shown whole with a soft blurred fill. Force a shape for the whole site or per project, choose smart/whole/trim, and show screenshots as a masonry or even grid. Screenshot size (small, medium or large, for the whole site or per screenshot) only changes how big a picture appears. Its shape and sharpness stay the same, and visitors can still zoom in to the full picture. |
 | Big video upload | Media Library | Videos up to 2 GB (MP4, MOV, WebM, MKV, AVI) upload with a progress bar, then are shrunk automatically to a web friendly 1080p MP4 with a cover image. Needs no setup: ffmpeg comes with `npm install`. Set `MAX_VIDEO_MB` to change the limit. |
 | Extras | Look and layout > Extras | Pulsing availability badge, previous and next project buttons, back to top, copy email, a strip of brands you have worked with (built only from your real projects), minutes to read on notes. |
 | Hero water bubble | Identity > Hero > Hero circle | The circle behind the stamp is now a glassy water bubble with a rainbow rim and reflection. Style, size, position, colour, opacity, sheen, frosted blur, wobble, drift, scroll movement and small satellite bubbles are all adjustable. |
@@ -191,7 +206,7 @@ Everything below is controlled from the admin. Nothing is on unless you switch i
 | Booking and newsletter | Booking & Newsletter | A booking button in the hero, header, contact and profile. A newsletter signup that either collects addresses on your server (with a consent tick box) or sends people to your newsletter service. |
 | Contact form | Identity > Contact | Choose: open the visitor's email or WhatsApp, or send to your inbox here (with fallback to email). A hidden honeypot field, a minimum fill time and a rate limit stop most bots. |
 | Inbox and subscribers | Messages and insight | Read, mark, reply, delete, export to CSV. Optional email and webhook alerts. Old messages can be deleted automatically. |
-| Visit insights | Messages and insight > Visit Insights | Cookieless, first party counts of visitors and views per day, top pages, sources, project opens, downloads and shares. No IP address, cookie or profile is stored. Your own visits while signed in are ignored. |
+| Visit insights | Messages and insight > Visit Insights | Cookieless, first party counts of visitors and views per day, top pages, sources, project opens, downloads and shares. No IP address, cookie or profile is stored. Visits by you are counted apart as **You and home** and never added to outside visitors: a browser signed in to the admin, a device you have used for the admin, and the network you last signed in from (kept as a scrambled fingerprint for 90 days, never the address). Turn **Count my own visits separately** off to ignore them completely. The switches are in Settings on the same page. |
 | Banner and schedule | Banner & Schedule | An announcement bar with a date window, plus rules that switch season, professional intensity, availability, hero words, sections and a banner on and off by themselves on dates you set. |
 | Maintenance and 404 | Maintenance & 404 | A "back soon" page (optionally a proper 503) while you are signed in you still see the site, and your own 404 page. |
 | Languages | Languages | Add languages, translate your own text field by field and the interface labels, with right to left support and a header switcher. |
@@ -290,6 +305,27 @@ It stores the username and password (hashed) in the database, so the live site r
 **After that.** Every time you `git push` to GitHub, Render rebuilds and updates the site by itself. Your content is in the database and your images are on the disk, so deploying never changes them. Daily backups are on; download one now and then.
 
 Costs and limits: the Starter plan stays awake (the free plan sleeps and would make visitors wait). The 2 GB disk holds your uploads and backups; raise `sizeGB` in `render.yaml` if you add many videos. Large videos are shrunk when uploaded, which needs a little memory, so keep one upload going at a time.
+
+## What needs setting up outside the site
+
+Everything below is optional unless marked, and none of it can be done from inside the admin because it lives with another company or on your host.
+
+| What | Where | Needed for |
+| --- | --- | --- |
+| Domain name pointing at Render (A and CNAME records at your registrar) | GoDaddy DNS and Render > Custom Domains | The site being reachable at your own address (required) |
+| `DATABASE_URL` (Neon Postgres) | Render > Environment | Keeping content, messages, insights and your admin login safe (required on Render) |
+| Admin login | Render Shell: `npm run admin:setup` | Signing in to `/admin` (required) |
+| `SITE_URL` and the Public website address (Admin > SEO) | `render.yaml` and Admin > SEO | Sharing previews, the sitemap, canonical links, the home screen app (required) |
+| SMTP (`SMTP_HOST`, `SMTP_USER`, `SMTP_PASS`, optionally `SMTP_FROM`) | An email provider such as your own mailbox, Brevo or SendGrid | Email alerts for new messages and subscribers. Without it the inbox still works; you just have to look |
+| `ALERT_WEBHOOK_URL` | Slack, Discord or Zapier | Alerts to a chat instead of, or as well as, email |
+| `S3_*` settings | S3 compatible storage (AWS S3, Cloudflare R2, Backblaze B2) | Off-site backups. Without it backups stay on the server's disk only |
+| Google Analytics 4, Google Tag Manager, Meta Pixel IDs | Those services (Admin > Analytics Tracking) | Third party analytics. Visit Insights needs none of them |
+| Booking link | Calendly, Cal.com or Google Calendar (Admin > Booking & Newsletter) | The booking button |
+| Newsletter service address | Mailchimp, Kit, Substack and so on, when you choose "send people to my service" | Newsletter signup in link mode. Collect mode needs nothing |
+| YouTube or Vimeo videos | Those sites | Videos you paste as links. Uploaded videos need nothing |
+| Social profile addresses | Each platform (Admin > Social Links) | The social icons |
+| Logos for tools with no built-in mark | The tool's brand page (upload in Tools & Platforms) | Sprout Social, Later, Klaviyo and similar show a letter tile until you add the real logo |
+| Visit Insights switched on | Admin > Visit Insights > Settings, then Publish | Counting visits (off by default). Sign in once from home so your home network is recognised |
 
 ## Deploying
 

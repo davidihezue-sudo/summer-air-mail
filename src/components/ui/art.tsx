@@ -256,35 +256,27 @@ export function Surfer() {
 
 export type ObjectName = string
 
+const S = { stroke: v('ink'), strokeWidth: 3, strokeLinejoin: 'round' as const, strokeLinecap: 'round' as const }
+
+/** A drawing of the thing a capability is about. The shapes are fixed; the colours follow the season. */
 export function TowelObject({ name }: { name: ObjectName }) {
   const p = { viewBox: '0 0 120 120', 'aria-hidden': true, focusable: 'false' as const, className: 'towel-art' }
   switch (name) {
-    case 'sunglasses':
+    case 'compass':
       return (
         <svg {...p}>
-          <path d="M8 46c0-4 3-6 7-6h6M112 46c0-4-3-6-7-6h-6" stroke={v('ink')} strokeWidth="5" fill="none" strokeLinecap="round" />
-          <path d="M16 44h38c2 22-4 36-20 36S14 62 16 44z" fill={v('ink')} />
-          <path d="M104 44H66c-2 22 4 36 20 36s20-18 18-36z" fill={v('ink')} />
-          <path d="M54 48c5-5 7-5 12 0" stroke={v('ink')} strokeWidth="5" fill="none" />
-          <path d="M24 52c4-2 8-2 10 2" stroke="#fff" strokeOpacity=".5" strokeWidth="3" fill="none" strokeLinecap="round" />
-        </svg>
-      )
-    case 'sunscreen':
-      return (
-        <svg {...p}>
-          <rect x="40" y="10" width="40" height="14" rx="4" fill={v('red')} />
-          <rect x="30" y="24" width="60" height="88" rx="12" fill={v('butter')} stroke={v('ink')} strokeWidth="3" />
-          <circle cx="60" cy="62" r="14" fill={v('peach')} />
-          {Array.from({ length: 8 }, (_, i) => (
-            <path key={i} d="M60 40v-6" stroke={v('peach')} strokeWidth="3" strokeLinecap="round" transform={`rotate(${i * 45} 60 62)`} />
-          ))}
-          <rect x="42" y="90" width="36" height="6" rx="3" fill={v('ink')} opacity=".7" />
+          <circle cx="60" cy="60" r="48" fill={v('paper')} {...S} />
+          <circle cx="60" cy="60" r="38" fill="none" stroke={v('sea')} strokeWidth="2" strokeDasharray="2 6" />
+          <path d="M60 14v8M60 98v8M14 60h8M98 60h8" {...S} fill="none" />
+          <path d="M60 24l12 36-12-5-12 5z" fill={v('red')} {...S} strokeWidth={2.5} />
+          <path d="M60 96L48 60l12 5 12-5z" fill={v('sky')} {...S} strokeWidth={2.5} />
+          <circle cx="60" cy="60" r="5" fill={v('butter')} {...S} strokeWidth={2.5} />
         </svg>
       )
     case 'camera':
       return (
         <svg {...p}>
-          <rect x="12" y="30" width="96" height="70" rx="10" fill={v('paper')} stroke={v('ink')} strokeWidth="3" />
+          <rect x="12" y="30" width="96" height="70" rx="10" fill={v('paper')} {...S} />
           <rect x="12" y="42" width="96" height="10" fill={v('red')} />
           <rect x="12" y="52" width="96" height="6" fill={v('butter')} />
           <circle cx="60" cy="75" r="20" fill={v('ink')} />
@@ -292,17 +284,6 @@ export function TowelObject({ name }: { name: ObjectName }) {
           <circle cx="55" cy="70" r="3" fill="#fff" opacity=".7" />
           <rect x="22" y="20" width="20" height="10" rx="3" fill={v('ink')} />
           <circle cx="90" cy="38" r="3" fill={v('pink')} />
-        </svg>
-      )
-    case 'flipflops':
-      return (
-        <svg {...p}>
-          {[0, 1].map((i) => (
-            <g key={i} transform={`translate(${i * 46} ${i * 4}) rotate(${i ? 6 : -6} 30 60)`}>
-              <path d="M30 8c-16 0-22 18-20 44s6 54 20 56 18-30 20-56S46 8 30 8z" fill={v('pink')} stroke={v('ink')} strokeWidth="3" />
-              <path d="M30 34l-10 14M30 34l10 14M30 34v-8" stroke={v('green')} strokeWidth="5" strokeLinecap="round" fill="none" />
-            </g>
-          ))}
         </svg>
       )
     case 'phone':
@@ -314,120 +295,126 @@ export function TowelObject({ name }: { name: ObjectName }) {
           <rect x="52" y="12" width="16" height="3" rx="1.5" fill="#fff" opacity=".4" />
         </svg>
       )
-    case 'tulip':
+    case 'palette':
       return (
         <svg {...p}>
-          <path d="M60 112V58" stroke={v('green')} strokeWidth="6" strokeLinecap="round" />
-          <path d="M60 100c-26-2-34-18-34-34 24 2 34 14 34 34zM60 92c22-2 32-16 32-30-22 2-32 12-32 30z" fill={v('sage')} />
-          <path d="M34 28c0 24 12 40 26 40s26-16 26-40c-8 6-16 4-26-8-10 12-18 14-26 8z" fill={v('pink')} stroke={v('red')} strokeWidth="3" strokeLinejoin="round" />
-          <path d="M60 20v46" stroke={v('red')} strokeWidth="2" opacity=".5" />
+          <path d="M60 12C32 12 12 32 12 58c0 22 16 40 36 40 8 0 10-6 8-12-2-6 2-10 8-10h14c16 0 30-6 30-22C108 30 88 12 60 12z" fill={v('butter')} {...S} />
+          <circle cx="36" cy="50" r="7" fill={v('red')} /><circle cx="56" cy="32" r="7" fill={v('sea')} />
+          <circle cx="82" cy="36" r="7" fill={v('green')} /><circle cx="92" cy="60" r="7" fill={v('pink')} />
+          <circle cx="44" cy="76" r="8" fill={v('paper')} {...S} strokeWidth={2.5} />
         </svg>
       )
-    case 'wateringcan':
+    case 'megaphone':
       return (
         <svg {...p}>
-          <path d="M30 50h54l-4 50a8 8 0 0 1-8 8H42a8 8 0 0 1-8-8z" fill={v('sage')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-          <path d="M84 62l24-26" stroke={v('ink')} strokeWidth="6" strokeLinecap="round" />
-          <path d="M104 28l10 10-6 6-10-10z" fill={v('ink')} />
-          <path d="M34 54c-18-6-20 22-2 22M42 50c10-16 34-16 42 0" stroke={v('ink')} strokeWidth="5" fill="none" strokeLinecap="round" />
-          {[0, 1, 2].map((i) => <circle key={i} cx={112 + i * 2} cy={52 + i * 12} r="2.4" fill={v('sea')} />)}
+          <path d="M18 46h22l46-24v76L40 74H18z" fill={v('red')} {...S} />
+          <path d="M36 74l6 26h13l-5-24" fill={v('butter')} {...S} />
+          <path d="M96 44c7 7 7 25 0 32M105 34c13 13 13 39 0 52" fill="none" stroke={v('ink')} strokeWidth="3.5" strokeLinecap="round" />
         </svg>
       )
-    case 'boots':
+    case 'chart':
       return (
         <svg {...p}>
-          {[0, 1].map((i) => (
-            <g key={i} transform={`translate(${i * 44} ${i * 4})`}>
-              <path d="M12 10h30v52c0 6 4 10 12 12 6 2 6 10 0 12H14c-6 0-8-6-4-10l4-4z" fill={v('peach')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-              <rect x="12" y="14" width="30" height="8" fill={v('red')} opacity=".85" />
-              <path d="M12 98h42" stroke={v('ink')} strokeWidth="3" />
-            </g>
-          ))}
+          <rect x="12" y="12" width="96" height="96" rx="10" fill={v('paper')} {...S} />
+          <rect x="26" y="70" width="16" height="28" rx="2" fill={v('sea')} />
+          <rect x="52" y="58" width="16" height="40" rx="2" fill={v('pink')} />
+          <rect x="78" y="44" width="16" height="54" rx="2" fill={v('green')} />
+          <path d="M20 100h80" stroke={v('ink')} strokeWidth="3" strokeLinecap="round" />
+          <path d="M24 58l24-16 16 8 30-28M82 22h12v12" fill="none" stroke={v('red')} strokeWidth="4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       )
-    case 'cherries':
+    case 'pen':
       return (
         <svg {...p}>
-          <path d="M40 80C44 50 56 30 74 18M82 82C78 50 74 32 74 18" stroke={v('green')} strokeWidth="4" fill="none" strokeLinecap="round" />
-          <path d="M74 18c14-10 28-8 34 4-14 6-26 4-34-4z" fill={v('sage')} />
-          <circle cx="40" cy="88" r="20" fill={v('red')} /><circle cx="84" cy="90" r="20" fill={v('red')} />
-          <circle cx="33" cy="82" r="5" fill="#fff" opacity=".45" /><circle cx="77" cy="84" r="5" fill="#fff" opacity=".45" />
+          <path d="M22 98l8-28L80 20l20 20-50 50z" fill={v('butter')} {...S} />
+          <path d="M22 98l8-28 20 20z" fill={v('peach')} {...S} />
+          <path d="M80 20l8-8a6 6 0 0 1 8 0l12 12a6 6 0 0 1 0 8l-8 8z" fill={v('pink')} {...S} />
+          <path d="M72 28l20 20" {...S} fill="none" />
+          <path d="M62 106h44" stroke={v('ink')} strokeWidth="3" strokeLinecap="round" />
         </svg>
       )
-    case 'notebook':
+    case 'clapper':
       return (
         <svg {...p}>
-          <rect x="26" y="12" width="68" height="96" rx="6" fill={v('red')} stroke={v('ink')} strokeWidth="3" />
-          <rect x="34" y="12" width="6" height="96" fill="rgb(0 0 0 / .18)" />
-          {[24, 40, 56, 72, 88].map((y) => <circle key={y} cx="26" cy={y} r="4" fill={v('paper')} stroke={v('ink')} strokeWidth="2" />)}
-          <rect x="50" y="32" width="34" height="5" rx="2.5" fill={v('paper')} /><rect x="50" y="44" width="24" height="4" rx="2" fill={v('paper')} opacity=".8" />
-          <path d="M84 12v96" stroke={v('butter')} strokeWidth="5" />
+          <rect x="14" y="48" width="92" height="58" rx="6" fill={v('paper')} {...S} />
+          <g transform="rotate(-10 14 44)">
+            <rect x="14" y="26" width="92" height="20" rx="4" fill={v('ink')} />
+            <path d="M32 26l-8 20h14l8-20zM58 26l-8 20h14l8-20zM84 26l-8 20h14l8-20z" fill={v('paper')} />
+          </g>
+          <path d="M50 68l28 15-28 15z" fill={v('red')} {...S} strokeWidth={2.5} />
         </svg>
       )
-    case 'mug':
+    case 'bubbles':
       return (
         <svg {...p}>
-          <path d="M30 44h56v40a20 20 0 0 1-20 20H50a20 20 0 0 1-20-20z" fill={v('paper')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-          <path d="M86 54h6a12 12 0 0 1 0 28h-8" stroke={v('ink')} strokeWidth="5" fill="none" />
-          <rect x="30" y="58" width="56" height="10" fill={v('red')} opacity=".85" />
-          <path d="M46 34c-6-8 6-12 0-20M62 34c-6-8 6-12 0-20M78 34c-6-8 6-12 0-20" stroke={v('stone')} strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M22 14h54a10 10 0 0 1 10 10v32a10 10 0 0 1-10 10H44L26 82V66h-4a10 10 0 0 1-10-10V24a10 10 0 0 1 10-10z" fill={v('aqua')} {...S} />
+          <circle cx="34" cy="40" r="4" fill={v('ink')} /><circle cx="49" cy="40" r="4" fill={v('ink')} /><circle cx="64" cy="40" r="4" fill={v('ink')} />
+          <path d="M50 54h48a10 10 0 0 1 10 10v26a10 10 0 0 1-10 10h-6v14L74 100H50a10 10 0 0 1-10-10V64a10 10 0 0 1 10-10z" fill={v('pink')} {...S} />
+          <path d="M74 90c-12-8-14-15-9-19 3-3 7-1 9 3 2-4 6-6 9-3 5 4 3 11-9 19z" fill={v('red')} />
         </svg>
       )
-    case 'apple':
+    case 'seedling':
       return (
         <svg {...p}>
-          <path d="M60 36c-14-12-40-6-40 26 0 28 20 48 40 40 20 8 40-12 40-40 0-32-26-38-40-26z" fill={v('red')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-          <path d="M60 36c0-12 4-20 12-24" stroke={v('ink')} strokeWidth="4" fill="none" strokeLinecap="round" />
-          <path d="M66 22c10-10 22-8 26 0-10 6-20 6-26 0z" fill={v('sage')} />
-          <path d="M34 54c-4 8-2 18 2 24" stroke="#fff" strokeOpacity=".4" strokeWidth="4" fill="none" strokeLinecap="round" />
+          <path d="M60 80V44" stroke={v('green')} strokeWidth="5" strokeLinecap="round" />
+          <path d="M60 60c-22 0-30-14-30-28 20 0 30 8 30 28z" fill={v('sage')} {...S} strokeWidth={2.5} />
+          <path d="M60 50c18 0 26-12 26-26-18 0-26 6-26 26z" fill={v('green')} {...S} strokeWidth={2.5} />
+          <path d="M34 82h52l-6 26H40z" fill={v('peach')} {...S} />
+          <rect x="30" y="76" width="60" height="10" rx="3" fill={v('red')} {...S} strokeWidth={2.5} />
         </svg>
       )
-    case 'ornament':
+    case 'star':
       return (
         <svg {...p}>
-          <path d="M60 8v14" stroke={v('stone')} strokeWidth="4" strokeLinecap="round" />
-          <rect x="50" y="20" width="20" height="12" rx="3" fill={v('butter')} stroke={v('ink')} strokeWidth="2.5" />
-          <circle cx="60" cy="70" r="38" fill={v('red')} stroke={v('ink')} strokeWidth="3" />
-          <path d="M24 62c20 10 52 10 72 0M24 82c20 10 52 10 72 0" stroke={v('paper')} strokeWidth="4" fill="none" />
-          <path d="M60 50l4 9 10 1-8 7 3 10-9-6-9 6 3-10-8-7 10-1z" fill={v('butter')} />
-          <circle cx="42" cy="52" r="6" fill="#fff" opacity=".35" />
+          <path d="M60 10l15 32 35 4-26 24 7 35-31-18-31 18 7-35L10 46l35-4z" fill={v('butter')} {...S} />
+          <path d="M98 14v12M92 20h12M20 92v10M15 97h10" stroke={v('ink')} strokeWidth="3" strokeLinecap="round" />
         </svg>
       )
-    case 'mittens':
+    case 'magnifier':
       return (
         <svg {...p}>
-          {[0, 1].map((i) => (
-            <g key={i} transform={`translate(${i * 50} ${i * 4}) rotate(${i ? 8 : -8} 30 60)`}>
-              <path d="M14 14c-4-8 8-12 12-2l2 14c0-12 4-14 8-14 8 0 10 8 10 18v40H14z" fill={v('red')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-              <rect x="10" y="78" width="38" height="22" rx="4" fill={v('paper')} stroke={v('ink')} strokeWidth="3" />
-              <path d="M14 88h30" stroke={v('stone')} strokeWidth="3" strokeDasharray="4 4" />
-              <path d="M18 38l8 8-8 8M32 38l8 8-8 8" stroke={v('paper')} strokeWidth="2.5" fill="none" />
-            </g>
-          ))}
+          <path d="M76 76l30 30" stroke={v('ink')} strokeWidth="11" strokeLinecap="round" />
+          <circle cx="52" cy="52" r="34" fill={v('aqua')} {...S} strokeWidth={5} />
+          <path d="M32 46c4-10 12-15 21-15" fill="none" stroke={v('paper')} strokeWidth="5" strokeLinecap="round" />
         </svg>
       )
-    case 'scarf':
+    case 'mail':
       return (
         <svg {...p}>
-          <path d="M12 34c24-24 72-24 96 0l-8 24c-26-14-54-14-80 0z" fill={v('red')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-          <path d="M66 52l30 6-6 48-30-6z" fill={v('red')} stroke={v('ink')} strokeWidth="3" strokeLinejoin="round" />
-          <path d="M20 40c22-14 58-14 80 0M24 48c20-10 52-10 72 0" stroke={v('paper')} strokeWidth="4" fill="none" />
-          <path d="M70 66l22 4M68 78l22 4" stroke={v('paper')} strokeWidth="4" />
-          {[0, 1, 2, 3, 4].map((i) => <path key={i} d={`M${64 + i * 6} ${99 + i * -1}v10`} stroke={v('red')} strokeWidth="3" strokeLinecap="round" />)}
+          <rect x="10" y="26" width="100" height="70" rx="8" fill={v('paper')} {...S} />
+          <path d="M12 32l48 38 48-38z" fill={v('butter')} {...S} />
+          <path d="M12 94l36-30M108 94L72 64" fill="none" stroke={v('ink')} strokeWidth="3" strokeLinecap="round" />
         </svg>
       )
-    case 'watermelon':
+    case 'chip':
+      return (
+        <svg {...p}>
+          <path d="M44 14v16M60 14v16M76 14v16M44 90v16M60 90v16M76 90v16M14 44h16M14 60h16M14 76h16M90 44h16M90 60h16M90 76h16" stroke={v('ink')} strokeWidth="5" strokeLinecap="round" />
+          <rect x="28" y="28" width="64" height="64" rx="8" fill={v('ink')} />
+          <rect x="42" y="42" width="36" height="36" rx="4" fill={v('sea')} />
+          <path d="M60 46l4 10 10 4-10 4-4 10-4-10-10-4 10-4z" fill={v('butter')} />
+        </svg>
+      )
+    case 'book':
+      return (
+        <svg {...p}>
+          <path d="M60 30c-12-10-30-12-46-8v62c16-4 34-2 46 8z" fill={v('paper')} {...S} />
+          <path d="M60 30c12-10 30-12 46-8v62c-16-4-34-2-46 8z" fill={v('butter')} {...S} />
+          <path d="M24 42c8-2 16-1 24 3M24 56c8-2 16-1 24 3M24 70c8-2 16-1 24 3M72 45c8-4 16-5 24-3M72 59c8-4 16-5 24-3" stroke={v('stone')} strokeWidth="3" fill="none" strokeLinecap="round" />
+          <path d="M82 20v30l7-6 7 6V22z" fill={v('red')} />
+        </svg>
+      )
+    case 'calendar':
+      return (
+        <svg {...p}>
+          <rect x="14" y="22" width="92" height="84" rx="10" fill={v('paper')} {...S} />
+          <path d="M14 32a10 10 0 0 1 10-10h72a10 10 0 0 1 10 10v16H14z" fill={v('red')} {...S} />
+          <rect x="34" y="12" width="8" height="20" rx="4" fill={v('ink')} /><rect x="78" y="12" width="8" height="20" rx="4" fill={v('ink')} />
+          {[0, 1, 2, 3].map((c) => [0, 1].map((r) => <circle key={`${c}${r}`} cx={32 + c * 19} cy={68 + r * 20} r="5" fill={c === 2 && r === 0 ? v('sea') : v('stone')} opacity={c === 2 && r === 0 ? 1 : 0.5} />))}
+        </svg>
+      )
     default:
-      return (
-        <svg {...p}>
-          <path d="M10 44a50 50 0 0 0 100 0z" fill={v('green')} />
-          <path d="M16 44a44 44 0 0 0 88 0z" fill={v('sage')} />
-          <path d="M22 44a38 38 0 0 0 76 0z" fill={v('red')} />
-          {[[44, 58], [60, 66], [76, 58], [52, 74], [68, 76]].map(([x, y], i) => (
-            <ellipse key={i} cx={x} cy={y} rx="2.4" ry="4" fill={v('ink')} transform={`rotate(-20 ${x} ${y})`} />
-          ))}
-        </svg>
-      )
+      return null
   }
 }
 

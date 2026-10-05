@@ -8,9 +8,9 @@ export function ToolLogo({ tool, size = 'md', mono = false }: { tool: Pick<Tool,
   const b: Brand = brandFor(tool)
   const px = SIZE[size]
   return (
-    <span className={`toollogo toollogo--${size}`} aria-hidden="true">
+    <span className={`toollogo toollogo--${size}`} aria-hidden="true" data-darkbrand={b.kind === 'svg' && parseInt(b.color.slice(1), 16) < 0x404040 ? '' : undefined}>
       {b.kind === 'image' ? <img src={b.src} alt="" width={px} height={px} loading="lazy" />
-        : b.kind === 'svg' ? <svg viewBox="0 0 24 24" width={px} height={px} focusable="false"><path d={b.path} fill={mono ? 'currentColor' : b.color} /></svg>
+        : b.kind === 'svg' ? <svg viewBox="0 0 24 24" width={px} height={px} focusable="false"><path d={b.path} fill={mono ? 'currentColor' : b.color} fillRule={b.evenodd ? 'evenodd' : undefined} /></svg>
         : <span className="toollogo__mono" style={{ background: b.color }}>{b.text}</span>}
     </span>
   )

@@ -65,6 +65,8 @@ export function applyTheme(resolved: ResolvedTheme, portfolio: Portfolio, plan: 
   if (bg && SAFE_URL.test(bg)) root.style.setProperty('--hero-bg-image', `url("${bg}")`)
   else root.style.removeProperty('--hero-bg-image')
   root.dataset.season = resolved.season
+  if (resolved.celebration) root.dataset.celebration = resolved.celebration.id
+  else delete root.dataset.celebration
   root.dataset.scheme = scheme
   root.style.colorScheme = scheme
   root.dataset.professional = portfolio.theme.professional

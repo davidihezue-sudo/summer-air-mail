@@ -59,7 +59,7 @@ describe('every section type has a label, a registry slot and a default position
 describe('no admin page goes missing', () => {
   it('registers every page the menu links to', async () => {
     const { NAV } = await import('../src/admin/nav')
-    const custom = new Set(['dashboard', 'sections', 'seasons', 'navigation', 'publish', 'advanced', 'media', 'cursor', 'looks', 'languages', 'inbox', 'subscribers', 'insights', 'qualityScore', 'bulk', 'altText', 'team', 'server'])
+    const custom = new Set(['dashboard', 'sections', 'seasons', 'navigation', 'publish', 'advanced', 'media', 'cursor', 'looks', 'celebrations', 'languages', 'inbox', 'subscribers', 'insights', 'qualityScore', 'bulk', 'altText', 'team', 'server'])
     for (const g of NAV) for (const i of g.items) {
       expect(custom.has(i.id) || !!ENTITIES[i.id] || !!PAGES[i.id], `menu item "${i.label}" (${i.id}) has no page`).toBe(true)
     }

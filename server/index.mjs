@@ -151,7 +151,11 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     res.status(204).end()
     if (!i?.enabled || (i.respectDoNotTrack && req.headers.dnt === '1') || !trackLimit(req.ip ?? 'x')) return
     const b = req.body ?? {}
-    await insights.record({ type: b.type, path: b.path, ref: b.ref, name: b.name, ip: req.ip, ua: req.headers['user-agent'] ?? '' })
+    // The owner's own visits (a signed-in browser, or the network they signed in from) are counted apart, or dropped if the owner prefers.
+    const countOwn = i.countOwn !== false
+    const own = b.own === true || insights.isHome(req.ip)
+    if (own && !countOwn) return
+    await insights.record({ type: b.type, path: b.path, ref: b.ref, name: b.name, ip: req.ip, ua: req.headers['user-agent'] ?? '', own })
   })
 
   /** A tailored application link. Only someone who knows the slug can fetch it; it is never in the public JSON. */
@@ -176,7 +180,8 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
       : type === 'note' ? `/notes/${encodeURIComponent(value)}`
       : type === 'application' ? `/for/${encodeURIComponent(value)}`
       : type === 'profile' ? '/profile' : '/'
-    void insights.record({ type: 'share', name: `/go/${l.slug}`, ip: req.ip, ua: req.headers['user-agent'] ?? '' }).catch(() => {})
+    const own = insights.isHome(req.ip)
+    if (!(own && published()?.portfolio?.insights?.countOwn === false)) void insights.record({ type: 'share', name: `/go/${l.slug}`, ip: req.ip, ua: req.headers['user-agent'] ?? '', own }).catch(() => {})
     res.set('Cache-Control', 'no-store').redirect(302, to)
   })
 
@@ -228,6 +233,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
 
   admin.get('/session', async (req, res) => {
     const me = auth.check(tokenOf(req))
+    if (me) void insights.markHome(req.ip)
     res.json({ configured: await auth.configured(), authenticated: !!me, username: me?.username ?? '', role: me?.role ?? '', canPublish: me ? can(me, 'publish') : false, storage: kv.kind })
   })
 
@@ -243,6 +249,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
       return res.status(401).json({ error: 'Incorrect username or password.' })
     }
     res.cookie(COOKIE, r.token, { httpOnly: true, sameSite: 'strict', secure: secureCookie(req), maxAge: r.maxAge * 1000, path: '/' })
+    void insights.markHome(req.ip)
     res.json({ ok: true, role: r.role })
   })
 
@@ -347,6 +354,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   admin.get('/subscribers.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="subscribers.csv"').send(subscribers.csv()))
   admin.delete('/subscribers/:id', async (req, res) => ((await subscribers.remove(req.params.id)) ? res.json({ ok: true }) : res.status(404).json({ error: 'Not found.' })))
   admin.get('/insights', (req, res) => res.json(insights.summary(Math.max(7, Math.min(365, Number(req.query.range) || 30)))))
+  admin.delete('/insights/home', ownerOnly, async (_req, res) => { await insights.forgetHome(); res.json({ ok: true }) })
 
   /* ---------- undo for a single item ---------- */
   admin.get('/history/item/:collection/:id', (req, res) => res.json({ versions: snapshots.list(req.params.collection, req.params.id) }))

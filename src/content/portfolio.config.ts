@@ -1,6 +1,7 @@
 import type { Portfolio } from './types'
 import { DEFAULT_RANGES, emptyOverride } from '../themes/seasonManager'
 import { defaultSections } from './sections'
+import { DEFAULT_CELEBRATIONS } from '../themes/celebrations'
 
 /**
  * STARTER CONTENT.
@@ -108,13 +109,14 @@ export const portfolio: Portfolio = {
       winter: emptyOverride(),
     },
   },
+  celebrations: { enabled: true, items: DEFAULT_CELEBRATIONS },
   design: {
     radius: 'soft', buttons: 'pill', density: 'comfortable', fontScale: 1, shadow: 'soft', borderWeight: 'normal',
     headingCase: 'normal', colorMode: 'light', colorToggle: false, dialogAnimation: true, readingProgress: true, cards: 'soft',
   },
   extras: { backToTop: true, availabilityBadge: true, projectNav: true, copyEmail: true, clientStrip: false, readingTime: true },
   media: { cardFit: 'smart', fill: 'blur', cardShape: 'auto', screenshots: 'masonry', screenshotSize: 'large' },
-  toolsUi: { layout: 'cards', showLogos: true, showNames: true, showUsage: true, showCategory: true, logoSize: 'md', logoStyle: 'color', tile: 'white', tabs: true, group: true, glow: true },
+  toolsUi: { layout: 'cards', showLogos: true, showNames: true, showUsage: true, showCategory: true, logoSize: 'md', logoPx: 0, logoStyle: 'color', tile: 'white', tabs: true, group: true, glow: true },
   cursor: {
     enabled: true, style: 'bubbles', size: 28, color: '', opacity: 0.85, smoothing: 0.35, trail: 20,
     blend: 'normal', scope: 'page', hideNativeCursor: false, growOnLinks: true, emoji: '', image: null,
@@ -136,7 +138,7 @@ export const portfolio: Portfolio = {
   maintenance: { enabled: false, title: 'Back soon', message: 'The portfolio is being updated. Please check back shortly.', status503: false, showContact: true, showSocial: true },
   notFound: { title: 'This page has moved on', message: 'The page you were looking for is not here. The portfolio home page is a good place to start.', buttonLabel: 'Back to the portfolio' },
   i18n: { enabled: false, defaultLabel: 'English', switcher: true, languages: [] },
-  insights: { enabled: false, respectDoNotTrack: true, requireConsent: false, retentionDays: 365 },
+  insights: { enabled: false, respectDoNotTrack: true, requireConsent: false, retentionDays: 365, countOwn: true },
   quality: { minDescription: 60, requireCover: true, requireAlt: true, requirePeriod: false, requireLink: false },
   sections: defaultSections(),
   navigation: { mode: 'auto', items: [] },

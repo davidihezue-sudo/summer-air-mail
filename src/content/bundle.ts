@@ -1,3 +1,4 @@
+import { LEGACY_DRAWINGS } from './serviceArt'
 import { portfolio } from './portfolio.config'
 import { projects } from './projects'
 import { services } from './services'
@@ -78,7 +79,7 @@ export function normalizeContent(raw: unknown): SiteContent {
     projects: has('projects')
       ? items(r.projects, newProject).map((x) => (x.caseStudy ? { ...x, caseStudy: mergeDefaults(newCaseStudy(), x.caseStudy) } : x))
       : baseContent.projects,
-    services: has('services') ? items(r.services, newService) : baseContent.services,
+    services: has('services') ? items(r.services, newService).map((s) => (s.object && LEGACY_DRAWINGS[s.object] ? { ...s, object: LEGACY_DRAWINGS[s.object] } : s)) : baseContent.services,
     tools: has('tools') ? items(r.tools, newTool) : baseContent.tools,
     testimonials: has('testimonials') ? items(r.testimonials, newTestimonial) : baseContent.testimonials,
     contentItems: has('contentItems') ? items(r.contentItems, newContentItem) : baseContent.contentItems,

@@ -1,4 +1,4 @@
-import type { Level, SeasonName, ServiceObject, ThemeColors } from '../content/types'
+import type { Level, SeasonName, ThemeColors } from '../content/types'
 
 export interface DecorationDef {
   id: string
@@ -38,8 +38,6 @@ export interface SeasonTheme {
   decorations: DecorationDef[]
   /** Default decorative motion level for this season. */
   defaultIntensity: Level
-  /** Re-skins the six services objects for this season. */
-  objects: Record<ServiceObject, string>
   surfaceName: string
   copy: SeasonCopy
 }

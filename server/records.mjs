@@ -67,18 +67,61 @@ export function createSubscribers(dir) {
 /* ---------- insights: aggregates only ---------- */
 const EVENTS = new Set(['view', 'project', 'cta', 'download', 'contact', 'note', 'share'])
 const clip = (s, n = 120) => String(s ?? '').slice(0, n)
+const HOME_DAYS = 90
+const HOME_MAX = 5
+
 export function createInsights(dir, { salt = randomBytes(16).toString('hex') } = {}) {
-  const f = jsonFile(dir, 'insights.json', { days: {} })
+  const f = jsonFile(dir, 'insights.json', { days: {}, home: {}, homeSalt: '' })
   const seen = new Map() // day -> Set of hashes, memory only and dropped when the day ends
   const day = (d = new Date()) => d.toISOString().slice(0, 10)
   const bump = (o, k) => { if (k) o[k] = (o[k] ?? 0) + 1 }
+  // The home network is remembered as a scrambled fingerprint (the address plus a secret that stays on the server), never the address itself.
+  const homeKey = (ip) => createHash('sha256').update(`${f.get().homeSalt}|home|${ip}`).digest('hex').slice(0, 16)
   return {
-    init: f.init, flush: f.flush,
+    async init() {
+      await f.init()
+      if (!f.get().homeSalt) { f.get().homeSalt = randomBytes(16).toString('hex'); await f.save() }
+    },
+    flush: f.flush,
+    /** Remember the network an admin signed in from, so later visits from it count as the owner's own. Keeps the five most recent. */
+    async markHome(ip, now = new Date()) {
+      if (!ip) return false
+      const k = homeKey(ip)
+      const d = day(now)
+      const home = f.get().home
+      if (home[k] === d) return false
+      home[k] = d
+      f.get().home = Object.fromEntries(Object.entries(home).sort((a, b) => b[1].localeCompare(a[1])).slice(0, HOME_MAX))
+      await f.save()
+      return true
+    },
+    /** True for a network the owner signed in from within the last 90 days. */
+    isHome(ip, now = new Date()) {
+      if (!ip) return false
+      const last = f.get().home[homeKey(ip)]
+      return !!last && last >= day(new Date(now.getTime() - HOME_DAYS * 864e5))
+    },
+    homeCount: () => Object.keys(f.get().home).length,
+    async forgetHome() { f.get().home = {}; await f.save() },
     /** No IP or user agent is stored. The visitor hash uses a salt that changes daily and is never written to disk. */
-    async record({ type, path = '', ref = '', name = '', ip = '', ua = '' }, now = new Date()) {
+    async record({ type, path = '', ref = '', name = '', ip = '', ua = '', own = false }, now = new Date()) {
       if (!EVENTS.has(type)) return false
       const d = day(now)
-      for (const k of seen.keys()) if (k !== d) seen.delete(k)
+      for (const k of seen.keys()) if (k !== d && !k.startsWith(`own|${d}`)) seen.delete(k)
+      if (own) {
+        // The owner and the home network are counted apart, so outside visitors are never inflated by checking the site.
+        const o = (f.get().days[d] ??= { views: 0, visitors: 0, paths: {}, refs: {}, events: {}, items: {} }).own ??= { views: 0, visitors: 0, paths: {}, events: 0 }
+        if (type === 'view') {
+          o.views++
+          const h = createHash('sha256').update(`${salt}|${d}|${ip}|${ua}`).digest('hex').slice(0, 16)
+          const sk = `own|${d}`
+          const s = seen.get(sk) ?? new Set(); seen.set(sk, s)
+          if (!s.has(h)) { s.add(h); o.visitors++ }
+          bump(o.paths, clip(path, 80) || '/')
+        } else o.events++
+        await f.save()
+        return true
+      }
       const rec = (f.get().days[d] ??= { views: 0, visitors: 0, paths: {}, refs: {}, events: {}, items: {} })
       if (type === 'view') {
         rec.views++
@@ -103,11 +146,17 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
     },
     days: () => f.get().days,
     summary(range = 30, now = new Date()) {
-      const out = { views: 0, visitors: 0, series: [], paths: {}, refs: {}, events: {}, items: {} }
+      const out = { views: 0, visitors: 0, series: [], paths: {}, refs: {}, events: {}, items: {}, own: { views: 0, visitors: 0, daysSeen: 0, series: [], paths: {} }, homeNetworks: Object.keys(f.get().home).length }
       for (let i = range - 1; i >= 0; i--) {
         const d = day(new Date(now.getTime() - i * 864e5))
         const r = f.get().days[d]
         out.series.push({ day: d, views: r?.views ?? 0, visitors: r?.visitors ?? 0 })
+        out.own.series.push({ day: d, views: r?.own?.views ?? 0, visitors: r?.own?.visitors ?? 0 })
+        if (r?.own) {
+          out.own.views += r.own.views; out.own.visitors += r.own.visitors
+          if (r.own.views) out.own.daysSeen++
+          for (const [k, v] of Object.entries(r.own.paths ?? {})) out.own.paths[k] = (out.own.paths[k] ?? 0) + v
+        }
         if (!r) continue
         out.views += r.views; out.visitors += r.visitors
         for (const [k, v] of Object.entries(r.paths)) out.paths[k] = (out.paths[k] ?? 0) + v

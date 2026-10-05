@@ -2,6 +2,7 @@
 import type { SiteContent } from '../content/types'
 import { newApplication, newJourney, newNote, newResource, newShortLink } from '../content/factories'
 import { ENTITIES, PAGES, type EntityDef } from './schema'
+import type { Field } from './fields'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const hiddenToggle = { shown: (x: any) => !x.hidden, setShown: (x: any, v: boolean) => { x.hidden = !v }, shownLabels: ['Published', 'Draft'] as [string, string] }
@@ -87,6 +88,14 @@ void SECTION_LAYOUT
 
 if (ENTITIES.screenshots) ENTITIES.screenshots.fields.push({ kind: 'select', key: 'size', label: 'Size on the page (this screenshot)', options: [{ value: '', label: 'Use the site setting' }, { value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }], help: 'Only changes how big it appears. The shape and sharpness stay the same.' })
 
+/** The switches for counting visits. They live on the Visit Insights page, next to the numbers they control. */
+export const INSIGHT_FIELDS: Field[] = [
+        { kind: 'bool', key: 'enabled', label: 'Count visits on my own server', help: 'Stores daily totals only. No IP address, cookie or profile of any visitor is kept.' },
+        { kind: 'bool', key: 'countOwn', label: 'Count my own visits separately', help: 'Your visits (signed in, on a device you have used for the admin, or from the network you signed in from) are shown apart as "You and home" and never added to outside visitors. Off ignores them completely.' },
+        { kind: 'bool', key: 'respectDoNotTrack', label: 'Skip visitors who send Do Not Track' }, { kind: 'bool', key: 'requireConsent', label: 'Count only visitors who accepted cookies and analytics' },
+        { kind: 'number', key: 'retentionDays', label: 'Keep daily totals for (days)', min: 7, max: 3650, nullable: false },
+]
+
 Object.assign(PAGES, {
   extras: {
     title: 'Extras', intro: 'Small touches that make the site nicer to use. Each one can be switched off.',
@@ -125,11 +134,12 @@ Object.assign(PAGES, {
         { kind: 'bool', key: 'group', label: 'Group by category when there are no tabs' },
       ] },
       { title: 'What shows', base: 'portfolio.toolsUi', fields: [
-        { kind: 'bool', key: 'showLogos', label: 'Logos' }, { kind: 'bool', key: 'showNames', label: 'Names under the logos (logo wall)' },
+        { kind: 'bool', key: 'showLogos', label: 'Logos' }, { kind: 'bool', key: 'showNames', label: 'Names with the logos', help: 'Turn this off with Logos on and the scrolling strip shows just the logos, with no pill around them.' },
         { kind: 'bool', key: 'showUsage', label: 'How I use each tool (the description)' }, { kind: 'bool', key: 'showCategory', label: 'Category on each card' },
       ] },
       { title: 'Look', base: 'portfolio.toolsUi', fields: [
         { kind: 'select', key: 'logoSize', label: 'Logo size', options: [{ value: 'sm', label: 'Small' }, { value: 'md', label: 'Medium' }, { value: 'lg', label: 'Large' }] },
+        { kind: 'range', key: 'logoPx', label: 'Exact logo size', min: 0, max: 160, step: 4, unit: 'px', help: '0 uses the size above. Otherwise anything from 24 to 160 pixels, in every layout, including the scrolling strip.' },
         { kind: 'select', key: 'logoStyle', label: 'Logo colours', options: [{ value: 'color', label: 'Brand colours' }, { value: 'mono', label: 'One colour (matches the site)' }] },
         { kind: 'select', key: 'tile', label: 'What the logo sits on', options: [{ value: 'white', label: 'A white tile' }, { value: 'glass', label: 'Frosted glass' }, { value: 'bare', label: 'Nothing (logo only)' }] },
         { kind: 'bool', key: 'glow', label: 'Glow in the brand colour on hover' },
@@ -224,17 +234,12 @@ Object.assign(PAGES, {
     ],
   },
   quality: {
-    title: 'Quality Rules & Insights', intro: 'What counts as a complete project, and privacy friendly visit counts.',
+    title: 'Quality Rules', intro: 'What counts as a complete project. The switches for counting visits are on the Visit Insights page.',
     blocks: [
       { title: 'Quality rules', base: 'portfolio.quality', fields: [
         { kind: 'number', key: 'minDescription', label: 'Shortest acceptable project description (characters)', min: 0, nullable: false },
         { kind: 'bool', key: 'requireCover', label: 'Every project needs a cover image' }, { kind: 'bool', key: 'requireAlt', label: 'Images need alt text' },
         { kind: 'bool', key: 'requirePeriod', label: 'Every project needs a year or period' }, { kind: 'bool', key: 'requireLink', label: 'Every project needs an external link' },
-      ] },
-      { title: 'Visit insights (first party, no cookies)', base: 'portfolio.insights', fields: [
-        { kind: 'bool', key: 'enabled', label: 'Count visits on my own server', help: 'Stores daily totals only. No IP address, cookie or profile of any visitor is kept.' },
-        { kind: 'bool', key: 'respectDoNotTrack', label: 'Skip visitors who send Do Not Track' }, { kind: 'bool', key: 'requireConsent', label: 'Count only visitors who accepted cookies and analytics' },
-        { kind: 'number', key: 'retentionDays', label: 'Keep daily totals for (days)', min: 7, max: 3650, nullable: false },
       ] },
     ],
   },

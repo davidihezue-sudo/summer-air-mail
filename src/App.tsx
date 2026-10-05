@@ -12,6 +12,7 @@ import { BackToTop } from './components/layout/BackToTop'
 import { ClientStrip } from './components/layout/ClientStrip'
 import { useT } from './i18n/useT'
 import { Decor } from './components/layout/Decor'
+import { Festive } from './components/layout/Festive'
 import { Hero } from './components/hero/Hero'
 import { RecruiterOverview } from './components/about/RecruiterOverview'
 import { About } from './components/about/About'
@@ -67,6 +68,7 @@ export default function App() {
       <Banner />
       <Header />
       <Decor />
+      <Festive />
       <main id="main">
         {sections.map(({ config, visible }) => {
           if (!visible) return null

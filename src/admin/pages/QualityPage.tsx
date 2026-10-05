@@ -10,7 +10,7 @@ export function QualityPage() {
   const q = useMemo(() => quality(content), [content])
   return (
     <>
-      <PageHead title="Quality & Completeness" intro="A checklist of what recruiters expect, scored from your real content. The rules are yours: change them under Quality Rules & Insights." />
+      <PageHead title="Quality & Completeness" intro="A checklist of what recruiters expect, scored from your real content. The rules are yours: change them under Quality Rules." />
       <Card title="Overall">
         <p className="astat"><Badge tone={tone(q.overall)}>{q.overall} / 100</Badge> overall · profile completeness {q.completeness}%</p>
         {q.completenessIssues.length > 0 && <ul className="atodo">{q.completenessIssues.map((t) => <li key={t}>{t}</li>)}</ul>}

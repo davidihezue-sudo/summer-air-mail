@@ -18,6 +18,29 @@ html.theme-fading *, html.theme-fading *::before, html.theme-fading *::after { t
 .decor__p--stars { background: #fff; filter: drop-shadow(0 0 2px rgb(42 90 135 / .6)); }
 .decor__glow { position: absolute; inset: 0; background: radial-gradient(120% 90% at 50% 120%, rgb(214 120 40 / .22), transparent 60%); }
 .decor__frost { position: absolute; inset: 0; box-shadow: inset 0 0 90px 24px rgb(230 240 250 / .55); }
+/* ===== Celebrations: Christmas, Boxing Day, New Year and the rest ===== */
+.decor__p--hearts { background: var(--c-red); opacity: .8; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21s-8-5.2-8-11a4.5 4.5 0 0 1 8-2.8A4.5 4.5 0 0 1 20 10c0 5.8-8 11-8 11z'/%3E%3C/svg%3E") center / contain no-repeat; }
+.decor__p--hearts[data-h='1'] { background: var(--c-pink); }
+.decor__p--hearts[data-h='2'] { background: var(--c-peach); }
+.decor__p--confetti { background: var(--c-red); border-radius: 1px; opacity: .9; }
+.decor__p--confetti[data-h='1'] { background: var(--c-butter); }
+.decor__p--confetti[data-h='2'] { background: var(--c-sea); }
+[data-celebration] .decor__p--leaves[data-h='0'] { background: #a3501f; }
+[data-celebration] .decor__p--leaves[data-h='1'] { background: #7e1f2e; }
+[data-celebration] .decor__p--leaves[data-h='2'] { background: #c98b2b; }
+.festive { position: fixed; inset: 0; z-index: 55; pointer-events: none; overflow: hidden; }
+.festive__lights { list-style: none; margin: 0; padding: 0 6px; position: absolute; top: var(--banner-h, 0px); left: 0; right: 0; height: 30px; display: flex; justify-content: space-between; background: linear-gradient(color-mix(in srgb, var(--c-ink) 65%, transparent), color-mix(in srgb, var(--c-ink) 65%, transparent)) 0 4px / 100% 2px no-repeat; }
+.festive__lights li { width: 9px; height: 13px; margin-top: 5px; border-radius: 50% 50% 45% 45%; color: var(--c-red); background: currentColor; box-shadow: 0 0 9px 2px currentColor; animation: festive-twinkle 2.4s ease-in-out infinite; animation-delay: calc(var(--i) * -.31s); }
+.festive__lights li:nth-child(even) { margin-top: 9px; }
+.festive__lights li:nth-child(4n + 2) { color: var(--c-butter); }
+.festive__lights li:nth-child(4n + 3) { color: var(--c-sage); }
+.festive__lights li:nth-child(4n) { color: var(--c-sky); }
+.festive--still .festive__lights li { animation: none; }
+.festive__burst { position: absolute; width: 6px; height: 6px; border-radius: 50%; opacity: 0; color: var(--b1); animation: festive-burst ease-out infinite; box-shadow: 0 -46px 0 0 var(--b1), 33px -33px 0 0 var(--b2), 46px 0 0 0 var(--b1), 33px 33px 0 0 var(--b2), 0 46px 0 0 var(--b1), -33px 33px 0 0 var(--b2), -46px 0 0 0 var(--b1), -33px -33px 0 0 var(--b2); }
+@keyframes festive-twinkle { 0%, 100% { opacity: .5; } 50% { opacity: 1; } }
+@keyframes festive-burst { 0% { transform: scale(.1); opacity: 0; } 12% { opacity: 1; } 70% { opacity: .9; } 100% { transform: scale(1.5); opacity: 0; } }
+[data-motion='none'] .festive__burst { display: none; }
+.banner--festive { background: var(--c-red-text); color: var(--c-paper); }
 @keyframes decor-fall {
   from { transform: translate3d(0, -8vh, 0) rotate(0deg); }
   to { transform: translate3d(var(--sway, 40px), 112vh, 0) rotate(var(--spin, 360deg)); }

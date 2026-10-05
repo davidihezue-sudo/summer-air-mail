@@ -270,6 +270,7 @@
 .ainbox__body { flex-basis: 100%; padding: .4rem 1rem 1rem; }
 .astat { font-size: 1.1rem; }
 .aspark { width: 100%; height: 90px; color: #2a8db0; }
+.aspark--own { color: #8a6d3b; height: 70px; }
 .abars { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
 .abars li { display: grid; grid-template-columns: minmax(80px, 30%) 1fr 3rem; gap: .6rem; align-items: center; font-size: .9rem; }
 .abars__k { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .abars__bar { height: 12px; border-radius: 6px; background: #2a8db0; min-width: 2px; } .abars__v { text-align: right; font-weight: 700; }

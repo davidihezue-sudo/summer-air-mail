@@ -22,7 +22,8 @@ function previewFromUrl(): ThemePreview | undefined {
   if (!q.has('preview')) return undefined
   const season = q.get('season') as SeasonName | null
   const scheme = q.get('scheme')
-  return { season: season && SEASONS.includes(season) ? season : undefined, scheme: scheme === 'dark' || scheme === 'light' ? scheme : undefined }
+  const celebration = q.get('celebration')
+  return { season: season && SEASONS.includes(season) ? season : undefined, scheme: scheme === 'dark' || scheme === 'light' ? scheme : undefined, celebration: celebration ?? undefined }
 }
 
 const readLang = () => {

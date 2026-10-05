@@ -14,6 +14,7 @@ import { Img } from '../ui/Img'
 import { hasValue, safeHref } from '../../utils/text'
 import { ShareButton } from '../layout/ShareButton'
 import { workUrl } from '../../utils/route'
+import { mediaCaption } from '../../utils/media'
 
 interface Props {
   project: Project | null
@@ -73,7 +74,7 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
       {media.length > 0 && (
         <figure
           ref={stage}
-          className="project__stage"
+          className={`project__stage${mediaCaption(current) ? ' project__stage--cap' : ''}`}
           onPointerDown={(e) => { start.current = e.clientX }}
           onPointerUp={(e) => {
             if (start.current === null) return
@@ -87,6 +88,7 @@ function Body({ project, focusCase, onOpen }: { project: Project; focusCase: boo
           ) : (
             <img key={current.src} className="project__media" src={current.src} alt={current.alt} draggable={false} />
           )}
+          {mediaCaption(current) && <figcaption className="project__cap">{mediaCaption(current)}</figcaption>}
           {media.length > 1 && (
             <>
               <button type="button" className="project__nav project__nav--prev" onClick={() => go(-1)} aria-label="Previous image"><ChevronLeft aria-hidden /></button>

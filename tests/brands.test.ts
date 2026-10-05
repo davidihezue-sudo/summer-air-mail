@@ -12,8 +12,7 @@ describe('tool logos', () => {
     expect(brandKey('Meta Business Suite')).toBe('metabusinesssuite')
   })
   it('falls back to a coloured monogram when no mark exists, and never invents a logo', () => {
-    const b = brandFor(t('Canva'))
-    expect(b).toMatchObject({ kind: 'mono', text: 'C', color: '#00C4CC' })
+    expect(brandFor(t('Sprout Social'))).toMatchObject({ kind: 'mono', text: 'SS', color: '#59CB59' })
     expect(brandFor(t('My Own Tool'))).toMatchObject({ kind: 'mono', text: 'MO' })
   })
   it('prefers an uploaded logo, then a linked one, then a chosen built-in mark', () => {
@@ -22,7 +21,7 @@ describe('tool logos', () => {
     expect(brandFor(t('Anything', { logoSlug: 'figma' })).kind).toBe('svg')
   })
   it('refuses unsafe logo addresses and bad colours', () => {
-    expect(brandFor(t('Canva', { logoUrl: 'javascript:alert(1)' })).kind).toBe('mono')
+    expect(brandFor(t('Sprout Social', { logoUrl: 'javascript:alert(1)' })).kind).toBe('mono')
     expect(brandFor(t('Notion', { color: 'red; background:url(x)' }))).toMatchObject({ kind: 'svg' })
     expect((brandFor(t('Notion', { color: '#112233' })) as { color: string }).color).toBe('#112233')
   })
@@ -59,9 +58,9 @@ describe('switched on means visible', () => {
     const c = { ...baseContent, platforms: baseContent.platforms.map((p, i) => (i === 0 ? { ...p, hidden: false } : p)) }
     expect(getPlatforms(c)).toHaveLength(1)
   })
-  it('gives platforms a logo, with an "in" tile for LinkedIn', () => {
+  it('gives platforms the real logo, LinkedIn included', () => {
     expect(brandFor(platformAsTool({ platform: 'instagram' })).kind).toBe('svg')
     expect(brandFor(platformAsTool({ platform: 'tiktok' })).kind).toBe('svg')
-    expect(brandFor(platformAsTool({ platform: 'linkedin' }))).toMatchObject({ kind: 'mono', text: 'in', color: '#0A66C2' })
+    expect(brandFor(platformAsTool({ platform: 'linkedin' }))).toMatchObject({ kind: 'svg', slug: 'linkedin', color: '#0A66C2' })
   })
 })

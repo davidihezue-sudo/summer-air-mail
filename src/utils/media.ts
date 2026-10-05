@@ -10,6 +10,9 @@ const PLATFORM_SHAPE: Record<string, number> = {
   instagram: 4 / 5, threads: 4 / 5, tiktok: 9 / 16, snapchat: 9 / 16, pinterest: 2 / 3, youtube: 16 / 9, x: 16 / 9, facebook: 1.91, linkedin: 1.91,
 }
 
+/** The text to show under a picture or video: its caption, or for a video with no caption the description written for it (a video has no alt text to hide it in). */
+export const mediaCaption = (m: { type: string; alt?: string; caption?: string }): string => (m.caption ?? '').trim() || (m.type === 'video' ? (m.alt ?? '').trim() : '')
+
 export const MIN_RATIO = 9 / 16
 export const MAX_RATIO = 2.4
 export const clampRatio = (r: number) => Math.min(MAX_RATIO, Math.max(MIN_RATIO, Number.isFinite(r) && r > 0 ? r : 1))

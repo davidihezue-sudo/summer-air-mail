@@ -1,7 +1,7 @@
 import {
   BarChart3, Bot, Briefcase, Calendar, Clapperboard, Compass, FileText, Film, Globe, Image as ImageIcon, LayoutDashboard, Layers,
   LayoutList, Link2, ListChecks, Megaphone, MessageSquareQuote, Palette, PenTool, Rocket, Search, Settings, Share2, Sparkles, Target, User, Wrench,
-  Laptop, Mail, Camera, MousePointer2, Brush, Megaphone as Horn, Languages, Inbox, Users, BarChart, ShieldCheck, FileDown, Files, Link as LinkIcon, Route, NotebookPen, Bookmark, Wand2, Timer, HardDrive, UserSquare, Type, ClipboardCheck, BookOpen, Star, Workflow, Cpu, Footprints, Eye,
+  Laptop, Mail, Camera, MousePointer2, Brush, Megaphone as Horn, Languages, Inbox, Users, BarChart, ShieldCheck, FileDown, Files, Link as LinkIcon, Route, NotebookPen, Bookmark, Wand2, Timer, HardDrive, UserSquare, Type, ClipboardCheck, BookOpen, Star, Workflow, Cpu, Footprints, Eye, PartyPopper, Monitor,
 } from 'lucide-react'
 
 export const NAV: { group: string; items: { id: string; label: string; icon: typeof User; owner?: boolean }[] }[] = [
@@ -11,7 +11,7 @@ export const NAV: { group: string; items: { id: string; label: string; icon: typ
     { id: 'cv', label: 'Resume / CV', icon: FileText }, { id: 'social', label: 'Social Links', icon: Share2 }, { id: 'contact', label: 'Contact', icon: Mail },
   ] },
   { group: 'Look and layout', items: [
-    { id: 'appearance', label: 'Appearance', icon: Palette }, { id: 'cursor', label: 'Cursor effect', icon: MousePointer2 }, { id: 'seasons', label: 'Seasons', icon: Calendar }, { id: 'sections', label: 'Sections & Visibility', icon: ListChecks },
+    { id: 'appearance', label: 'Appearance', icon: Palette }, { id: 'cursor', label: 'Cursor effect', icon: MousePointer2 }, { id: 'seasons', label: 'Seasons', icon: Calendar }, { id: 'celebrations', label: 'Celebrations', icon: PartyPopper }, { id: 'sections', label: 'Sections & Visibility', icon: ListChecks },
     { id: 'design', label: 'Design', icon: Brush }, { id: 'extras', label: 'Extras', icon: Wand2 }, { id: 'looks', label: 'Saved Looks', icon: Bookmark },
     { id: 'navigation', label: 'Navigation', icon: Compass }, { id: 'footer', label: 'Footer', icon: Footprints },
   ] },
@@ -26,12 +26,12 @@ export const NAV: { group: string; items: { id: string; label: string; icon: typ
     { id: 'qualityScore', label: 'Quality Score', icon: ClipboardCheck },
   ] },
   { group: 'Tools', items: [
-    { id: 'bulk', label: 'Bulk & CSV', icon: Files }, { id: 'altText', label: 'Alt Text Assistant', icon: Wand2 }, { id: 'quality', label: 'Quality Rules & Insights', icon: ShieldCheck },
+    { id: 'bulk', label: 'Bulk & CSV', icon: Files }, { id: 'altText', label: 'Alt Text Assistant', icon: Wand2 }, { id: 'quality', label: 'Quality Rules', icon: ShieldCheck },
     { id: 'team', label: 'Team & Access', icon: Users, owner: true }, { id: 'server', label: 'Server & Backups', icon: HardDrive, owner: true },
   ] },
   { group: 'Portfolio', items: [
-    { id: 'projects', label: 'Portfolio', icon: Briefcase }, { id: 'caseStudies', label: 'Case Studies', icon: BookOpen }, { id: 'campaigns', label: 'Campaigns', icon: Megaphone },
-    { id: 'posts', label: 'Social Media Content', icon: Camera }, { id: 'videos', label: 'Videos & Reels', icon: Film }, { id: 'screenshots', label: 'Screenshots', icon: Clapperboard }, { id: 'mediaDisplay', label: 'Pictures & Screenshots', icon: ImageIcon },
+    { id: 'projects', label: 'Portfolio', icon: Briefcase },
+    { id: 'posts', label: 'Social Media Content', icon: Camera }, { id: 'screenshots', label: 'Screenshots', icon: Monitor }, { id: 'mediaDisplay', label: 'Picture Display', icon: ImageIcon },
     { id: 'results', label: 'Analytics & Results', icon: BarChart3 }, { id: 'websites', label: 'Websites & Digital Projects', icon: Laptop },
   ] },
   { group: 'Capabilities', items: [
@@ -45,4 +45,4 @@ export const NAV: { group: string; items: { id: string; label: string; icon: typ
   ] },
 ]
 
-void [Bot, LayoutList, Link2]
+void [Bot, LayoutList, Link2, Megaphone, Film, Clapperboard]

@@ -3,6 +3,8 @@ import { MotionConfig } from 'framer-motion'
 import { useContent } from './useContent'
 import { useMediaQuery } from './useMediaQuery'
 import { resolveSeason, resolveTheme, type ResolvedTheme } from '../themes/seasonManager'
+import { activeCelebration } from '../themes/celebrations'
+import { SEASON_ORDER } from '../themes'
 import { resolveMotion, type MotionPlan } from '../motion/motion'
 import { applyTheme } from '../utils/theme'
 import type { Level, ProfessionalIntensity, SeasonName } from '../content/types'
@@ -39,14 +41,21 @@ export interface ThemePreview {
   professional?: ProfessionalIntensity
   intensity?: Level
   scheme?: 'light' | 'dark'
+  /** A celebration id to show whatever the date, or "none" to show the plain season. Left out, the date decides. */
+  celebration?: string
 }
 
 export function ThemeProvider({ preview, children }: { preview?: ThemePreview; children: ReactNode }) {
   const { content } = useContent()
-  const { theme, seasons, hero } = content.portfolio
+  const { theme, seasons, hero, celebrations } = content.portfolio
   const prefersReduced = useMediaQuery('(prefers-reduced-motion: reduce)')
   const finePointer = useMediaQuery('(hover: hover) and (pointer: fine)')
-  const season = preview?.season ?? resolveSeason(seasons)
+  const forcedCelebration = preview?.celebration
+  const festive = useMemo(
+    () => (forcedCelebration === undefined ? activeCelebration(celebrations) : forcedCelebration === 'none' ? null : celebrations?.items?.find((c) => c.id === forcedCelebration) ?? null),
+    [celebrations, forcedCelebration],
+  )
+  const season = preview?.season ?? (festive?.season && SEASON_ORDER.includes(festive.season) ? festive.season : resolveSeason(seasons))
   const professional = preview?.professional ?? theme.professional
   const sysDark = useMediaQuery('(prefers-color-scheme: dark)')
   const [visitor, setVisitor] = useState<'light' | 'dark' | ''>(() => {
@@ -60,7 +69,7 @@ export function ThemeProvider({ preview, children }: { preview?: ThemePreview; c
   }, [])
 
   const state = useMemo<ThemeState>(() => {
-    const resolved = resolveTheme(season, seasons)
+    const resolved = resolveTheme(season, seasons, festive)
     const heroLevel = hero.animation === 'inherit' ? resolved.intensity : hero.animation
     const plan = resolveMotion({
       global: theme.animationIntensity,
@@ -75,7 +84,7 @@ export function ThemeProvider({ preview, children }: { preview?: ThemePreview; c
       copy: professional === 'professional' ? NEUTRAL : resolved.theme.copy,
       scheme, setScheme,
     }
-  }, [scheme, setScheme, season, seasons, hero.animation, theme.animationIntensity, professional, prefersReduced, finePointer, preview?.intensity])
+  }, [scheme, setScheme, season, seasons, festive, hero.animation, theme.animationIntensity, professional, prefersReduced, finePointer, preview?.intensity])
 
   const first = useRef(true)
   useEffect(() => {

@@ -25,7 +25,7 @@ function scrubRefs(c: SiteContent, id: string) {
   for (const [coll, key] of SINGLE_TO_SCRUB) for (const item of root[coll]) if (item[key] === id) item[key] = ''
 }
 
-export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
+export function EntityPage({ def, id, view: startView }: { def: EntityDef; id?: string; view?: string }) {
   const { content, edit, set, replace, status, me } = useAdmin()
   const [versions, setVersions] = useState<{ index: number; at: string; title: string }[] | null>(null)
   const { go } = useRoute()
@@ -33,9 +33,12 @@ export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
   const [state, setState] = useState<'all' | 'on' | 'off'>('all')
   const [del, setDel] = useState<string | null>(null)
   const [csOff, setCsOff] = useState(false)
+  const [view, setView] = useState(startView && def.views?.some((v) => v.value === startView) ? startView : def.views?.[0]?.value ?? '')
+  const viewTest = def.views?.find((v) => v.value === view)?.test
+  const inView = (x: any) => (!def.filter || def.filter(x)) && (!viewTest || viewTest(x))
   const items = (content as any)[def.collection] as any[]
 
-  const rows = useMemo(() => items.map((x, index) => ({ x, index })).filter(({ x }) => (!def.filter || def.filter(x)) && (state === 'all' || def.shown(x) === (state === 'on')) && (!q || `${def.titleOf(x)} ${def.subtitleOf?.(x) ?? ''}`.toLowerCase().includes(q.toLowerCase()))), [items, def, q, state])
+  const rows = useMemo(() => items.map((x, index) => ({ x, index })).filter(({ x }) => (!def.filter || def.filter(x)) && (!viewTest || viewTest(x)) && (state === 'all' || def.shown(x) === (state === 'on')) && (!q || `${def.titleOf(x)} ${def.subtitleOf?.(x) ?? ''}`.toLowerCase().includes(q.toLowerCase()))), [items, def, q, state, viewTest])
 
   if (id) {
     const index = items.findIndex((x) => x.id === id)
@@ -74,8 +77,8 @@ export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
     )
   }
 
-  const add = () => {
-    const item = def.make()
+  const add = (make: () => any = def.make) => {
+    const item = make()
     edit((c) => { (c as any)[def.collection].push(item) })
     go(`${def.id}/${item.id}`)
   }
@@ -107,21 +110,29 @@ export function EntityPage({ def, id }: { def: EntityDef; id?: string }) {
     setDel(null)
   }
 
-  const shownCount = items.filter((x) => (!def.filter || def.filter(x)) && def.shown(x)).length
-  const total = items.filter((x) => !def.filter || def.filter(x)).length
+  const shownCount = items.filter((x) => inView(x) && def.shown(x)).length
+  const total = items.filter((x) => inView(x)).length
 
   return (
     <>
-      <PageHead title={def.title} intro={def.intro} actions={<button type="button" className="abtn abtn--primary" onClick={add}><Plus size={14} aria-hidden /> Add {def.singular}</button>} />
+      <PageHead title={def.title} intro={def.intro} actions={<>
+        <button type="button" className="abtn abtn--primary" onClick={() => add()}><Plus size={14} aria-hidden /> Add {def.singular}</button>
+        {def.makers?.map((m) => <button key={m.label} type="button" className="abtn" onClick={() => add(m.make)}><Plus size={14} aria-hidden /> Add {m.label}</button>)}
+      </>} />
       <Card>
         <div className="atoolbar">
+          {def.views && (
+            <select aria-label={`Show in ${def.title}`} value={view} onChange={(e) => setView(e.target.value)}>
+              {def.views.map((v) => <option key={v.value} value={v.value}>{v.label} ({items.filter((x) => (!def.filter || def.filter(x)) && v.test(x)).length})</option>)}
+            </select>
+          )}
           <input type="search" aria-label={`Search ${def.title}`} placeholder={`Search ${def.title.toLowerCase()}`} value={q} onChange={(e) => setQ(e.target.value)} />
           <select aria-label="Filter by status" value={state} onChange={(e) => setState(e.target.value as 'all' | 'on' | 'off')}>
             <option value="all">All ({total})</option><option value="on">{def.shownLabels[0]} ({shownCount})</option><option value="off">{def.shownLabels[1]} ({total - shownCount})</option>
           </select>
         </div>
         {rows.length === 0 ? (
-          <div className="aempty"><p>{total === 0 ? `No ${def.title.toLowerCase()} yet.` : 'Nothing matches those filters.'}</p>{total === 0 && <button type="button" className="abtn abtn--primary" onClick={add}><Plus size={14} aria-hidden /> Add your first {def.singular}</button>}</div>
+          <div className="aempty"><p>{total === 0 ? `No ${def.title.toLowerCase()} yet.` : 'Nothing matches those filters.'}</p>{total === 0 && <button type="button" className="abtn abtn--primary" onClick={() => add()}><Plus size={14} aria-hidden /> Add your first {def.singular}</button>}</div>
         ) : (
           <ul className="arows">
             {rows.map(({ x, index }, i) => {

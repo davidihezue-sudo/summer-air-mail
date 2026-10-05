@@ -10,6 +10,7 @@ import { Modal } from '../ui/Modal'
 import { Img } from '../ui/Img'
 import { TowelObject } from '../ui/art'
 import { getIcon } from '../ui/iconMap'
+import { drawingFor } from '../../content/serviceArt'
 import { platformLabel } from '../ui/Icons'
 import { toneValue } from '../../utils/theme'
 import { useViewer } from '../projects/Viewer'
@@ -27,8 +28,12 @@ export function Services({ config }: { config: SectionConfig }) {
   const playful = professional !== 'professional'
   const canDrag = finePointer && !reduced && playful
 
-  const art = (s: Service) =>
-    s.object ? <TowelObject name={resolved.theme.objects[s.object] ?? s.object} /> : (() => { const Icon = getIcon(s.icon); return <Icon className="towel-art towel-art--icon" aria-hidden strokeWidth={1.4} /> })()
+  const art = (s: Service) => {
+    const drawing = drawingFor(s)
+    if (drawing) return <TowelObject name={drawing} />
+    const Icon = getIcon(s.icon)
+    return <Icon className="towel-art towel-art--icon" aria-hidden strokeWidth={1.4} />
+  }
 
   const related = active ? projects.filter((p) => active.projectIds?.includes(p.id) || p.serviceIds?.includes(active.id)) : []
   const categories = [...new Set(services.map((s) => s.category || 'Services'))]

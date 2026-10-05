@@ -111,7 +111,7 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
     writeFileSync(join(dist, 'index.html'), '<!doctype html><html lang="en"><head><meta name="robots" content="index" /><!--head:start--><!--head:end--></head><body></body></html>')
     const fakeFetch = async (url: string, init: any) => { hooks.push({ url, init }); return new Response('', { status: 200 }) }
     const transportFactory = () => ({ sendMail: async (m: any) => { sent.push(m) } })
-    const env: Record<string, string> = { SMTP_HOST: 'smtp.test', SMTP_USER: 'u', SMTP_PASS: 'p', ALERT_WEBHOOK_URL: 'https://hooks.example/x', S3_ENDPOINT: 'https://s3.example.test', S3_BUCKET: 'bk', S3_ACCESS_KEY: 'AKTEST', S3_SECRET_KEY: 'SKTEST', S3_REGION: 'us-east-1', ...(dbUrl ? { DATABASE_URL: dbUrl } : {}) }
+    const env: Record<string, string> = { SMTP_HOST: 'smtp.test', SMTP_USER: 'u', SMTP_PASS: 'p', ALERT_WEBHOOK_URL: 'https://hooks.example/x', S3_ENDPOINT: 'https://s3.example.test', S3_BUCKET: 'bk', S3_ACCESS_KEY: 'AKTEST', S3_SECRET_KEY: 'SKTEST', S3_REGION: 'us-east-1', TRUST_PROXY: '1', ...(dbUrl ? { DATABASE_URL: dbUrl } : {}) }
     if (dbUrl) {
       const pg = (await import('pg' as string)).default
       const pool = new pg.Pool({ connectionString: dbUrl }); await pool.query('DROP TABLE IF EXISTS sam_kv'); await pool.end()
@@ -266,13 +266,50 @@ describe.each(backends)('server features on %s', (_name, dbUrl) => {
   })
 
   it('records insights only when enabled and honours Do Not Track', async () => {
-    const track = (b: object, h: object = {}) => fetch(base + '/api/track', { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: JSON.stringify(b) })
+    // A different forwarded address stands in for someone outside. The owner signed in from the test's own address, which is now "home".
+    const outsider = { 'x-forwarded-for': '203.0.113.7' }
+    const track = (b: object, h: object = {}) => fetch(base + '/api/track', { method: 'POST', headers: { 'content-type': 'application/json', ...outsider, ...h }, body: JSON.stringify(b) })
     await track({ type: 'view', path: '/' })
     await track({ type: 'view', path: '/' }, { DNT: '1' })
     await track({ type: 'project', name: 'Launch one' })
     const s = await (await api('/api/admin/insights?range=7')).json()
     expect(s.views).toBe(1)
     expect(s.items.project['Launch one']).toBe(1)
+    expect(s.own.views).toBe(0)
+  })
+
+  it('counts the owner and the home network apart from outside visitors', async () => {
+    const send = (b: object, h: object = {}) => fetch(base + '/api/track', { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: JSON.stringify(b) })
+    const before = await (await api('/api/admin/insights?range=7')).json()
+    expect(before.homeNetworks).toBe(1) // signing in recognised this network
+    await send({ type: 'view', path: '/work' }, { 'x-forwarded-for': '127.0.0.1' }) // signed out, but from the home network
+    await send({ type: 'view', path: '/work', own: true }, { 'x-forwarded-for': '198.51.100.9' }) // a signed-in browser somewhere else
+    const after = await (await api('/api/admin/insights?range=7')).json()
+    expect(after.own.views).toBe(before.own.views + 2)
+    expect(after.own.paths['/work']).toBe((before.own.paths['/work'] ?? 0) + 2)
+    expect(after.views).toBe(before.views) // outside visitors are untouched
+    expect(after.own.daysSeen).toBe(1)
+  })
+
+  it('can ignore the owner entirely, and can forget the home network', async () => {
+    const send = (b: object, h: object = {}) => fetch(base + '/api/track', { method: 'POST', headers: { 'content-type': 'application/json', ...h }, body: JSON.stringify(b) })
+    const draft = await (await api('/api/admin/draft')).json()
+    const c = draft.draft
+    c.portfolio.insights.countOwn = false
+    await api('/api/admin/draft', { method: 'PUT', body: JSON.stringify({ content: c, baseRev: draft.rev }) })
+    await api('/api/admin/publish', { method: 'POST', body: '{}' })
+    const before = await (await api('/api/admin/insights?range=7')).json()
+    await send({ type: 'view', path: '/ignored', own: true }, { 'x-forwarded-for': '198.51.100.9' })
+    await send({ type: 'view', path: '/ignored' }, { 'x-forwarded-for': '127.0.0.1' })
+    const mid = await (await api('/api/admin/insights?range=7')).json()
+    expect(mid.own.views).toBe(before.own.views)
+    expect(mid.views).toBe(before.views)
+    expect((await api('/api/admin/insights/home', { method: 'DELETE' })).status).toBe(200)
+    expect((await (await api('/api/admin/insights?range=7')).json()).homeNetworks).toBe(0)
+    c.portfolio.insights.countOwn = true
+    const d2 = await (await api('/api/admin/draft')).json()
+    await api('/api/admin/draft', { method: 'PUT', body: JSON.stringify({ content: c, baseRev: d2.rev }) })
+    await api('/api/admin/publish', { method: 'POST', body: '{}' })
   })
 
   it('keeps per item history and restores a previous version into the draft', async () => {

@@ -4,6 +4,7 @@ import { BeforeAfter } from './BeforeAfter'
 import { platformLabel } from '../ui/Icons'
 import { RichText } from '../ui/RichText'
 import { hasValue } from '../../utils/text'
+import { mediaCaption } from '../../utils/media'
 import { useViewer } from '../projects/Viewer'
 
 /** The structured case study. Only sections that have content are shown, and they are numbered in order. */
@@ -37,13 +38,22 @@ export function CaseStudyBody({ project, locale }: { project: Project; locale: s
   const creative = (cs.creative ?? []).filter((m) => m.src)
   add('creative', 'Creative', 'exec', creative.length > 0, (
     <div className="blk-gallery__grid">
-      {creative.map((m, i) => m.type === 'video' ? (
-        <video key={m.src} src={m.src} poster={m.poster} controls preload="none" playsInline aria-label={m.alt} />
-      ) : (
-        <button key={m.src} type="button" onClick={() => openImages(creative.filter((x) => x.type === 'image').map((x) => ({ src: x.src, alt: x.alt })), creative.filter((x) => x.type === 'image').findIndex((x) => x.src === m.src))} aria-label={`View creative ${i + 1} full size`}>
-          <img src={m.src} alt={m.alt} loading="lazy" decoding="async" />
-        </button>
-      ))}
+      {creative.map((m, i) => {
+        const cap = mediaCaption(m)
+        const images = creative.filter((x) => x.type === 'image')
+        return (
+          <figure key={m.src} className="case__creative">
+            {m.type === 'video' ? (
+              <video src={m.src} poster={m.poster} controls preload="none" playsInline aria-label={m.alt || cap || undefined} />
+            ) : (
+              <button type="button" onClick={() => openImages(images.map((x) => ({ src: x.src, alt: x.alt, caption: mediaCaption(x) })), images.findIndex((x) => x.src === m.src))} aria-label={`View creative ${i + 1} full size`}>
+                <img src={m.src} alt={m.alt} loading="lazy" decoding="async" />
+              </button>
+            )}
+            {cap && <figcaption>{cap}</figcaption>}
+          </figure>
+        )
+      })}
     </div>
   ))
   add('distribution', 'Distribution', 'exec', !!cs.distribution?.length, <ul className="chips">{cs.distribution!.map((d) => <li key={d}>{platformLabel(d)}</li>)}</ul>)

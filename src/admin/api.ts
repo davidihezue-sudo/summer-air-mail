@@ -41,7 +41,12 @@ export interface Status {
 export interface Me { username: string; role: 'owner' | 'editor' | 'viewer' | ''; canPublish: boolean; storage: 'file' | 'postgres' }
 export interface Enquiry { id: string; at: string; read: boolean; name: string; email: string; type: string; budget: string; company: string; message: string }
 export interface Subscriber { id: string; at: string; email: string; consent: string }
-export interface InsightsSummary { views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>> }
+export interface InsightsSummary {
+  views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>>
+  /** Visits by the owner: a signed-in browser, or the home network. Kept apart from everyone else. */
+  own: { views: number; visitors: number; daysSeen: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number> }
+  homeNetworks: number
+}
 export interface ServerSettings { notifyEmail: string; notifyOnEnquiry: boolean; notifyOnSubscriber: boolean; enquiryRetentionDays: number; editorsCanPublish: boolean; backups: { enabled: boolean; everyHours: number; keep: number; s3: boolean } }
 export interface EnvInfo { dataDir?: string; emailConfigured: boolean; webhookConfigured: boolean; s3Configured: boolean; storage: string }
 export interface UserRow { username: string; role: 'owner' | 'editor' | 'viewer'; managedByEnv: boolean }
@@ -98,6 +103,7 @@ export const api = {
   subscribers: () => request<{ items: Subscriber[] }>('/subscribers'),
   deleteSubscriber: (id: string) => request<{ ok: true }>(`/subscribers/${id}`, { method: 'DELETE' }),
   insights: (range: number) => request<InsightsSummary>(`/insights?range=${range}`),
+  forgetHome: () => request<{ ok: boolean }>('/insights/home', { method: 'DELETE' }),
   itemVersions: (collection: string, id: string) => request<{ versions: { index: number; at: string; title: string }[] }>(`/history/item/${collection}/${id}`),
   restoreItem: (collection: string, id: string, index: number) => request<{ draft: SiteContent; rev: number } & Status>(`/history/item/${collection}/${id}/restore`, { method: 'POST', body: JSON.stringify({ index }) }),
   settings: () => request<{ settings: ServerSettings; env: EnvInfo }>('/settings'),

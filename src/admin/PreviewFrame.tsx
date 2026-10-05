@@ -10,7 +10,7 @@ const HEIGHT: Record<Viewport, number> = { desktop: 760, tablet: 900, mobile: 78
  * Live preview of the public site. Unsaved edits are sent to the frame with postMessage, so what you see
  * is the draft exactly as it will publish. The frame is same-origin and only trusts messages from this window.
  */
-export function PreviewFrame({ viewport, season, professional }: { viewport: Viewport; season?: SeasonName; professional?: ProfessionalIntensity }) {
+export function PreviewFrame({ viewport, season, professional, celebration }: { viewport: Viewport; season?: SeasonName; professional?: ProfessionalIntensity; celebration?: string }) {
   const { content } = useAdmin()
   const frame = useRef<HTMLIFrameElement>(null)
   const box = useRef<HTMLDivElement>(null)
@@ -28,10 +28,10 @@ export function PreviewFrame({ viewport, season, professional }: { viewport: Vie
     if (!ready) return
     window.clearTimeout(timer.current)
     timer.current = window.setTimeout(() => {
-      frame.current?.contentWindow?.postMessage({ type: 'sam-preview', content, preview: { season, professional } }, location.origin)
+      frame.current?.contentWindow?.postMessage({ type: 'sam-preview', content, preview: { season, professional, celebration } }, location.origin)
     }, 220)
     return () => window.clearTimeout(timer.current)
-  }, [content, ready, season, professional])
+  }, [content, ready, season, professional, celebration])
 
   useEffect(() => {
     const el = box.current

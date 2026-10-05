@@ -24,7 +24,6 @@ export const autumn: SeasonTheme = {
     { id: 'bubbles', label: 'Leaf cursor trail', description: 'Warm sparks follow the mouse on desktop (Creative mode only).', defaultOn: false },
   ],
   defaultIntensity: 'standard',
-  objects: { sunglasses: 'notebook', sunscreen: 'mug', camera: 'camera', flipflops: 'boots', phone: 'phone', watermelon: 'apple' },
   surfaceName: 'wool blanket',
   copy: {
     servicesTitle: 'On the desk this season',

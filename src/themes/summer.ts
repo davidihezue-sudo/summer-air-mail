@@ -23,7 +23,6 @@ export const summer: SeasonTheme = {
     { id: 'bubbles', label: 'Bubble cursor trail', description: 'Bubbles follow the mouse on desktop (Creative mode only).', defaultOn: true },
   ],
   defaultIntensity: 'expressive',
-  objects: { sunglasses: 'sunglasses', sunscreen: 'sunscreen', camera: 'camera', flipflops: 'flipflops', phone: 'phone', watermelon: 'watermelon' },
   surfaceName: 'beach towel',
   copy: {
     servicesTitle: 'What I put on the towel',

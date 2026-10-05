@@ -69,8 +69,17 @@ function Row({ tool }: { tool: Tool }) {
   )
 }
 
+/** In the scrolling strip, logos on and names off means just the logo: no pill around it. */
 function Chip({ tool, hidden }: { tool: Tool; hidden?: boolean }) {
   const { ui, mono } = useUi()
+  if (ui.showLogos && !ui.showNames) {
+    return (
+      <li className="toolchip toolchip--icon" style={accent(tool)} aria-hidden={hidden || undefined} title={tool.name}>
+        <ToolLogo tool={tool} size={ui.logoSize} mono={mono} />
+        <span className="sr-only">{tool.name}</span>
+      </li>
+    )
+  }
   return (
     <li className="toolchip" style={accent(tool)} aria-hidden={hidden || undefined}>
       {ui.showLogos && <ToolLogo tool={tool} size="sm" mono={mono} />}
@@ -108,6 +117,7 @@ export function Tools({ config }: { config: SectionConfig }) {
   const cats = useMemo(() => [...new Set([...CATEGORY_ORDER, ...all.map((t) => t.category)])].filter((c) => all.some((t) => t.category === c)), [all])
   const useTabs = ui.tabs && cats.length > 1 && ui.layout !== 'marquee'
   const shown = useTabs && cat ? all.filter((t) => t.category === cat) : all
+  const logoPx = Number(ui.logoPx) > 0 ? Math.min(160, Math.max(24, Math.round(Number(ui.logoPx)))) : 0
   const grouped = !useTabs && ui.group && ui.layout !== 'marquee'
   const groups = grouped ? cats.map((c) => ({ c, items: shown.filter((t) => t.category === c) })).filter((g) => g.items.length) : [{ c: '', items: shown }]
   const intro = ui.layout === 'rings' ? 'Software I genuinely use. Select a ring to flip it.' : ui.layout === 'wall' ? 'The software I genuinely use.' : 'Software I genuinely use, and what I use it for.'
@@ -128,7 +138,7 @@ export function Tools({ config }: { config: SectionConfig }) {
   }
 
   return (
-    <Section config={config} tone="var(--c-sea-deep)" dark eyebrow="Tools and platforms" title={copy.toolsTitle} intro={intro} className={`tools tools--${ui.layout} tools--tile-${ui.tile}`}>
+    <Section config={config} tone="var(--c-sea-deep)" dark eyebrow="Tools and platforms" title={copy.toolsTitle} intro={intro} className={`tools tools--${ui.layout} tools--tile-${ui.tile}${logoPx ? ' tools--px' : ''}`}>
       {useTabs && (
         <div className="filters toolfilters" role="group" aria-label="Filter tools by category">
           <button type="button" className="chip" aria-pressed={!cat} onClick={() => setCat('')}>All <span className="toolfilters__n">{all.length}</span></button>
@@ -136,7 +146,7 @@ export function Tools({ config }: { config: SectionConfig }) {
         </div>
       )}
       {groups.map((g) => (
-        <div key={g.c || 'all'} className="toolgroup">
+        <div key={g.c || 'all'} className="toolgroup" style={logoPx ? ({ ['--tool-logo' as string]: `${logoPx}px` } as CSSProperties) : undefined}>
           {g.c && <h3 className="h4 toolgroup__title">{g.c}</h3>}
           {body(g.items)}
         </div>

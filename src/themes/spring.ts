@@ -24,7 +24,6 @@ export const spring: SeasonTheme = {
     { id: 'bubbles', label: 'Petal cursor trail', description: 'Soft petals follow the mouse on desktop (Creative mode only).', defaultOn: true },
   ],
   defaultIntensity: 'standard',
-  objects: { sunglasses: 'tulip', sunscreen: 'wateringcan', camera: 'camera', flipflops: 'boots', phone: 'phone', watermelon: 'cherries' },
   surfaceName: 'picnic blanket',
   copy: {
     servicesTitle: 'What is in the picnic basket',

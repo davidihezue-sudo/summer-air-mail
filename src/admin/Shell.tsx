@@ -11,6 +11,7 @@ import { FormPage } from './pages/FormPage'
 import { Dashboard } from './pages/Dashboard'
 import { SectionsPage } from './pages/SectionsPage'
 import { SeasonsPage } from './pages/SeasonsPage'
+import { CelebrationsPage } from './pages/CelebrationsPage'
 import { NavigationPage } from './pages/NavigationPage'
 import { PublishPage } from './pages/PublishPage'
 import { AdvancedPage } from './pages/AdvancedPage'
@@ -29,10 +30,16 @@ import { ServerPage } from './pages/ServerPage'
 import { Badge } from './ui'
 
 
-function Page({ page, id }: { page: string; id?: string }) {
+/** Pages that used to have a menu entry of their own and are now a view of another page. Old links and bookmarks still land in the right place. */
+const ALIASES: Record<string, { page: string; view: string }> = { caseStudies: { page: 'projects', view: 'caseStudies' }, campaigns: { page: 'projects', view: 'campaigns' }, videos: { page: 'posts', view: 'videos' } }
+
+function Page({ page: requested, id }: { page: string; id?: string }) {
+  const alias = ALIASES[requested]
+  const page = alias?.page ?? requested
   if (page === 'dashboard') return <Dashboard />
   if (page === 'sections') return <SectionsPage />
   if (page === 'seasons') return <SeasonsPage />
+  if (page === 'celebrations') return <CelebrationsPage />
   if (page === 'navigation') return <NavigationPage />
   if (page === 'publish') return <PublishPage />
   if (page === 'advanced') return <AdvancedPage />
@@ -48,7 +55,7 @@ function Page({ page, id }: { page: string; id?: string }) {
   if (page === 'altText') return <AltTextPage />
   if (page === 'team') return <UsersPage />
   if (page === 'server') return <ServerPage />
-  if (ENTITIES[page]) return <EntityPage key={page} def={ENTITIES[page]} id={id} />
+  if (ENTITIES[page]) return <EntityPage key={`${page}-${alias?.view ?? ''}`} def={ENTITIES[page]} id={id} view={alias?.view} />
   if (PAGES[page]) return <FormPage key={page} page={PAGES[page]} />
   return <p>That page does not exist. <a href="#/dashboard">Back to the dashboard</a></p>
 }

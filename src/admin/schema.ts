@@ -7,6 +7,7 @@ import {
 } from '../content/factories'
 import { FONT_CHOICES } from '../themes/seasonManager'
 import { BRAND_CHOICES, brandDataUri, brandFor, platformAsTool } from '../content/brands'
+import { SERVICE_DRAWINGS } from '../content/serviceArt'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export const PLATFORMS: Opt[] = ['instagram', 'tiktok', 'facebook', 'linkedin', 'youtube', 'pinterest', 'x', 'threads', 'snapchat', 'web']
@@ -19,12 +20,13 @@ const RESULT_CLASSES: Opt[] = [
   { value: 'verified', label: 'Verified result' }, { value: 'team', label: 'Team result' }, { value: 'individual', label: 'Individual result' },
   { value: 'confidential', label: 'Confidential result' }, { value: 'illustrative', label: 'Illustrative example' },
 ]
-const SERVICE_OBJECTS: Opt[] = [{ value: '', label: 'No illustration (use an icon)' }, { value: 'sunglasses', label: 'Object 1 (sunglasses, tulip, notebook, ornament)' }, { value: 'sunscreen', label: 'Object 2 (sunscreen, watering can, mug)' }, { value: 'camera', label: 'Object 3 (camera)' }, { value: 'flipflops', label: 'Object 4 (flip-flops, boots, mittens)' }, { value: 'phone', label: 'Object 5 (phone)' }, { value: 'watermelon', label: 'Object 6 (watermelon, cherries, apple, scarf)' }]
+const SERVICE_OBJECTS: Opt[] = [{ value: '', label: 'Automatic: a drawing that fits the name (or the icon below)' }, ...SERVICE_DRAWINGS]
 
 const mediaItem = (): Field[] => [
   { kind: 'select', key: 'type', label: 'Type', options: [{ value: 'image', label: 'Image' }, { value: 'video', label: 'Video' }] },
   { kind: 'file', key: 'src', label: 'File', accept: 'any' },
-  { kind: 'text', key: 'alt', label: 'Alt text or description' },
+  { kind: 'textarea', key: 'caption', label: 'Text shown under it (optional)', help: 'Appears on the page directly under this picture or video.' },
+  { kind: 'text', key: 'alt', label: 'Description for screen readers (not shown on the page)' },
   { kind: 'file', key: 'poster', label: 'Cover image (videos)', accept: 'image', showIf: (m: any) => m.type === 'video' },
 ]
 
@@ -46,6 +48,10 @@ export interface EntityDef {
   fields: Field[]
   /** Offer the case study switch (projects only). */
   caseStudy?: boolean
+  /** A "Show" filter over the same records, for example all projects, case studies only, campaigns only. The first is the default. */
+  views?: { value: string; label: string; test: (x: any) => boolean }[]
+  /** Extra "Add" buttons for other kinds of the same record. */
+  makers?: { label: string; make: () => any }[]
 }
 
 const hiddenToggle = { shown: (x: any) => !x.hidden, setShown: (x: any, v: boolean) => { x.hidden = !v }, shownLabels: ['Published', 'Draft'] as [string, string] }
@@ -67,7 +73,7 @@ export const PROJECT_FIELDS: Field[] = [
   {
     kind: 'group', label: 'Cover image and gallery', fields: [
       { kind: 'image', key: 'thumbnail', label: 'Cover image', help: 'Shown on the Polaroid card.' },
-      { kind: 'list', key: 'media', label: 'Lead gallery (images or videos shown at the top)', item: (m: any) => m.alt || m.src, make: () => ({ type: 'image', src: '', alt: '' }), addLabel: 'Add item', fields: mediaItem() },
+      { kind: 'list', key: 'media', label: 'Lead gallery (images or videos shown at the top)', item: (m: any) => m.caption || m.alt || m.src, make: () => ({ type: 'image', src: '', alt: '', caption: '' }), addLabel: 'Add item', fields: mediaItem() },
     ],
   },
   {
@@ -111,7 +117,7 @@ export const PROJECT_FIELDS: Field[] = [
       ] },
       { kind: 'group', label: 'Execution, creative and distribution', key: 'caseStudy', open: false, fields: [
         { kind: 'strings', key: 'execution', label: 'What was done (steps)' }, { kind: 'strings', key: 'deliverables', label: 'Deliverables' },
-        { kind: 'list', key: 'creative', label: 'Creative (images and videos)', item: (m: any) => m.alt || m.src, make: () => ({ type: 'image', src: '', alt: '' }), addLabel: 'Add creative', fields: mediaItem() },
+        { kind: 'list', key: 'creative', label: 'Creative (images and videos)', item: (m: any) => m.caption || m.alt || m.src, make: () => ({ type: 'image', src: '', alt: '', caption: '' }), addLabel: 'Add creative', fields: mediaItem() },
         { kind: 'multi', key: 'distribution', label: 'Distribution channels', options: PLATFORMS, custom: true },
         { kind: 'rich', key: 'paidMedia', label: 'Paid media (optional)' },
       ] },
@@ -141,22 +147,18 @@ export const PROJECT_FIELDS: Field[] = [
 export const ENTITIES: Record<string, EntityDef> = {
   projects: {
     id: 'projects', title: 'Portfolio', singular: 'project', collection: 'projects', make: newProject, caseStudy: true, featured: true,
-    intro: 'Every project, from a single image with a link to a full case study. Drafts stay private until you publish them.',
+    intro: 'Every project, from a single image with a link to a full case study. Use Show to look at case studies or campaigns only: they are the same records. Drafts stay private until you publish them.',
     titleOf: (p) => p.title || 'Untitled project', subtitleOf: (p) => [p.client, p.category, p.year].filter(Boolean).join(' · '), thumbOf: (p) => p.thumbnail?.src,
+    views: [
+      { value: 'all', label: 'All projects', test: () => true },
+      { value: 'caseStudies', label: 'Case studies', test: (p: any) => !!p.caseStudy },
+      { value: 'campaigns', label: 'Campaigns', test: (p: any) => /campaign|advertis/i.test(p.category) },
+    ],
+    makers: [
+      { label: 'case study', make: () => ({ ...newProject(), caseStudy: newCaseStudy() }) },
+      { label: 'campaign', make: () => ({ ...newProject(), category: 'Digital Marketing Campaign' }) },
+    ],
     ...hiddenToggle, fields: PROJECT_FIELDS,
-  },
-  caseStudies: {
-    id: 'caseStudies', title: 'Case Studies', singular: 'case study', collection: 'projects',
-    make: () => ({ ...newProject(), caseStudy: newCaseStudy() }), caseStudy: true, featured: true,
-    intro: 'Projects that tell the full marketing story: challenge, strategy, execution, results, your contribution and lessons.',
-    titleOf: (p) => p.title || 'Untitled case study', subtitleOf: (p) => [p.client, p.industry].filter(Boolean).join(' · '), thumbOf: (p) => p.thumbnail?.src,
-    filter: (p) => !!p.caseStudy, ...hiddenToggle, fields: PROJECT_FIELDS,
-  },
-  campaigns: {
-    id: 'campaigns', title: 'Campaigns', singular: 'campaign', collection: 'projects', make: () => ({ ...newProject(), category: 'Digital Marketing Campaign' }), caseStudy: true, featured: true,
-    intro: 'Campaign projects: social, paid, influencer and email. These are the same records as Portfolio, filtered by project type.',
-    titleOf: (p) => p.title || 'Untitled campaign', subtitleOf: (p) => [p.client, p.category, p.year].filter(Boolean).join(' · '), thumbOf: (p) => p.thumbnail?.src,
-    filter: (p) => /campaign|advertis/i.test(p.category), ...hiddenToggle, fields: PROJECT_FIELDS,
   },
   services: {
     id: 'services', title: 'Services', singular: 'service', collection: 'services', make: newService,
@@ -166,7 +168,7 @@ export const ENTITIES: Record<string, EntityDef> = {
       { kind: 'text', key: 'name', label: 'Service name' },
       { kind: 'select', key: 'category', label: 'Category', options: SERVICE_CATEGORIES, custom: true },
       { kind: 'textarea', key: 'description', label: 'Short description' }, { kind: 'rich', key: 'detail', label: 'Detailed explanation' },
-      { kind: 'select', key: 'object', label: 'Illustration', options: SERVICE_OBJECTS, help: 'The illustration changes with the season automatically.' },
+      { kind: 'select', key: 'object', label: 'Illustration', options: SERVICE_OBJECTS, help: 'A drawing of what the service is. Its colours follow the season. To use an icon instead, pick one below and leave this on Automatic.' },
       { kind: 'icon', key: 'icon', label: 'Icon (used when there is no illustration)', showIf: (s: any) => !s.object },
       { kind: 'tone', key: 'color', label: 'Colour' }, { kind: 'image', key: 'image', label: 'Supporting image' },
       { kind: 'multi', key: 'platforms', label: 'Relevant platforms', options: PLATFORMS, custom: true },
@@ -205,15 +207,15 @@ export const ENTITIES: Record<string, EntityDef> = {
   },
   posts: {
     id: 'posts', title: 'Social Media Content', singular: 'post', collection: 'contentItems', make: () => newContentItem('post'),
-    intro: 'Posts, carousels, stories and campaign creatives.',
-    titleOf: (c) => c.title || 'Untitled', subtitleOf: (c) => [c.format, c.platform].filter(Boolean).join(' · '), thumbOf: (c) => c.thumbnail?.src, filter: (c) => c.kind !== 'video',
+    intro: 'Posts, carousels, stories, reels and videos in one list. Choose each item\'s type inside it. For a video, upload a file or paste a YouTube or Vimeo link; nothing autoplays and nothing loads until a visitor presses play.',
+    titleOf: (c) => c.title || 'Untitled', subtitleOf: (c) => [c.kind === 'video' ? 'Video' : 'Post', c.format, c.platform, c.duration].filter(Boolean).join(' · '), thumbOf: (c) => c.thumbnail?.src,
+    views: [
+      { value: 'all', label: 'Everything', test: () => true },
+      { value: 'posts', label: 'Posts and carousels', test: (c: any) => c.kind !== 'video' },
+      { value: 'videos', label: 'Videos and reels', test: (c: any) => c.kind === 'video' },
+    ],
+    makers: [{ label: 'video or reel', make: () => newContentItem('video') }],
     ...hiddenToggle, fields: [], // filled below
-  },
-  videos: {
-    id: 'videos', title: 'Videos & Reels', singular: 'video', collection: 'contentItems', make: () => newContentItem('video'),
-    intro: 'Reels, TikToks, Shorts and campaign videos. Upload a file or paste a YouTube or Vimeo link. Nothing autoplays and nothing loads until a visitor presses play.',
-    titleOf: (c) => c.title || 'Untitled video', subtitleOf: (c) => [c.format, c.platform, c.duration].filter(Boolean).join(' · '), thumbOf: (c) => c.thumbnail?.src, filter: (c) => c.kind === 'video',
-    ...hiddenToggle, fields: [],
   },
   websites: {
     id: 'websites', title: 'Websites & Digital Projects', singular: 'website', collection: 'websites', make: newWebsite,
@@ -300,19 +302,17 @@ export const ENTITIES: Record<string, EntityDef> = {
   },
 }
 
-const contentFields = (kind: 'post' | 'video'): Field[] => [
+const contentFields = (): Field[] => [
+  { kind: 'select', key: 'kind', label: 'Type', options: [{ value: 'post', label: 'Post, carousel or story' }, { value: 'video', label: 'Video or reel' }], help: 'A video shows a play button and uses the video fields below.' },
   { kind: 'text', key: 'title', label: 'Title' }, { kind: 'select', key: 'format', label: 'Content type', options: FORMATS, custom: true },
   { kind: 'select', key: 'platform', label: 'Platform', options: PLATFORMS, custom: true }, { kind: 'textarea', key: 'explanation', label: 'Short explanation' },
-  { kind: 'image', key: 'thumbnail', label: kind === 'video' ? 'Poster image' : 'Thumbnail' },
-  ...(kind === 'video' ? [
-    { kind: 'file', key: 'video', label: 'Video', accept: 'video', help: 'Upload an MP4 or WebM, or paste a YouTube, Vimeo or other link.' } as Field,
-    { kind: 'text', key: 'duration', label: 'Duration (for example 0:24)' } as Field,
-  ] : []),
+  { kind: 'image', key: 'thumbnail', label: 'Thumbnail or poster image' },
+  { kind: 'file', key: 'video', label: 'Video', accept: 'video', help: 'Upload an MP4 or WebM, or paste a YouTube, Vimeo or other link.', showIf: (c: any) => c.kind === 'video' },
+  { kind: 'text', key: 'duration', label: 'Duration (for example 0:24)', showIf: (c: any) => c.kind === 'video' },
   { kind: 'text', key: 'date', label: 'Date' }, { kind: 'text', key: 'campaign', label: 'Campaign' }, { kind: 'text', key: 'role', label: 'My role' },
   { kind: 'text', key: 'result', label: 'Result (only if verified)' }, { kind: 'url', key: 'link', label: 'Original post or video link' },
 ]
-ENTITIES.posts.fields = contentFields('post')
-ENTITIES.videos.fields = contentFields('video')
+ENTITIES.posts.fields = contentFields()
 
 /* ---------- single page forms ---------- */
 
@@ -323,14 +323,13 @@ const CURRENCIES: Opt[] = [{ value: 'GBP', label: 'GBP (£)' }, { value: 'CAD', 
 
 export const PAGES: Record<string, PageForm> = {
   profile: {
-    title: 'Personal Profile', intro: 'Your identity. Everything here updates the public site everywhere it appears.',
+    title: 'Personal Profile', intro: 'Your identity. Everything here updates the public site everywhere it appears. Your email, phone and WhatsApp number are on the Contact page, and your social links are on Social Links.',
     blocks: [
       { base: 'portfolio.profile', fields: [
         { kind: 'text', key: 'fullName', label: 'Full name' }, { kind: 'text', key: 'preferredName', label: 'Professional name' },
         { kind: 'text', key: 'title', label: 'Professional title' }, { kind: 'strings', key: 'roles', label: 'Roles (three to five, shown in the hero)' },
         { kind: 'text', key: 'tagline', label: 'Tagline' }, { kind: 'textarea', key: 'intro', label: 'Professional summary (one or two sentences)' },
-        { kind: 'text', key: 'location', label: 'Location' }, { kind: 'email', key: 'email', label: 'Email' }, { kind: 'tel', key: 'phone', label: 'Phone' },
-        { kind: 'tel', key: 'whatsapp', label: 'WhatsApp number', help: 'International format, for example +447700900123.' },
+        { kind: 'text', key: 'location', label: 'Location' },
         { kind: 'text', key: 'signature', label: 'Handwritten signature text (defaults to your professional name)' },
         { kind: 'image', key: 'profilePhoto', label: 'Profile photo' },
         { kind: 'number', key: 'yearsExperience', label: 'Years of experience', min: 0 },

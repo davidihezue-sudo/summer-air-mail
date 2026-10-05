@@ -18,7 +18,7 @@ const hiddenService = (id: string, name: string, category: string, description: 
 
 export const services: Service[] = [
   {
-    id: 'strategy', name: 'Social Media Strategy', category: 'Strategy', object: 'sunglasses', color: 'sky',
+    id: 'strategy', name: 'Social Media Strategy', category: 'Strategy', object: 'compass', color: 'sky',
     description: 'Audience research, positioning and a plan tied to a business goal.',
     detail: 'Research the audience and category, define the role of each platform, set objectives with a baseline, and turn it into a plan a team can run.',
     platforms: ['Instagram', 'TikTok', 'LinkedIn', 'Facebook'],
@@ -36,17 +36,17 @@ export const services: Service[] = [
     platforms: ['Meta Business Suite', 'LinkedIn', 'TikTok'],
   },
   {
-    id: 'brand', name: 'Brand Development', category: 'Strategy', object: 'sunscreen', color: 'butter',
+    id: 'brand', name: 'Brand Development', category: 'Strategy', object: 'palette', color: 'butter',
     description: 'Voice, visual direction and messaging that feel like one brand.',
     detail: 'Positioning, tone of voice, content pillars and visual guidelines so every post and campaign reinforces the same idea.',
   },
   {
-    id: 'campaigns', name: 'Digital Campaigns', category: 'Growth', object: 'flipflops', color: 'peach',
+    id: 'campaigns', name: 'Digital Campaigns', category: 'Growth', object: 'megaphone', color: 'peach',
     description: 'Big idea, phased rollout, creative routes and paid support.',
     detail: 'Campaign concepts, phasing, creative briefs, launch plans and, where relevant, paid social support and creator collaborations.',
   },
   {
-    id: 'analytics', name: 'Marketing Analytics', category: 'Analytics', object: 'watermelon', color: 'sage',
+    id: 'analytics', name: 'Marketing Analytics', category: 'Analytics', object: 'chart', color: 'sage',
     description: 'Reporting that compares against a baseline and recommends the next move.',
     detail: 'Dashboards and monthly reports covering reach, engagement, traffic and conversions, with plain-language insight and recommendations.',
   },

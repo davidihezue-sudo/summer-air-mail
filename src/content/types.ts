@@ -17,7 +17,10 @@ export interface ImageRef {
 export interface MediaItem {
   type: 'image' | 'video'
   src: string
+  /** Read by screen readers. Not shown on the page. */
   alt: string
+  /** Text shown under the picture or video. */
+  caption?: string
   poster?: string
 }
 
@@ -214,8 +217,8 @@ export interface Project {
 
 /* ---------- Services, skills, tools ---------- */
 
-export type ServiceObject =
-  | 'sunglasses' | 'sunscreen' | 'camera' | 'flipflops' | 'phone' | 'watermelon'
+/** The name of a drawing in src/content/serviceArt.ts. Older content stored sunglasses, sunscreen, flipflops or watermelon; those are mapped on load. */
+export type ServiceObject = string
 
 export type ServiceCategory =
   | 'Strategy' | 'Content' | 'Management' | 'Growth' | 'Advertising' | 'Analytics' | 'Technology' | (string & {})
@@ -226,7 +229,7 @@ export interface Service {
   category?: ServiceCategory
   description: string
   detail: string
-  /** Built-in towel illustration. It is re-skinned automatically for each season. */
+  /** Built-in drawing of what the service is. Its colours follow the season. Empty picks one from the name. */
   object?: ServiceObject
   icon?: string
   color: string
@@ -306,6 +309,8 @@ export interface ToolsUi {
   showUsage: boolean
   showCategory: boolean
   logoSize: 'sm' | 'md' | 'lg'
+  /** Exact logo size in pixels (24 to 160). 0 uses the size above. Works in every layout. */
+  logoPx: number
   logoStyle: 'color' | 'mono'
   /** What the logo sits on. */
   tile: 'white' | 'glass' | 'bare'
@@ -473,6 +478,34 @@ export interface SeasonSettings {
   ranges: Record<SeasonName, { month: number; day: number }>
   transition: 'none' | 'immediate' | 'fade' | 'crossfade'
   overrides: Record<SeasonName, SeasonOverride>
+}
+
+/** A celebration changes the look of the site for a few days: its own colours, falling decorations and a greeting. */
+export interface Celebration {
+  id: string
+  name: string
+  enabled: boolean
+  /** fixed: the same dates every year. easter: counted in days from Easter Sunday, so it moves with Easter. */
+  rule: 'fixed' | 'easter'
+  from: { month: number; day: number }
+  to: { month: number; day: number }
+  /** For the easter rule: days from Easter Sunday (Good Friday is -2, Easter Monday is 1). */
+  easterFrom: number
+  easterTo: number
+  /** The season whose artwork (stamp, postmark, hero drawings) the site borrows while this is on. Blank keeps the current season's. */
+  season: '' | SeasonName
+  /** A line shown across the top of the site while it is on. Blank shows nothing. */
+  greeting: string
+  /** Colours that replace the season's. Any colour left out keeps the season's own. */
+  colors: Partial<ThemeColors>
+  decorations: string[]
+  /** Blank follows the season. */
+  intensity: '' | Level
+}
+
+export interface CelebrationSettings {
+  enabled: boolean
+  items: Celebration[]
 }
 
 export type SectionType =
@@ -781,6 +814,7 @@ export interface Portfolio {
     professional: ProfessionalIntensity
   }
   seasons: SeasonSettings
+  celebrations: CelebrationSettings
   design: DesignSettings
   extras: Extras
   media: MediaSettings
@@ -814,7 +848,7 @@ export interface Portfolio {
   maintenance: { enabled: boolean; title: string; message: string; status503: boolean; showContact: boolean; showSocial: boolean }
   notFound: { title: string; message: string; buttonLabel: string }
   i18n: { enabled: boolean; defaultLabel: string; switcher: boolean; languages: LanguagePack[] }
-  insights: { enabled: boolean; respectDoNotTrack: boolean; requireConsent: boolean; retentionDays: number }
+  insights: { enabled: boolean; respectDoNotTrack: boolean; requireConsent: boolean; retentionDays: number; /** Count the owner's own visits (signed in, or from the home network) apart from outside visitors. Off ignores them. */ countOwn: boolean }
   quality: { minDescription: number; requireCover: boolean; requireAlt: boolean; requirePeriod: boolean; requireLink: boolean }
   sections: SectionConfig[]
   navigation: { mode: 'auto' | 'custom'; items: NavItem[] }

@@ -1,4 +1,4 @@
-import type { Level, SeasonMode, SeasonName, SeasonOverride, SeasonSettings, ThemeColors } from '../content/types'
+import type { Celebration, Level, SeasonMode, SeasonName, SeasonOverride, SeasonSettings, ThemeColors } from '../content/types'
 import { THEMES, SEASON_ORDER } from './index'
 import type { SeasonTheme } from './types'
 
@@ -73,7 +73,12 @@ export interface ResolvedTheme {
   texture: boolean
   fonts: { display?: string; script?: string; body?: string }
   override: SeasonOverride
+  /** The celebration in effect, if any. Its colours and decorations are already folded into this theme. */
+  celebration: { id: string; name: string; greeting: string } | null
 }
+
+/** Decorations a celebration may use. Kept here so the theme does not depend on the celebrations list. */
+const FESTIVE_DECORATIONS = ['snow', 'lights', 'stars', 'hearts', 'confetti', 'fireworks', 'petals', 'leaves', 'glints']
 
 function hexToRgb(hex: string): [number, number, number] {
   const n = parseInt(hex.slice(1), 16)
@@ -139,23 +144,31 @@ export function darkPalette(c: ThemeColors) {
   }
 }
 
-export function resolveTheme(season: SeasonName, settings: SeasonSettings): ResolvedTheme {
+export function resolveTheme(season: SeasonName, settings: SeasonSettings, festive: Celebration | null = null): ResolvedTheme {
   const theme = THEMES[season]
   const override = { ...emptyOverride(), ...(settings.overrides?.[season] ?? {}) }
   const colors = { ...theme.colors }
-  for (const [k, v] of Object.entries(override.colors ?? {})) {
-    if (k in colors && typeof v === 'string' && HEX.test(v)) (colors as Record<string, string>)[k] = v
+  // The season's own colours first, then the celebration's on top.
+  for (const source of [override.colors, festive?.colors]) {
+    for (const [k, v] of Object.entries(source ?? {})) {
+      if (k in colors && typeof v === 'string' && HEX.test(v)) (colors as Record<string, string>)[k] = v
+    }
   }
-  const decorations = theme.decorations
-    .filter((d) => (d.id in (override.decorations ?? {}) ? override.decorations[d.id] : d.defaultOn))
-    .map((d) => d.id)
+  // A celebration replaces the season's falling decorations (no autumn leaves at Christmas).
+  const decorations = festive
+    ? (festive.decorations ?? []).filter((d) => FESTIVE_DECORATIONS.includes(d))
+    : theme.decorations
+      .filter((d) => (d.id in (override.decorations ?? {}) ? override.decorations[d.id] : d.defaultOn))
+      .map((d) => d.id)
+  const festiveLevel = festive && ['none', 'subtle', 'standard', 'expressive'].includes(festive.intensity) ? (festive.intensity as Level) : null
   return {
     season,
     theme,
     colors,
     derived: deriveTokens(colors),
     decorations,
-    intensity: override.intensity ?? theme.defaultIntensity,
+    celebration: festive ? { id: festive.id, name: festive.name, greeting: String(festive.greeting ?? '').trim() } : null,
+    intensity: festiveLevel ?? override.intensity ?? theme.defaultIntensity,
     texture: override.texture !== false,
     fonts: { display: safeFont(override.fonts?.display), script: safeFont(override.fonts?.script), body: safeFont(override.fonts?.body) },
     override,

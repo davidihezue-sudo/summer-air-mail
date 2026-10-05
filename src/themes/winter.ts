@@ -25,7 +25,6 @@ export const winter: SeasonTheme = {
     { id: 'bubbles', label: 'Ice sparkle cursor trail', description: 'Sparkles follow the mouse on desktop (Creative mode only).', defaultOn: false },
   ],
   defaultIntensity: 'standard',
-  objects: { sunglasses: 'ornament', sunscreen: 'mug', camera: 'camera', flipflops: 'mittens', phone: 'phone', watermelon: 'scarf' },
   surfaceName: 'knitted throw',
   copy: {
     servicesTitle: 'By the fire',
