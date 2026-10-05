@@ -88,6 +88,14 @@ void SECTION_LAYOUT
 
 if (ENTITIES.screenshots) ENTITIES.screenshots.fields.push({ kind: 'select', key: 'size', label: 'Size on the page (this screenshot)', options: [{ value: '', label: 'Use the site setting' }, { value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }], help: 'Only changes how big it appears. The shape and sharpness stay the same.' })
 
+/** The public "This site, in numbers" panel. */
+export const STATS_FIELDS: Field[] = [
+  { kind: 'bool', key: 'enabled', label: 'Allow a public stats panel', help: 'Needs the visit counting above to be on.' },
+  { kind: 'select', key: 'rangeDays', label: 'Period shown', options: [{ value: '7', label: 'Last 7 days' }, { value: '30', label: 'Last 30 days' }, { value: '90', label: 'Last 90 days' }] },
+  { kind: 'bool', key: 'showViews', label: 'Show page views as well as visitors' }, { kind: 'bool', key: 'showTopPages', label: 'Show the most read pages' },
+  { kind: 'textarea', key: 'note', label: 'Your own words above the numbers (optional)', help: 'Leave blank for a short plain line.' },
+]
+
 /** The switches for counting visits. They live on the Visit Insights page, next to the numbers they control. */
 export const INSIGHT_FIELDS: Field[] = [
         { kind: 'bool', key: 'enabled', label: 'Count visits on my own server', help: 'Stores daily totals only. No IP address, cookie or profile of any visitor is kept.' },
@@ -116,6 +124,14 @@ Object.assign(PAGES, {
       { kind: 'select', key: 'fill', label: 'What fills the space around a picture', options: [{ value: 'blur', label: 'A soft blurred copy of the picture' }, { value: 'tone', label: 'A plain colour' }, { value: 'none', label: 'Nothing' }] },
       { kind: 'select', key: 'screenshotSize', label: 'Screenshot size', options: [{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }], help: 'Only how big they appear on the page. Their shape and sharpness never change, and visitors can still zoom in to the full picture. You can also set the size on each screenshot.' },
       { kind: 'select', key: 'screenshots', label: 'Screenshots section layout', options: [{ value: 'masonry', label: 'Masonry: tall and wide screenshots fit together' }, { value: 'grid', label: 'Even grid' }] },
+    ] }],
+  },
+  resultsDisplay: {
+    title: 'Results Display', intro: 'How visitors can explore your results. Everything comes from the results you enter under Analytics & Results; nothing is added or estimated.',
+    blocks: [{ title: 'Explorer', base: 'portfolio.resultsUi', fields: [
+      { kind: 'select', key: 'defaultView', label: 'What visitors see first', options: [{ value: 'cards', label: 'Cards: one card per result' }, { value: 'compare', label: 'Compare: bars ranking how far each result moved' }, { value: 'table', label: 'Table: every figure in rows' }] },
+      { kind: 'bool', key: 'showSwitcher', label: 'Let visitors switch between cards, compare and table', help: 'They can also filter by platform and type, and sort by biggest change.' },
+      { kind: 'bool', key: 'allowDownload', label: 'Offer a "Download the data (CSV)" button', help: 'Visitors get the results they can see as a spreadsheet file. Confidential results with hidden values are left out of the numbers.' },
     ] }],
   },
   toolsDisplay: {
@@ -277,5 +293,16 @@ PAGES.hero.blocks.push({
     { kind: 'range', key: 'float', label: 'Up and down drift', min: 0, max: 60, step: 1, unit: 'px', help: '0 holds it still.' },
     { kind: 'range', key: 'parallax', label: 'Movement as the visitor scrolls', min: 0, max: 100, step: 5 },
     { kind: 'range', key: 'satellites', label: 'Small bubbles around it', min: 0, max: 8, step: 1, showIf: (o: any) => o.style === 'bubble' },
+  ],
+})
+
+// A page for visitors to your business card, with a QR code and a button that saves your contact details.
+PAGES.contact.blocks.push({
+  title: 'Business card page (/card)', base: 'portfolio.card', fields: [
+    { kind: 'bool', key: 'enabled', label: 'Turn on the business card page', help: 'A clean page at /card with your name, title and contact details, a QR code and a button that saves your details to a phone. Handy at events and on a printed card.' },
+    { kind: 'bool', key: 'showQr', label: 'Show a QR code' },
+    { kind: 'select', key: 'qrTarget', label: 'The QR code opens', options: [{ value: 'site', label: 'My website' }, { value: 'card', label: 'This card page' }], help: 'Needs your public website address under SEO.' },
+    { kind: 'bool', key: 'showSocial', label: 'Show my social links' },
+    { kind: 'textarea', key: 'note', label: 'A line under your name (optional)', placeholder: 'For example: Say hello at the event.' },
   ],
 })

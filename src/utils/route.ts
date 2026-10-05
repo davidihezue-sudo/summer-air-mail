@@ -2,6 +2,7 @@ export type Route =
   | { kind: 'home' }
   | { kind: 'work'; id: string }
   | { kind: 'profile' }
+  | { kind: 'card' }
   | { kind: 'note'; slug: string }
   | { kind: 'application'; slug: string }
   | { kind: 'notfound' }
@@ -14,6 +15,7 @@ export function parseRoute(path: string): Route {
   let m: RegExpExecArray | null
   if ((m = /^\/work\/([^/]+)$/.exec(p))) return { kind: 'work', id: dec(m[1]) }
   if (p === '/profile') return { kind: 'profile' }
+  if (p === '/card') return { kind: 'card' }
   if ((m = /^\/notes\/([^/]+)$/.exec(p))) return { kind: 'note', slug: dec(m[1]) }
   if ((m = /^\/for\/([^/]+)$/.exec(p))) return { kind: 'application', slug: dec(m[1]) }
   return { kind: 'notfound' }

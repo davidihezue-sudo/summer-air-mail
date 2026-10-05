@@ -6,6 +6,8 @@ export function injectHead(html: string, p: any): string
 export function buildRobots(p: any): string
 export function buildSitemap(p: any): string
 export function buildCsp(p: any): string
+export const DASHBOARD_HOSTS: string[]
+export function dashboardEmbedUrl(url: unknown): string
 export function buildFeed(content: unknown): string
 export function buildFullSitemap(content: unknown): string
 export function pageSeo(content: unknown, path: string): null | { missing: true } | { missing?: false; title: string; description: string; image: string; canonical: string }

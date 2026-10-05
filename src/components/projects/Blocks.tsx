@@ -10,6 +10,7 @@ import { BeforeAfter } from '../case-studies/BeforeAfter'
 import { hasValue, parseVideo, safeHref } from '../../utils/text'
 import { platformLabel } from '../ui/Icons'
 import { useViewer } from './Viewer'
+import { DashboardBlock, FlowBlock, MetricTreeBlock, QueryBlock } from './DataBlocks'
 
 function host(url: string) {
   try { return new URL(url, 'https://x.invalid').hostname.replace(/^www\./, '').replace(/^x\.invalid$/, '') } catch { return '' }
@@ -155,6 +156,14 @@ function BlockView({ b }: { b: Block }) {
       return (b.items ?? []).length ? (
         <div>{b.title && <h4 className="h4">{b.title}</h4>}<ul className="chips">{b.items!.map((i) => <li key={i}>{b.type === 'platforms' ? platformLabel(i) : i}</li>)}</ul></div>
       ) : null
+    case 'flow':
+      return <FlowBlock b={b} />
+    case 'query':
+      return <QueryBlock b={b} />
+    case 'dashboard':
+      return <DashboardBlock b={b} />
+    case 'metricTree':
+      return <MetricTreeBlock b={b} />
     default:
       return null
   }

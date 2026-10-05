@@ -129,6 +129,18 @@ export function buildSitemap(p) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>${esc(base)}/</loc></url></urlset>\n`
 }
 
+/** Dashboard and report sites that may be shown inside a page. Anything else is shown as a link instead. */
+export const DASHBOARD_HOSTS = ['lookerstudio.google.com', 'datastudio.google.com', 'public.tableau.com', 'app.powerbi.com']
+
+/** The address to put in the frame for a pasted dashboard link, or '' when the site is not on the list. Looker Studio share links are turned into embed links. */
+export function dashboardEmbedUrl(url) {
+  let u
+  try { u = new URL(String(url ?? '').trim()) } catch { return '' }
+  if (u.protocol !== 'https:' || !DASHBOARD_HOSTS.includes(u.hostname)) return ''
+  if ((u.hostname === 'lookerstudio.google.com' || u.hostname === 'datastudio.google.com') && /^\/reporting\//.test(u.pathname)) u.pathname = `/embed${u.pathname}`
+  return u.toString()
+}
+
 /** Content Security Policy built from the analytics the owner has switched on. */
 export function buildCsp(p) {
   const a = p.analytics ?? {}
@@ -147,7 +159,7 @@ export function buildCsp(p) {
     "media-src 'self' blob: https:",
     "font-src 'self' data:",
     `connect-src ${[...new Set(connect)].join(' ')}`,
-    "frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com",
+    `frame-src 'self' https://www.youtube-nocookie.com https://player.vimeo.com ${DASHBOARD_HOSTS.map((h) => `https://${h}`).join(' ')}`,
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
@@ -176,7 +188,7 @@ export function buildFullSitemap(c) {
   const p = c?.portfolio ?? {}
   const base = baseUrl(p)
   if (!base || p.seo?.robots === 'noindex') return ''
-  const urls = [`${base}/`, ...(p.profilePage?.enabled ? [`${base}/profile`] : []), ...visibleNotes(c).map((n) => `${base}/notes/${n.slug}`)]
+  const urls = [`${base}/`, ...(p.profilePage?.enabled ? [`${base}/profile`] : []), ...(p.card?.enabled ? [`${base}/card`] : []), ...visibleNotes(c).map((n) => `${base}/notes/${n.slug}`)]
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.map((u) => `<url><loc>${xml(u)}</loc></url>`).join('')}</urlset>\n`
 }
 
@@ -195,6 +207,7 @@ export function pageSeo(c, path) {
     if (!x) return { missing: true }
     return { title: clean(x.seo?.title) || `${x.title} | ${clean(p.profile?.fullName)}`, description: clean(x.seo?.description) || clean(x.description).slice(0, 200), image: x.seo?.image || x.thumbnail?.src || '', canonical: base ? `${base}/work/${x.id}` : '' }
   }
+  if (/^\/card\/?$/.test(path)) return p.card?.enabled === true ? { title: `${clean(p.profile?.fullName)} | Business card`, description: clean(p.profile?.title), image: p.seo?.ogImage ?? '', canonical: base ? `${base}/card` : '' } : { missing: true }
   if (/^\/profile\/?$/.test(path)) return p.profilePage?.enabled === false ? { missing: true } : { title: clean(p.profilePage?.title) || `${clean(p.profile?.fullName)} | Profile`, description: clean(p.seo?.description), image: p.seo?.ogImage ?? '', canonical: base ? `${base}/profile` : '' }
   return null
 }

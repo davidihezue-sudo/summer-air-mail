@@ -26,6 +26,7 @@ export function defaultSections(): SectionConfig[] {
     on('testimonials', 'testimonials'),
     on('mentoring', 'mentoring', { enabled: false }),
     on('newsletter', 'newsletter'),
+    on('stats', 'siteStats', { enabled: false }),
     on('contact', 'contact', { navLabel: 'Contact' }),
   ]
 }
@@ -53,6 +54,7 @@ export const SECTION_LABELS: Record<SectionType, string> = {
   resources: 'Resources and downloads',
   notes: 'Notes (blog)',
   newsletter: 'Newsletter signup',
+  siteStats: "This site's own numbers (public visit counts)",
   richText: 'Text and call to action',
   contact: 'Contact',
 }

@@ -8,15 +8,11 @@ import { hasValue } from '../../utils/text'
 import { platformLabel } from '../ui/Icons'
 import { useViewer } from '../projects/Viewer'
 import { toneValue } from '../../utils/theme'
+import { pctOf } from '../../content/resultsData'
 
 const CONTRIBUTION = { individual: 'Individual contribution', team: 'Team result', shared: 'Shared with the team' } as const
 
-/** Percentage change: the supplied value, or calculated only when both start and end exist. */
-export function pctOf(r: ResultEntry): { value: number; calculated: boolean } | null {
-  if (typeof r.pctChange === 'number') return { value: r.pctChange, calculated: false }
-  if (typeof r.start === 'number' && typeof r.end === 'number' && r.start > 0) return { value: ((r.end - r.start) / r.start) * 100, calculated: true }
-  return null
-}
+export { pctOf }
 
 export function ResultCard({ result: r }: { result: ResultEntry }) {
   const { content } = useContent()

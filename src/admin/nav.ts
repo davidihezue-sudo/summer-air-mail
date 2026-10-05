@@ -1,7 +1,7 @@
 import {
   BarChart3, Bot, Briefcase, Calendar, Clapperboard, Compass, FileText, Film, Globe, Image as ImageIcon, LayoutDashboard, Layers,
   LayoutList, Link2, ListChecks, Megaphone, MessageSquareQuote, Palette, PenTool, Rocket, Search, Settings, Share2, Sparkles, Target, User, Wrench,
-  Laptop, Mail, Camera, MousePointer2, Brush, Megaphone as Horn, Languages, Inbox, Users, BarChart, ShieldCheck, FileDown, Files, Link as LinkIcon, Route, NotebookPen, Bookmark, Wand2, Timer, HardDrive, UserSquare, Type, ClipboardCheck, BookOpen, Star, Workflow, Cpu, Footprints, Eye, PartyPopper, Monitor,
+  Laptop, Mail, Camera, MousePointer2, Brush, Megaphone as Horn, Languages, Inbox, Users, BarChart, ShieldCheck, FileDown, Files, Link as LinkIcon, Route, NotebookPen, Bookmark, Wand2, Timer, HardDrive, UserSquare, Type, ClipboardCheck, BookOpen, Star, Workflow, Cpu, Footprints, Eye, PartyPopper, Monitor, TrendingUp,
 } from 'lucide-react'
 
 export const NAV: { group: string; items: { id: string; label: string; icon: typeof User; owner?: boolean }[] }[] = [
@@ -32,7 +32,7 @@ export const NAV: { group: string; items: { id: string; label: string; icon: typ
   { group: 'Portfolio', items: [
     { id: 'projects', label: 'Portfolio', icon: Briefcase },
     { id: 'posts', label: 'Social Media Content', icon: Camera }, { id: 'screenshots', label: 'Screenshots', icon: Monitor }, { id: 'mediaDisplay', label: 'Picture Display', icon: ImageIcon },
-    { id: 'results', label: 'Analytics & Results', icon: BarChart3 }, { id: 'websites', label: 'Websites & Digital Projects', icon: Laptop },
+    { id: 'results', label: 'Analytics & Results', icon: BarChart3 }, { id: 'resultsDisplay', label: 'Results Display', icon: TrendingUp }, { id: 'websites', label: 'Websites & Digital Projects', icon: Laptop },
   ] },
   { group: 'Capabilities', items: [
     { id: 'services', label: 'Services', icon: Layers }, { id: 'skills', label: 'Skills', icon: Star }, { id: 'platforms', label: 'Platform Expertise', icon: Globe },

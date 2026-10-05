@@ -57,6 +57,7 @@ export function sectionHasContent(type: SectionType, c: SiteContent, cfg?: Secti
     case 'resources': return c.resources.some((x) => !x.hidden && hasValue(x.title) && hasValue(x.file))
     case 'notes': return c.notes.some((x) => !x.hidden && hasValue(x.title) && hasValue(x.slug))
     case 'newsletter': return p.newsletter.enabled && (p.newsletter.mode === 'collect' || hasValue(p.newsletter.link))
+    case 'siteStats': return p.publicStats.enabled
     case 'richText': return hasValue(cfg?.heading) || hasValue(cfg?.body)
   }
 }

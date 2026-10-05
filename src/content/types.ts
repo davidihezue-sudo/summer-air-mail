@@ -91,7 +91,26 @@ export interface ResultEntry {
 export type BlockType =
   | 'heading' | 'paragraph' | 'image' | 'gallery' | 'video' | 'reel' | 'screenshot' | 'link' | 'button'
   | 'quote' | 'metric' | 'chart' | 'beforeAfter' | 'embed' | 'pdf' | 'download' | 'timeline' | 'process'
-  | 'framework' | 'skills' | 'platforms'
+  | 'framework' | 'skills' | 'platforms' | 'flow' | 'query' | 'dashboard' | 'metricTree'
+
+/** One step in a flow diagram. A decision can branch: each branch says when it happens and where it leads. */
+export interface FlowNode {
+  label: string
+  kind: 'start' | 'step' | 'decision' | 'system' | 'end'
+  detail: string
+  branches?: { condition: string; outcome: string }[]
+}
+
+export interface TreeLeaf {
+  label: string
+  value?: string
+  note?: string
+}
+
+/** A branch of a metric tree: the goal splits into measures, and each measure into the levers behind it. */
+export interface TreeBranch extends TreeLeaf {
+  children?: TreeLeaf[]
+}
 
 export interface Block {
   id: string
@@ -124,6 +143,15 @@ export interface Block {
   entries?: { label: string; text: string }[]
   columns?: { title: string; items: string[] }[]
   filename?: string
+  /** Flow diagram steps. */
+  nodes?: FlowNode[]
+  /** Query block: the code, and its language (sql, python, dax or other). */
+  code?: string
+  language?: string
+  /** Dashboard block: frame height in pixels. */
+  height?: number
+  /** Metric tree: the measures under the goal (the goal itself is title and note). */
+  tree?: TreeBranch[]
 }
 
 export interface CaseStudy {
@@ -299,6 +327,34 @@ export interface Tool {
   color?: string
   /** Where the tool's own site is. Makes the card a link. */
   link?: string
+}
+
+export interface ResultsUi {
+  /** What visitors see first. */
+  defaultView: 'cards' | 'compare' | 'table'
+  /** Let visitors switch between cards, a comparison chart and a table. */
+  showSwitcher: boolean
+  /** A button that downloads the visible results as a spreadsheet file. */
+  allowDownload: boolean
+}
+
+/** An optional public panel with this site's own visit counts. Off until you switch it on. */
+export interface PublicStats {
+  enabled: boolean
+  rangeDays: 7 | 30 | 90
+  showViews: boolean
+  showTopPages: boolean
+  note: string
+}
+
+/** The shareable business card page at /card. */
+export interface BusinessCard {
+  enabled: boolean
+  showQr: boolean
+  /** Where the QR code points. */
+  qrTarget: 'site' | 'card'
+  showSocial: boolean
+  note: string
 }
 
 export interface ToolsUi {
@@ -522,7 +578,7 @@ export type SectionType =
   | 'hero' | 'overview' | 'about' | 'services' | 'skills' | 'platforms' | 'process' | 'work'
   | 'caseStudies' | 'results' | 'tools' | 'ai' | 'content' | 'screenshots' | 'strategy'
   | 'websites' | 'testimonials' | 'mentoring' | 'richText' | 'contact'
-  | 'journey' | 'resources' | 'notes' | 'newsletter'
+  | 'journey' | 'resources' | 'notes' | 'newsletter' | 'siteStats'
 
 export interface SectionConfig {
   id: string
@@ -832,6 +888,9 @@ export interface Portfolio {
   extras: Extras
   media: MediaSettings
   toolsUi: ToolsUi
+  resultsUi: ResultsUi
+  publicStats: PublicStats
+  card: BusinessCard
   cursor: CursorSettings
   announcement: Announcement
   schedule: ScheduleRule[]

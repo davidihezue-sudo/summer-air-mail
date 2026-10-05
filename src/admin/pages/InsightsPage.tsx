@@ -3,7 +3,7 @@ import { api, type InsightsSummary } from '../api'
 import { useAdmin } from '../store'
 import { Card, PageHead } from '../ui'
 import { Fields } from '../fields'
-import { INSIGHT_FIELDS } from '../schemaExtra'
+import { INSIGHT_FIELDS, STATS_FIELDS } from '../schemaExtra'
 
 const top = (o: Record<string, number>, n = 8) => Object.entries(o).sort((a, b) => b[1] - a[1]).slice(0, n)
 
@@ -77,6 +77,10 @@ export function InsightsPage() {
       <Card title="Settings">
         <div className="aform"><Fields base="portfolio.insights" fields={INSIGHT_FIELDS} /></div>
         <p className="ahelp">Changes here go live when you publish.</p>
+      </Card>
+      <Card title="Show some of this publicly (optional)">
+        <div className="aform"><Fields base="portfolio.publicStats" fields={STATS_FIELDS} /></div>
+        <p className="ahelp">Adds a section called &quot;This site, in numbers&quot; with real visit counts. Turn it on, then switch the section on in Sections &amp; Visibility. It never shows your own visits, application links or the admin.</p>
       </Card>
     </>
   )

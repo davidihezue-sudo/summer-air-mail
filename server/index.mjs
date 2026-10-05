@@ -185,6 +185,17 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     res.set('Cache-Control', 'no-store').redirect(302, to)
   })
 
+  /** Optional public visit counts, only when the owner switched the panel on. Application links and the admin never appear. */
+  app.get('/api/stats', (_req, res) => {
+    const s = published()?.portfolio?.publicStats
+    res.set('Cache-Control', 'public, max-age=300')
+    if (!s?.enabled) return res.status(404).json({ error: 'Not available.' })
+    const range = [7, 30, 90].includes(Number(s.rangeDays)) ? Number(s.rangeDays) : 30
+    const sum = insights.summary(range)
+    const topPages = s.showTopPages === false ? [] : Object.entries(sum.paths).filter(([p]) => !/^\/(for|admin|go)(\/|$)/.test(p)).sort((a, b) => b[1] - a[1]).slice(0, 5).map(([path, views]) => ({ path, views }))
+    res.json({ range, visitors: sum.visitors, views: s.showViews === false ? null : sum.views, series: sum.series.map((d) => ({ day: d.day, views: d.views })), topPages, updated: new Date().toISOString() })
+  })
+
   app.get('/feed.xml', (_req, res) => {
     const xml = buildFeed(published())
     if (xml) res.type('application/rss+xml').send(xml)

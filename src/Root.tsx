@@ -14,6 +14,7 @@ import { NotFound } from './pages/NotFound'
 
 // Pages other than the home page load only when someone goes to them.
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
+const CardPage = lazy(() => import('./pages/CardPage').then((m) => ({ default: m.CardPage })))
 const NotePage = lazy(() => import('./pages/NotePage').then((m) => ({ default: m.NotePage })))
 const Maintenance = lazy(() => import('./pages/Maintenance').then((m) => ({ default: m.Maintenance })))
 import type { SeasonName, SiteContent } from './content/types'
@@ -111,8 +112,9 @@ export default function Root({ initial }: { initial: LoadedContent }) {
   let page
   if (maintenance) page = <Maintenance />
   else if (route.kind === 'profile' && content.portfolio.profilePage.enabled) page = <ProfilePage />
+  else if (route.kind === 'card' && content.portfolio.card.enabled) page = <CardPage />
   else if (route.kind === 'note') page = <NotePage slug={route.slug} />
-  else if (route.kind === 'notfound' || (route.kind === 'profile') || (route.kind === 'application' && appState.status === 'missing')) page = <NotFound />
+  else if (route.kind === 'notfound' || (route.kind === 'profile') || route.kind === 'card' || (route.kind === 'application' && appState.status === 'missing')) page = <NotFound />
   else if (route.kind === 'application' && appState.status !== 'ok') page = null
   else page = <App />
 

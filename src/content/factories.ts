@@ -65,6 +65,7 @@ export const BLOCK_LABELS: Record<BlockType, string> = {
   screenshot: 'Screenshot', link: 'Link', button: 'Button', quote: 'Quote', metric: 'Metric', chart: 'Chart',
   beforeAfter: 'Before and after', embed: 'Embedded post or video', pdf: 'PDF document', download: 'Download',
   timeline: 'Timeline', process: 'Process', framework: 'Strategy framework', skills: 'Skills used', platforms: 'Platforms used',
+  flow: 'Flow diagram (journey, automation, data flow)', query: 'Query or code', dashboard: 'Live dashboard or report', metricTree: 'Metric tree (goal, measures, levers)',
 }
 
 export function newBlock(type: BlockType): Block {
@@ -88,6 +89,10 @@ export function newBlock(type: BlockType): Block {
     case 'process': return { ...base, entries: [] }
     case 'framework': return { ...base, title: '', columns: [] }
     case 'skills': case 'platforms': return { ...base, title: '', items: [] }
+    case 'flow': return { ...base, title: '', caption: '', nodes: [] }
+    case 'query': return { ...base, title: '', language: 'sql', code: '', text: '' }
+    case 'dashboard': return { ...base, url: '', title: '', caption: '', height: 520 }
+    case 'metricTree': return { ...base, title: '', note: '', tree: [] }
   }
 }
 

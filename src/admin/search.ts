@@ -24,6 +24,7 @@ const SYNONYMS: Record<string, string> = {
   design: 'dark mode night light theme corners rounded buttons shadows card style text size font scale',
   appearance: 'professional intensity creative balanced fonts animation motion',
   seasons: 'spring summer autumn fall winter colour color palette dates hero image',
+  resultsDisplay: 'results explorer compare table csv download chart sort filter',
   celebrations: 'christmas boxing day new year easter halloween valentine canada day holiday festive snow lights confetti fireworks greeting celebration',
   cursor: 'mouse pointer bubble trail water circle ring sparkle size effect hover',
   hero: 'bubble water circle orb stamp portrait headline first screen',

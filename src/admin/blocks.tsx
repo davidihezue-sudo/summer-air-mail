@@ -47,6 +47,33 @@ export const BLOCK_FIELDS: Record<BlockType, Field[]> = {
   framework: [{ kind: 'text', key: 'title', label: 'Title' }, { kind: 'list', key: 'columns', label: 'Columns', item: (c) => c.title, make: () => ({ title: '', items: [] }), addLabel: 'Add column', fields: [{ kind: 'text', key: 'title', label: 'Column title' }, { kind: 'strings', key: 'items', label: 'Points' }] }],
   skills: [{ kind: 'text', key: 'title', label: 'Title' }, { kind: 'strings', key: 'items', label: 'Skills' }],
   platforms: [{ kind: 'text', key: 'title', label: 'Title' }, { kind: 'multi', key: 'items', label: 'Platforms', options: PLATFORM_OPTIONS, custom: true }],
+  flow: [
+    { kind: 'text', key: 'title', label: 'Title (for example Lead lifecycle)' }, { kind: 'text', key: 'caption', label: 'One line about it (optional)' },
+    { kind: 'list', key: 'nodes', label: 'Steps, in order', item: (n) => `${n.label || 'Untitled step'}${n.kind === 'decision' ? ' (decision)' : ''}`, addLabel: 'Add step', make: () => ({ label: '', kind: 'step', detail: '', branches: [] }), fields: [
+      { kind: 'text', key: 'label', label: 'Step name' },
+      { kind: 'select', key: 'kind', label: 'What it is', options: [{ value: 'start', label: 'Start (a trigger or entry point)' }, { value: 'step', label: 'Step (an action)' }, { value: 'decision', label: 'Decision (a question with outcomes)' }, { value: 'system', label: 'System (a tool, table or automation)' }, { value: 'end', label: 'End (a result)' }] },
+      { kind: 'textarea', key: 'detail', label: 'What happens here (shown when a visitor opens the step)' },
+      { kind: 'list', key: 'branches', label: 'Outcomes of this decision', showIf: (n: { kind?: string }) => n.kind === 'decision', addLabel: 'Add outcome', item: (b) => `${b.condition || 'If...'} then ${b.outcome || '...'}`, make: () => ({ condition: '', outcome: '' }), fields: [{ kind: 'text', key: 'condition', label: 'If (for example score is 50 or more)' }, { kind: 'text', key: 'outcome', label: 'Then (for example assign to sales)' }] },
+    ] },
+  ],
+  query: [
+    { kind: 'text', key: 'title', label: 'Title (what this query is)' },
+    { kind: 'select', key: 'language', label: 'Language', options: [{ value: 'sql', label: 'SQL' }, { value: 'python', label: 'Python' }, { value: 'dax', label: 'DAX' }, { value: 'r', label: 'R' }, { value: 'other', label: 'Other' }] },
+    { kind: 'textarea', key: 'code', label: 'The query or code', rows: 12, help: 'Remove client names, keys and anything confidential first. Shown exactly as written.' },
+    { kind: 'textarea', key: 'text', label: 'What it answers, in plain English' },
+  ],
+  dashboard: [
+    { kind: 'url', key: 'url', label: 'Dashboard link', help: 'Looker Studio (use its share or embed link), Tableau Public, or Power BI publish-to-web. Other sites show as a link card. Only publish dashboards that are safe for anyone to see.' },
+    { kind: 'text', key: 'title', label: 'Title' }, { kind: 'text', key: 'caption', label: 'Caption (optional)' },
+    { kind: 'number', key: 'height', label: 'Height in pixels', min: 300, max: 1400, nullable: false },
+  ],
+  metricTree: [
+    { kind: 'text', key: 'title', label: 'The goal (for example Grow qualified leads)' }, { kind: 'text', key: 'note', label: 'Its target or period (optional, written by you)' },
+    { kind: 'list', key: 'tree', label: 'Measures under the goal', addLabel: 'Add a measure', item: (b) => b.label || 'Untitled measure', make: () => ({ label: '', value: '', note: '', children: [] }), fields: [
+      { kind: 'text', key: 'label', label: 'Measure (for example Conversion rate)' }, { kind: 'text', key: 'value', label: 'Value, if you have a verified one (optional)' }, { kind: 'text', key: 'note', label: 'Note (optional)' },
+      { kind: 'list', key: 'children', label: 'Levers behind it', addLabel: 'Add a lever', item: (c) => c.label || 'Untitled lever', make: () => ({ label: '', value: '', note: '' }), fields: [{ kind: 'text', key: 'label', label: 'Lever (for example Landing page speed)' }, { kind: 'text', key: 'value', label: 'Value (optional)' }, { kind: 'text', key: 'note', label: 'Note (optional)' }] },
+    ] },
+  ],
 }
 
 const summary = (b: Block) => b.text || b.title || b.label || b.caption || b.url || b.src || (b.images?.length ? `${b.images.length} images` : '') || ''
