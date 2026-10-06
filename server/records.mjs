@@ -218,7 +218,7 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
 }
 
 /* ---------- per-item snapshots for undo ---------- */
-export const SNAP_COLLECTIONS = ['projects', 'services', 'tools', 'testimonials', 'contentItems', 'websites', 'skills', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'journey', 'resources', 'notes', 'applications', 'shortLinks', 'looks']
+export const SNAP_COLLECTIONS = ['projects', 'services', 'tools', 'testimonials', 'contentItems', 'websites', 'skills', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'journey', 'faqs', 'resources', 'notes', 'applications', 'shortLinks', 'looks']
 export function createSnapshots(dir, { max = 12 } = {}) {
   const f = jsonFile(dir, 'snapshots.json', { items: {} })
   return {

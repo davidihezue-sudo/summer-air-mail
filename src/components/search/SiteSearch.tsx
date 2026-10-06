@@ -3,7 +3,7 @@ import { Search } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { Modal } from '../ui/Modal'
 import { useViewer } from '../projects/Viewer'
-import { getProjects, getServices, getTools, toolCategories } from '../../content/selectors'
+import { getFaqs, getProjects, getServices, getTools, toolCategories } from '../../content/selectors'
 import { SECTION_LABELS } from '../../content/sections'
 import { searchItems, type SearchAction, type SearchItem } from '../../utils/siteSearch'
 import { goTo } from '../../utils/nav'
@@ -27,6 +27,8 @@ export function SiteSearch({ open, onClose }: { open: boolean; onClose: () => vo
     if (servicesId) for (const s of getServices(content)) out.push({ id: `v-${s.id}`, kind: 'Service', title: s.name, detail: s.description, action: { type: 'section', id: servicesId } })
     const toolsId = idOf('tools')
     if (toolsId) for (const t of getTools(content)) out.push({ id: `t-${t.id}`, kind: 'Tool', title: t.name, detail: `${toolCategories(t).join(' ')} ${t.usage ?? ''}`, action: { type: 'section', id: toolsId } })
+    const faqId = idOf('faq')
+    if (faqId) for (const f of getFaqs(content)) out.push({ id: `f-${f.id}`, kind: 'FAQ', title: f.question, detail: `${f.topic} ${f.answer}`, action: { type: 'faq', id: f.id, section: faqId } })
     for (const n of content.notes) if (!n.hidden && hasValue(n.title) && hasValue(n.slug)) out.push({ id: `n-${n.id}`, kind: 'Note', title: n.title, detail: n.summary ?? '', action: { type: 'note', slug: n.slug } })
     return out
   }, [content, sections, idOf])
@@ -39,7 +41,12 @@ export function SiteSearch({ open, onClose }: { open: boolean; onClose: () => vo
     onClose()
     window.setTimeout(() => {
       if (a.type === 'section') goTo(a.id)
-      else if (a.type === 'project') openProject(a.id)
+      else if (a.type === 'faq') {
+        // The address is set first so the question opens even if the section has not loaded yet; the event covers a section already on screen.
+        history.replaceState(null, '', `#faq-${a.id}`)
+        goTo(a.section)
+        window.setTimeout(() => window.dispatchEvent(new CustomEvent('sam-faq', { detail: a.id })), 250)
+      } else if (a.type === 'project') openProject(a.id)
       else navigate(`/notes/${encodeURIComponent(a.slug)}`)
     }, 60)
   }
@@ -56,7 +63,7 @@ export function SiteSearch({ open, onClose }: { open: boolean; onClose: () => vo
         <Search aria-hidden size={20} />
         <input
           ref={input} type="search" role="combobox" aria-expanded={results.length > 0} aria-controls={listId} aria-autocomplete="list" aria-activedescendant={results[active] ? `${listId}-${active}` : undefined}
-          aria-label="Search this site" placeholder="Search projects, services, tools, notes" autoComplete="off" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onKey}
+          aria-label="Search this site" placeholder="Search projects, services, tools, FAQ, notes" autoComplete="off" value={q} onChange={(e) => setQ(e.target.value)} onKeyDown={onKey}
         />
       </div>
       <ul id={listId} role="listbox" aria-label="Results" className="sitesearch__list">

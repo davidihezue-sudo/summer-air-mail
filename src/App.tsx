@@ -48,6 +48,7 @@ const REGISTRY: Record<SectionType, SectionComponent> = {
   notes: lazySection(() => import('./components/notes/Notes'), 'Notes'),
   newsletter: lazySection(() => import('./components/newsletter/Newsletter'), 'Newsletter'),
   siteStats: lazySection(() => import('./components/stats/SiteStats'), 'SiteStats'),
+  faq: lazySection(() => import('./components/faq/Faq'), 'Faq'),
   richText: lazySection(() => import('./components/about/RichTextSection'), 'RichTextSection'),
 }
 

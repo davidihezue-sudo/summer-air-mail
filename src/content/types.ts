@@ -600,7 +600,7 @@ export type SectionType =
   | 'hero' | 'overview' | 'about' | 'services' | 'skills' | 'platforms' | 'process' | 'work'
   | 'caseStudies' | 'results' | 'tools' | 'ai' | 'content' | 'screenshots' | 'strategy'
   | 'websites' | 'testimonials' | 'mentoring' | 'richText' | 'contact'
-  | 'journey' | 'resources' | 'notes' | 'newsletter' | 'siteStats'
+  | 'journey' | 'resources' | 'notes' | 'newsletter' | 'siteStats' | 'faq'
 
 export interface SectionConfig {
   id: string
@@ -806,6 +806,34 @@ export interface Application {
   cvFilename: string
 }
 
+/** One question and its answer, shown in the FAQ section. Nothing appears until it has both and is published. */
+export interface Faq {
+  id: string
+  question: string
+  /** Plain paragraphs, "- " lists, **bold**, *italic* and [label](https://link), like the rest of the site's written text. */
+  answer: string
+  /** Groups questions under a chip, for example Pricing or Working together. Blank means no topic. */
+  topic: string
+  /** An optional button under the answer, for example Book a call. */
+  buttonLabel: string
+  buttonLink: string
+  hidden: boolean
+}
+
+export interface FaqSettings {
+  /** 'one' keeps a single answer open at a time. 'many' lets visitors open several. */
+  openMode: 'one' | 'many'
+  showTopics: boolean
+  /** 'auto' shows the search box only when there are enough questions to need it. */
+  search: 'auto' | 'always' | 'never'
+  allLabel: string
+  searchLabel: string
+  closingText: string
+  closingLabel: string
+  /** Where the closing button goes. Blank means the contact section. */
+  closingLink: string
+}
+
 export interface JourneyItem {
   id: string
   period: string
@@ -911,6 +939,7 @@ export interface Portfolio {
   media: MediaSettings
   toolsUi: ToolsUi
   resultsUi: ResultsUi
+  faq: FaqSettings
   endorsements: Endorsements
   publicStats: PublicStats
   card: BusinessCard
@@ -1021,6 +1050,7 @@ export interface SiteContent {
   /** Custom project types added in the admin, on top of the built-in list. */
   categories: string[]
   journey: JourneyItem[]
+  faqs: Faq[]
   resources: Resource[]
   notes: Note[]
   /** Private. Never sent to visitors; one is delivered only to someone who knows its link. */

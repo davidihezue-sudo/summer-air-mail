@@ -2,6 +2,7 @@ import {
   BarChart3, Bot, Briefcase, Calendar, Clapperboard, Compass, FileText, Film, Globe, Image as ImageIcon, LayoutDashboard, Layers,
   LayoutList, Link2, ListChecks, Megaphone, MessageSquareQuote, Palette, PenTool, Rocket, Search, Settings, Share2, Sparkles, Target, User, Wrench,
   Laptop, Mail, Camera, MousePointer2, Brush, Megaphone as Horn, Languages, Inbox, Users, BarChart, ShieldCheck, FileDown, Files, Link as LinkIcon, Route, NotebookPen, Bookmark, Wand2, Timer, HardDrive, UserSquare, Type, ClipboardCheck, BookOpen, Star, Workflow, Cpu, Footprints, Eye, PartyPopper, Monitor, TrendingUp,
+  CircleHelp,
 } from 'lucide-react'
 
 export const NAV: { group: string; items: { id: string; label: string; icon: typeof User; owner?: boolean }[] }[] = [
@@ -17,7 +18,7 @@ export const NAV: { group: string; items: { id: string; label: string; icon: typ
   ] },
   { group: 'Reach and engagement', items: [
     { id: 'applications', label: 'Application Links', icon: UserSquare }, { id: 'profilePage', label: 'One Page Profile', icon: FileDown }, { id: 'shortLinks', label: 'Short Links', icon: LinkIcon },
-    { id: 'notes', label: 'Notes (blog)', icon: NotebookPen }, { id: 'journey', label: 'Career Journey', icon: Route }, { id: 'resources', label: 'Resources', icon: Files },
+    { id: 'notes', label: 'Notes (blog)', icon: NotebookPen }, { id: 'journey', label: 'Career Journey', icon: Route }, { id: 'faq', label: 'FAQ', icon: CircleHelp }, { id: 'faqDisplay', label: 'FAQ Display', icon: Brush }, { id: 'resources', label: 'Resources', icon: Files },
     { id: 'engage', label: 'Booking & Newsletter', icon: Horn }, { id: 'announcement', label: 'Banner & Schedule', icon: Timer }, { id: 'languages', label: 'Languages', icon: Languages },
     { id: 'maintenance', label: 'Maintenance & 404', icon: Type },
   ] },

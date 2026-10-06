@@ -14,14 +14,14 @@ import { defaultSections } from './sections'
 import { mergeDefaults } from './merge'
 import {
   newAiSkill, newCaseStudy, newContentItem, newPlatform, newProcessStep, newProject, newResult, newScreenshot, newService,
-  newSkillGroup, newTestimonial, newTool, newWebsite, newJourney, newResource, newNote, newApplication, newShortLink, newLook,
+  newSkillGroup, newTestimonial, newTool, newWebsite, newJourney, newFaq, newResource, newNote, newApplication, newShortLink, newLook,
 } from './factories'
 import type { SectionConfig, SiteContent } from './types'
 
 export const baseContent: SiteContent = {
   portfolio, projects, services, tools, testimonials, contentItems, websites,
   skills, platforms, aiSkills, results, screenshots, process, categories: [],
-  journey: [], resources: [], notes: [], applications: [], shortLinks: [], looks: [],
+  journey: [], faqs: [], resources: [], notes: [], applications: [], shortLinks: [], looks: [],
 }
 export type ContentBundle = SiteContent
 
@@ -104,6 +104,7 @@ export function normalizeContent(raw: unknown): SiteContent {
     screenshots: has('screenshots') ? items(r.screenshots, newScreenshot) : baseContent.screenshots,
     process: has('process') ? items(r.process, newProcessStep) : baseContent.process,
     journey: has('journey') ? items(r.journey, newJourney) : [],
+    faqs: has('faqs') ? items(r.faqs, newFaq) : [],
     resources: has('resources') ? items(r.resources, newResource) : [],
     notes: has('notes') ? items(r.notes, newNote) : [],
     applications: has('applications') ? items(r.applications, newApplication) : [],

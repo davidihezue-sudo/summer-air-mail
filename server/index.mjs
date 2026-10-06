@@ -21,7 +21,7 @@ import { s3FromEnv } from './s3.mjs'
 import { restoreBackup } from './restore.mjs'
 import { renderCard, readPicture } from './ogcard.mjs'
 import { buildDigest, digestDue, localParts } from './digest.mjs'
-import { buildCsp, buildManifest, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
+import { buildFaqJsonLd, buildCsp, buildManifest, buildRobots, buildFeed, buildFullSitemap, injectHead, pageSeo, withSeo } from '../shared/head.mjs'
 
 function parseCookies(header = '') {
   const out = {}
@@ -595,6 +595,11 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
         let html = headP ? injectHead(await template(), headP) : await template()
         if (noindex.length) html = html.replace(/<meta name="robots"[^>]*>/, '<meta name="robots" content="noindex, nofollow" />')
         if (owner) html = html.replace('</head>', '<meta name="sam-owner" content="1" /></head>')
+        // Questions and answers for search engines, only on the home page where the FAQ section is.
+        if (c && !isAdmin && req.path === '/' && p.seo?.structuredData !== false) {
+          const faqLd = buildFaqJsonLd(c)
+          if (faqLd) html = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(faqLd).replace(/</g, '\\u003c')}</script></head>`)
+        }
         // Ship the published content inside the page so the site can render without a second request.
         if (pub && !isAdmin) {
           const json = JSON.stringify(publicView(pub.content)).replace(/</g, '\\u003c').replace(/\u2028|\u2029/g, '')

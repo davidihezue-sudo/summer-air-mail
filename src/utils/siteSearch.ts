@@ -1,5 +1,5 @@
-export type SearchKind = 'Section' | 'Project' | 'Case study' | 'Service' | 'Tool' | 'Note'
-export type SearchAction = { type: 'section'; id: string } | { type: 'project'; id: string } | { type: 'note'; slug: string }
+export type SearchKind = 'Section' | 'Project' | 'Case study' | 'Service' | 'Tool' | 'Note' | 'FAQ'
+export type SearchAction = { type: 'section'; id: string } | { type: 'project'; id: string } | { type: 'note'; slug: string } | { type: 'faq'; id: string; section: string }
 
 export interface SearchItem {
   id: string
@@ -12,7 +12,7 @@ export interface SearchItem {
 const norm = (s: string) => s.toLowerCase().normalize('NFKD').replace(/[̀-ͯ]/g, '')
 const words = (s: string) => norm(s).split(/[^a-z0-9]+/).filter(Boolean)
 
-const ORDER: SearchKind[] = ['Section', 'Project', 'Case study', 'Service', 'Tool', 'Note']
+const ORDER: SearchKind[] = ['Section', 'Project', 'Case study', 'Service', 'Tool', 'FAQ', 'Note']
 
 /** Ranks items for what a visitor typed. Every word must appear somewhere; matches at the start of the title count most. Empty text finds nothing. */
 export function searchItems(items: SearchItem[], query: string, limit = 8): SearchItem[] {

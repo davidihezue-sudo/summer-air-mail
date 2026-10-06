@@ -1,7 +1,7 @@
 // What visitors are allowed to download. The published copy keeps everything the owner saved
 // (so Discard and Restore work), but draft, hidden and unapproved items must never leave the server.
 
-const HIDEABLE = ['projects', 'services', 'contentItems', 'websites', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'journey', 'resources', 'notes']
+const HIDEABLE = ['projects', 'services', 'contentItems', 'websites', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'journey', 'faqs', 'resources', 'notes']
 
 export function publicView(content) {
   if (!content || typeof content !== 'object') return null

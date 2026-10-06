@@ -1,6 +1,6 @@
 // Entities and pages added in version 3. Registered into the same tables the rest of the admin reads.
 import type { SiteContent } from '../content/types'
-import { newApplication, newJourney, newNote, newResource, newShortLink } from '../content/factories'
+import { newApplication, newFaq, newJourney, newNote, newResource, newShortLink } from '../content/factories'
 import { ENTITIES, PAGES, type EntityDef } from './schema'
 import type { Field } from './fields'
 
@@ -18,6 +18,19 @@ const defs: EntityDef[] = [
       { kind: 'text', key: 'title', label: 'Title' }, { kind: 'text', key: 'org', label: 'Organisation or place' }, { kind: 'text', key: 'period', label: 'When (for example 2023 to 2025)' },
       { kind: 'select', key: 'kind', label: 'Kind', options: [{ value: 'role', label: 'Role' }, { value: 'project', label: 'Project' }, { value: 'learning', label: 'Learning' }, { value: 'award', label: 'Award' }, { value: 'milestone', label: 'Milestone' }] },
       { kind: 'textarea', key: 'description', label: 'Description' }, { kind: 'url', key: 'link', label: 'Link (optional)' }, { kind: 'image', key: 'image', label: 'Image (optional)' },
+    ],
+  },
+  {
+    id: 'faq', title: 'FAQ questions', singular: 'question', collection: 'faqs', make: newFaq,
+    intro: 'Questions people often ask, with your answers. Nothing appears until a question is published and has both a question and an answer. The section stays hidden while it is empty.',
+    titleOf: (q) => q.question || 'Untitled question', subtitleOf: (q) => q.topic || '',
+    ...hiddenToggle,
+    fields: [
+      { kind: 'text', key: 'question', label: 'Question', maxLength: 200 },
+      { kind: 'textarea', key: 'answer', label: 'Answer', rows: 6, help: 'Leave a blank line between paragraphs. Start a line with "- " for a bullet list. Use **bold**, *italic* and [a label](https://link).' },
+      { kind: 'select', key: 'topic', label: 'Topic (optional)', custom: true, options: (c: SiteContent) => [{ value: '', label: 'No topic' }, ...[...new Set(c.faqs.map((q) => q.topic).filter(Boolean))].map((t) => ({ value: t, label: t }))], help: 'Visitors can filter by topic. Pick one you have used, or type a new one. Questions with no topic show under All only.' },
+      { kind: 'text', key: 'buttonLabel', label: 'Button under the answer (optional)', placeholder: 'For example: Book a call', maxLength: 40 },
+      { kind: 'url', key: 'buttonLink', label: 'Where the button goes', placeholder: 'https://, mailto: or #contact' },
     ],
   },
   {
@@ -127,6 +140,20 @@ Object.assign(PAGES, {
       { kind: 'select', key: 'fill', label: 'What fills the space around a picture', options: [{ value: 'blur', label: 'A soft blurred copy of the picture' }, { value: 'tone', label: 'A plain colour' }, { value: 'none', label: 'Nothing' }] },
       { kind: 'select', key: 'screenshotSize', label: 'Screenshot size', options: [{ value: 'small', label: 'Small' }, { value: 'medium', label: 'Medium' }, { value: 'large', label: 'Large' }], help: 'Only how big they appear on the page. Their shape and sharpness never change, and visitors can still zoom in to the full picture. You can also set the size on each screenshot.' },
       { kind: 'select', key: 'screenshots', label: 'Screenshots section layout', options: [{ value: 'masonry', label: 'Masonry: tall and wide screenshots fit together' }, { value: 'grid', label: 'Even grid' }] },
+    ] }],
+  },
+  faqDisplay: {
+    title: 'FAQ Display', intro: 'How the FAQ section behaves and the words around it. The questions and answers themselves are under FAQ. Change the section heading and intro under Sections & Visibility.',
+    blocks: [{ title: 'Behaviour', base: 'portfolio.faq', fields: [
+      { kind: 'select', key: 'openMode', label: 'Opening an answer', options: [{ value: 'one', label: 'One at a time: opening one closes the other' }, { value: 'many', label: 'Several can stay open' }] },
+      { kind: 'bool', key: 'showTopics', label: 'Show topic buttons', help: 'Only appears when your questions use at least two topics.' },
+      { kind: 'select', key: 'search', label: 'Search box', options: [{ value: 'auto', label: 'Only when there are 8 or more questions' }, { value: 'always', label: 'Always' }, { value: 'never', label: 'Never' }] },
+    ] }, { title: 'Words', base: 'portfolio.faq', fields: [
+      { kind: 'text', key: 'allLabel', label: 'Label of the button that shows every topic', maxLength: 24 },
+      { kind: 'text', key: 'searchLabel', label: 'Search box label', maxLength: 60 },
+      { kind: 'text', key: 'closingText', label: 'Line after the questions', maxLength: 120 },
+      { kind: 'text', key: 'closingLabel', label: 'Button after the questions', maxLength: 40 },
+      { kind: 'text', key: 'closingLink', label: 'Where that button goes (blank means your contact section)', placeholder: 'https://, mailto: or #contact', maxLength: 300 },
     ] }],
   },
   resultsDisplay: {

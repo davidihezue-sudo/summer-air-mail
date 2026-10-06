@@ -17,6 +17,8 @@ export const toolCategories = (t: { category: string; categories?: string[] }): 
 export const getTools = (c: ContentBundle) => c.tools.filter((t) => t.confirmed && hasValue(t.name))
 export const getTestimonials = (c: ContentBundle) =>
   c.testimonials.filter((t) => t.approved && hasValue(t.quote)).slice().sort(byOrder)
+/** A question shows once it is published and has both a question and an answer. */
+export const getFaqs = (c: ContentBundle) => c.faqs.filter((q) => !q.hidden && hasValue(q.question) && hasValue(q.answer))
 export const getContentItems = (c: ContentBundle) => c.contentItems.filter((i) => !i.hidden && hasValue(i.title))
 export const getWebsites = (c: ContentBundle) => c.websites.filter((w) => !w.hidden && hasValue(w.name))
 export const getSkillGroups = (c: ContentBundle) =>
@@ -60,6 +62,7 @@ export function sectionHasContent(type: SectionType, c: SiteContent, cfg?: Secti
     case 'notes': return c.notes.some((x) => !x.hidden && hasValue(x.title) && hasValue(x.slug))
     case 'newsletter': return p.newsletter.enabled && (p.newsletter.mode === 'collect' || hasValue(p.newsletter.link))
     case 'siteStats': return p.publicStats.enabled
+    case 'faq': return getFaqs(c).length > 0
     case 'richText': return hasValue(cfg?.heading) || hasValue(cfg?.body)
   }
 }

@@ -1,6 +1,6 @@
 import type {
   AiSkill, Block, BlockType, CaseStudy, ContentItem, PlatformExpertise, ProcessStep, Project, ResultEntry,
-  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject, JourneyItem, Resource, Note, Application, ShortLink, Look, LanguagePack,
+  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject, JourneyItem, Faq, Resource, Note, Application, ShortLink, Look, LanguagePack,
 } from './types'
 
 export const uid = (prefix = 'id') => `${prefix}-${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-3)}`
@@ -96,6 +96,7 @@ export function newBlock(type: BlockType): Block {
   }
 }
 
+export const newFaq = (): Faq => ({ id: uid('faq'), question: '', answer: '', topic: '', buttonLabel: '', buttonLink: '', hidden: true })
 export const newJourney = (): JourneyItem => ({ id: uid('journey'), period: '', title: '', org: '', description: '', kind: 'role', link: '', image: null, hidden: true })
 export const newResource = (): Resource => ({ id: uid('resource'), title: '', description: '', file: '', image: null, format: 'PDF', hidden: true })
 export const newNote = (): Note => ({

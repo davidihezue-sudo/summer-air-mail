@@ -43,6 +43,34 @@ export function buildMeta(p) {
   }
 }
 
+/** Plain text of an answer written with the site's light formatting, for search engines. */
+function plainAnswer(text) {
+  return String(text ?? '')
+    .replace(/\[([^\]]+)\]\([^)\s]+\)/g, '$1')
+    .replace(/\*\*([^*]+)\*\*/g, '$1')
+    .replace(/\*([^*]+)\*/g, '$1')
+    .replace(/^\s*-\s+/gm, '')
+    .replace(/\s*\n+\s*/g, ' ')
+    .trim()
+}
+
+/**
+ * FAQ markup for search engines, built only from questions that are published, have an answer, and sit in a FAQ section that
+ * is switched on. Returns null when there is nothing visible to describe, since the markup must match what visitors can see.
+ */
+export function buildFaqJsonLd(c) {
+  // Content saved before the FAQ existed has no such section; the site adds it switched on, so that counts as on here too.
+  const section = (c?.portfolio?.sections ?? []).find((s) => s.type === 'faq')
+  if (section && section.enabled === false) return null
+  const items = (c?.faqs ?? []).filter((q) => q && q.hidden !== true && clean(q.question) && plainAnswer(q.answer))
+  if (!items.length) return null
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map((q) => ({ '@type': 'Question', name: clean(q.question), acceptedAnswer: { '@type': 'Answer', text: plainAnswer(q.answer) } })),
+  }
+}
+
 export function buildJsonLd(p) {
   const profile = p.profile ?? {}
   const sameAs = Object.values(profile.social ?? {}).filter(isHttp)

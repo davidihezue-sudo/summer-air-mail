@@ -123,6 +123,7 @@ export const portfolio: Portfolio = {
     consentText: 'I agree that my name, role and words may be shown on this website once approved.',
     successMessage: 'Thank you. I will read it and, if I can, add it to the site.',
   },
+  faq: { openMode: 'one', showTopics: true, search: 'auto', allLabel: 'All', searchLabel: 'Search the questions', closingText: 'Did not find your answer?', closingLabel: 'Ask me directly', closingLink: '' },
   resultsUi: { defaultView: 'cards', showSwitcher: true, allowDownload: true },
   publicStats: { enabled: false, rangeDays: 30, showViews: true, showTopPages: true, note: '' },
   card: { enabled: false, showQr: true, qrTarget: 'site', showSocial: true, note: '' },

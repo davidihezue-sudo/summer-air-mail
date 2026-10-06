@@ -1,5 +1,5 @@
 import type { SiteContent } from '../content/types'
-import { newJourney, newNote, newProject, newResult, newService, newTestimonial } from '../content/factories'
+import { newFaq, newJourney, newNote, newProject, newResult, newService, newTestimonial } from '../content/factories'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 export function parseCsv(text: string): string[][] {
@@ -79,6 +79,12 @@ export const CSV_SETS: CsvSet[] = [
     collection: 'journey', label: 'Career journey', make: newJourney,
     columns: ['title', 'org', 'period', 'kind', 'description', 'link', 'published'],
     apply: (i, r) => { assign(i, r, ['title', 'org', 'period', 'description', 'link']); if (r.kind) i.kind = r.kind; i.hidden = !yes(r.published ?? '') },
+    view: (i) => ({ ...i, published: !i.hidden }),
+  },
+  {
+    collection: 'faqs', label: 'FAQ', make: newFaq,
+    columns: ['question', 'answer', 'topic', 'buttonLabel', 'buttonLink', 'published'],
+    apply: (i, r) => { assign(i, r, ['question', 'answer', 'topic', 'buttonLabel', 'buttonLink']); i.hidden = !yes(r.published ?? '') },
     view: (i) => ({ ...i, published: !i.hidden }),
   },
   {
