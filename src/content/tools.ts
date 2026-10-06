@@ -1,6 +1,16 @@
 import type { Tool } from './types'
 
 /**
+ * Tools added after the first release. Sites saved before then get these once (see toolsSeeded), and removing one sticks.
+ * They carry no built-in logo, so each shows a plain letter tile until you upload the official one in Tools and Platforms.
+ */
+export const ADDED_TOOLS: Tool[] = [
+  { id: 'higgsfield', name: 'Higgsfield', category: 'Content Creation', categories: ['AI and Automation', 'Filming'], confirmed: true, usage: '', color: '#111111' },
+  { id: 'grok', name: 'Grok', category: 'AI and Automation', confirmed: true, usage: '', color: '#111111' },
+]
+export const TOOLS_SEED_VERSION = 1
+
+/**
  * A catalogue of common tools. NOTHING is shown until you set confirmed: true
  * AND write a truthful usage line. Delete the tools you do not use.
  */
@@ -19,4 +29,6 @@ export const tools: Tool[] = [
   { id: 'mailchimp', name: 'Mailchimp', category: 'AI and Automation', confirmed: false, usage: '[How you use it]' },
   { id: 'hubspot', name: 'HubSpot', category: 'AI and Automation', confirmed: false, usage: '[How you use it]' },
   { id: 'chatgpt', name: 'ChatGPT', category: 'AI and Automation', confirmed: false, usage: '[How you use it]' },
+  // Shown in the catalogue like every other built-in tool: not on the site until switched on.
+  ...ADDED_TOOLS.map((t) => ({ ...t, confirmed: false, usage: '[How you use it]' })),
 ]

@@ -3,7 +3,7 @@ import { Search } from 'lucide-react'
 import { useContent } from '../../hooks/useContent'
 import { Modal } from '../ui/Modal'
 import { useViewer } from '../projects/Viewer'
-import { getProjects, getServices, getTools } from '../../content/selectors'
+import { getProjects, getServices, getTools, toolCategories } from '../../content/selectors'
 import { SECTION_LABELS } from '../../content/sections'
 import { searchItems, type SearchAction, type SearchItem } from '../../utils/siteSearch'
 import { goTo } from '../../utils/nav'
@@ -26,7 +26,7 @@ export function SiteSearch({ open, onClose }: { open: boolean; onClose: () => vo
     const servicesId = idOf('services')
     if (servicesId) for (const s of getServices(content)) out.push({ id: `v-${s.id}`, kind: 'Service', title: s.name, detail: s.description, action: { type: 'section', id: servicesId } })
     const toolsId = idOf('tools')
-    if (toolsId) for (const t of getTools(content)) out.push({ id: `t-${t.id}`, kind: 'Tool', title: t.name, detail: `${t.category} ${t.usage ?? ''}`, action: { type: 'section', id: toolsId } })
+    if (toolsId) for (const t of getTools(content)) out.push({ id: `t-${t.id}`, kind: 'Tool', title: t.name, detail: `${toolCategories(t).join(' ')} ${t.usage ?? ''}`, action: { type: 'section', id: toolsId } })
     for (const n of content.notes) if (!n.hidden && hasValue(n.title) && hasValue(n.slug)) out.push({ id: `n-${n.id}`, kind: 'Note', title: n.title, detail: n.summary ?? '', action: { type: 'note', slug: n.slug } })
     return out
   }, [content, sections, idOf])

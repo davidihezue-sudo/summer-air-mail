@@ -12,6 +12,8 @@ export const getProjectTypes = (c: ContentBundle) => [...new Set(getProjects(c).
 export const getCaseStudyProjects = (c: ContentBundle) => getProjects(c).filter((p) => p.caseStudy)
 export const getServices = (c: ContentBundle) => c.services.filter((s) => !s.hidden && hasValue(s.name))
 /** A tool shows once you tick "I use this tool". The how-I-use-it line is optional and only shown when it is real text. */
+/** Every category a tool belongs to: its main one first, then any others, with no repeats. */
+export const toolCategories = (t: { category: string; categories?: string[] }): string[] => [...new Set([t.category, ...(t.categories ?? [])].filter(Boolean))]
 export const getTools = (c: ContentBundle) => c.tools.filter((t) => t.confirmed && hasValue(t.name))
 export const getTestimonials = (c: ContentBundle) =>
   c.testimonials.filter((t) => t.approved && hasValue(t.quote)).slice().sort(byOrder)

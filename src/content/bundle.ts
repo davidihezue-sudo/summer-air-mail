@@ -2,7 +2,7 @@ import { LEGACY_DRAWINGS } from './serviceArt'
 import { portfolio } from './portfolio.config'
 import { projects } from './projects'
 import { services } from './services'
-import { tools } from './tools'
+import { tools, ADDED_TOOLS, TOOLS_SEED_VERSION } from './tools'
 import { testimonials } from './testimonials'
 import { contentItems } from './contentItems'
 import { websites } from './websites'
@@ -66,6 +66,16 @@ export function normalizeSections(stored: unknown): SectionConfig[] {
     }
   }
   return out
+}
+
+/**
+ * Admin only: adds the built-in tools a site saved before they existed has never seen, once. After that the owner's list is left
+ * alone, so a deleted tool stays deleted. The public site never calls this, so nothing appears there until it is published.
+ */
+export function seedBuiltIns(c: SiteContent): { content: SiteContent; changed: boolean } {
+  if (c.portfolio.toolsSeeded >= TOOLS_SEED_VERSION) return { content: c, changed: false }
+  const have = new Set(c.tools.map((t) => t.id))
+  return { content: { ...c, portfolio: { ...c.portfolio, toolsSeeded: TOOLS_SEED_VERSION }, tools: [...c.tools, ...ADDED_TOOLS.filter((t) => !have.has(t.id))] }, changed: true }
 }
 
 /** Accepts anything from storage or the API and returns a complete, safe SiteContent. */

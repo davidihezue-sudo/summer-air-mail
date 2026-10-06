@@ -2,14 +2,14 @@ import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 import type { SectionConfig, Tool } from '../../content/types'
 import { useContent } from '../../hooks/useContent'
-import { getTools } from '../../content/selectors'
+import { getTools, toolCategories } from '../../content/selectors'
 import { brandColor } from '../../content/brands'
 import { Section } from '../ui/Section'
 import { ToolLogo } from '../ui/ToolLogo'
 import { useTheme } from '../../hooks/useTheme'
 import { hasValue, safeHref } from '../../utils/text'
 
-const CATEGORY_ORDER = ['Social Media Management', 'Content Creation', 'Design', 'Analytics', 'Advertising', 'AI and Automation']
+const CATEGORY_ORDER = ['Social Media Management', 'Content Creation', 'Filming', 'Design', 'Analytics', 'Advertising', 'AI and Automation', 'Workflow and Automation']
 const accent = (t: Tool) => ({ ['--brand' as string]: brandColor(t) }) as CSSProperties
 
 function Name({ tool, link = true }: { tool: Tool; link?: boolean }) {
@@ -31,7 +31,7 @@ function Card({ tool }: { tool: Tool }) {
       {ui.showLogos && <ToolLogo tool={tool} size={ui.logoSize} mono={mono} />}
       <div className="toolcard__body">
         <h4 className="toolcard__name"><Name tool={tool} /></h4>
-        {ui.showCategory && <p className="toolcard__cat">{tool.category}</p>}
+        {ui.showCategory && <p className="toolcard__cat">{toolCategories(tool).join(' · ')}</p>}
         {ui.showUsage && hasValue(tool.usage) && <p className="toolcard__use">{tool.usage}</p>}
       </div>
     </li>
@@ -62,7 +62,7 @@ function Row({ tool }: { tool: Tool }) {
       {ui.showLogos && <ToolLogo tool={tool} size={ui.logoSize} mono={mono} />}
       <div className="toolrowitem__main">
         <h4 className="toolcard__name"><Name tool={tool} /></h4>
-        {ui.showCategory && <p className="toolcard__cat">{tool.category}</p>}
+        {ui.showCategory && <p className="toolcard__cat">{toolCategories(tool).join(' · ')}</p>}
       </div>
       {ui.showUsage && hasValue(tool.usage) && <p className="toolrowitem__use">{tool.usage}</p>}
     </li>
@@ -116,12 +116,12 @@ export function Tools({ config }: { config: SectionConfig }) {
   const all = getTools(content)
   const { copy } = useTheme()
   const [cat, setCat] = useState('')
-  const cats = useMemo(() => [...new Set([...CATEGORY_ORDER, ...all.map((t) => t.category)])].filter((c) => all.some((t) => t.category === c)), [all])
+  const cats = useMemo(() => [...new Set([...CATEGORY_ORDER, ...all.flatMap(toolCategories)])].filter((c) => all.some((t) => toolCategories(t).includes(c))), [all])
   const useTabs = ui.tabs && cats.length > 1 && ui.layout !== 'marquee'
-  const shown = useTabs && cat ? all.filter((t) => t.category === cat) : all
+  const shown = useTabs && cat ? all.filter((t) => toolCategories(t).includes(cat)) : all
   const logoPx = Number(ui.logoPx) > 0 ? Math.min(160, Math.max(24, Math.round(Number(ui.logoPx)))) : 0
   const grouped = !useTabs && ui.group && ui.layout !== 'marquee'
-  const groups = grouped ? cats.map((c) => ({ c, items: shown.filter((t) => t.category === c) })).filter((g) => g.items.length) : [{ c: '', items: shown }]
+  const groups = grouped ? cats.map((c) => ({ c, items: shown.filter((t) => toolCategories(t).includes(c)) })).filter((g) => g.items.length) : [{ c: '', items: shown }]
   const intro = ui.layout === 'rings' ? 'Software I genuinely use. Select a ring to flip it.' : ui.layout === 'wall' ? 'The software I genuinely use.' : 'Software I genuinely use, and what I use it for.'
 
   const body = (items: Tool[]) => {
@@ -144,7 +144,7 @@ export function Tools({ config }: { config: SectionConfig }) {
       {useTabs && (
         <div className="filters toolfilters" role="group" aria-label="Filter tools by category">
           <button type="button" className="chip" aria-pressed={!cat} onClick={() => setCat('')}>All <span className="toolfilters__n">{all.length}</span></button>
-          {cats.map((c) => <button key={c} type="button" className="chip" aria-pressed={cat === c} onClick={() => setCat(cat === c ? '' : c)}>{c} <span className="toolfilters__n">{all.filter((t) => t.category === c).length}</span></button>)}
+          {cats.map((c) => <button key={c} type="button" className="chip" aria-pressed={cat === c} onClick={() => setCat(cat === c ? '' : c)}>{c} <span className="toolfilters__n">{all.filter((t) => toolCategories(t).includes(c)).length}</span></button>)}
         </div>
       )}
       {groups.map((g) => (

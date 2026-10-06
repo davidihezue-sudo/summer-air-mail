@@ -1,6 +1,6 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState, type ReactNode } from 'react'
 import { api, ApiError, type Me, type Status } from './api'
-import { baseContent, normalizeContent } from '../content/bundle'
+import { baseContent, normalizeContent, seedBuiltIns } from '../content/bundle'
 import type { MediaAsset, SiteContent } from '../content/types'
 import { setIn } from './paths'
 
@@ -55,13 +55,14 @@ export function AdminProvider({ onLogout, me, children }: { onLogout: () => void
   const load = useCallback(async () => {
     const d = await api.getDraft()
     rev.current = d.rev
-    const c = normalizeContent(d.draft ?? structuredClone(baseContent))
+    const seeded = seedBuiltIns(normalizeContent(d.draft ?? structuredClone(baseContent)))
+    const c = seeded.content
     latest.current = c
     setContent(c)
     setStatus(d)
-    // Nothing saved yet: the defaults are the starting draft.
-    dirty.current = !d.draft
-    setSave(d.draft ? 'saved' : 'dirty')
+    // Nothing saved yet: the defaults are the starting draft. Newly built-in tools also count as an unsaved change.
+    dirty.current = !d.draft || seeded.changed
+    setSave(d.draft && !seeded.changed ? 'saved' : 'dirty')
     setConflict(false)
     setError('')
   }, [])
@@ -152,7 +153,7 @@ export function AdminProvider({ onLogout, me, children }: { onLogout: () => void
     dirty.current = false
     const r = await api.discard()
     rev.current = r.rev
-    const c = normalizeContent(r.draft ?? baseContent)
+    const c = seedBuiltIns(normalizeContent(r.draft ?? baseContent)).content
     latest.current = c
     setContent(c)
     setStatus(r)

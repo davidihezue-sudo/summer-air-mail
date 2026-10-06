@@ -317,11 +317,15 @@ export type ToolCategory =
   | 'Advertising'
   | 'Design'
   | 'AI and Automation'
+  | 'Workflow and Automation'
+  | 'Filming'
 
 export interface Tool {
   id: string
   name: string
   category: ToolCategory
+  /** Other categories this tool also belongs to. It shows under each one. */
+  categories?: ToolCategory[]
   /** Set true only for tools you genuinely use. Unconfirmed tools never render. */
   confirmed: boolean
   usage: string
@@ -913,6 +917,8 @@ export interface Portfolio {
   cursor: CursorSettings
   announcement: Announcement
   schedule: ScheduleRule[]
+  /** Which version of the built-in tool list has been added to this site. Lets new built-in tools arrive once and stay deleted if you remove them. */
+  toolsSeeded: number
   booking: { enabled: boolean; label: string; url: string; showIn: ('hero' | 'header' | 'contact' | 'profile')[] }
   newsletter: {
     enabled: boolean

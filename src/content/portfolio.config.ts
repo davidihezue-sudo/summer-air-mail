@@ -135,6 +135,7 @@ export const portfolio: Portfolio = {
   announcement: { enabled: false, text: '', linkLabel: '', link: '', tone: 'ink', dismissible: true, from: '', to: '' },
   schedule: [],
   booking: { enabled: false, label: 'Book a call', url: '', showIn: ['contact'] },
+  toolsSeeded: 0,
   newsletter: {
     enabled: false, mode: 'link', heading: 'Stay in the loop', text: 'Occasional notes on social media and marketing. No spam.',
     buttonLabel: 'Subscribe', consentText: 'I agree to receive occasional emails and understand I can unsubscribe at any time.',

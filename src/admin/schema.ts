@@ -13,7 +13,7 @@ import { SERVICE_DRAWINGS } from '../content/serviceArt'
 export const PLATFORMS: Opt[] = ['instagram', 'tiktok', 'facebook', 'linkedin', 'youtube', 'pinterest', 'x', 'threads', 'snapchat', 'web']
 const LEVELS: Opt[] = [{ value: '', label: 'Not stated' }, 'Working knowledge', 'Proficient', 'Advanced', 'Specialist']
 const SERVICE_CATEGORIES = ['Strategy', 'Content', 'Management', 'Growth', 'Advertising', 'Analytics', 'Technology']
-const TOOL_CATEGORIES = ['Social Media Management', 'Content Creation', 'Analytics', 'Advertising', 'Design', 'AI and Automation']
+const TOOL_CATEGORIES = ['Social Media Management', 'Content Creation', 'Filming', 'Analytics', 'Advertising', 'Design', 'AI and Automation', 'Workflow and Automation']
 const AI_CATEGORIES = ['AI Content Creation', 'AI Copywriting', 'AI Image Generation', 'AI Video Generation', 'AI Research', 'AI Content Ideation', 'AI Analytics', 'AI Automation', 'Prompt Engineering', 'Marketing Workflow Automation', 'AI-Assisted Strategy']
 const FORMATS = ['Reel', 'TikTok', 'YouTube Short', 'Story', 'Carousel', 'Post', 'Campaign creative', 'Short-form video', 'Brand video', 'Product video', 'Promotional video', 'Video ad', 'Brand content']
 const RESULT_CLASSES: Opt[] = [
@@ -178,10 +178,10 @@ export const ENTITIES: Record<string, EntityDef> = {
   tools: {
     id: 'tools', title: 'Tools & Platforms', singular: 'tool', collection: 'tools', make: newTool,
     intro: 'Software you genuinely use. A tool only appears publicly when you tick "I use this tool" and describe how.',
-    titleOf: (t) => t.name || 'Untitled tool', subtitleOf: (t) => [t.category, t.usage && !/^\[/.test(t.usage) ? t.usage : ''].filter(Boolean).join(' · '),
+    titleOf: (t) => t.name || 'Untitled tool', subtitleOf: (t) => [[t.category, ...(t.categories ?? [])].filter((c, i, a) => c && a.indexOf(c) === i).join(', '), t.usage && !/^\[/.test(t.usage) ? t.usage : ''].filter(Boolean).join(' · '),
     thumbOf: (t) => brandDataUri(brandFor(t)), shown: (t) => !!t.confirmed, setShown: (t, v) => { t.confirmed = v }, shownLabels: ['In use', 'Not shown'],
     fields: [
-      { kind: 'text', key: 'name', label: 'Tool name' }, { kind: 'select', key: 'category', label: 'Category', options: TOOL_CATEGORIES },
+      { kind: 'text', key: 'name', label: 'Tool name' }, { kind: 'select', key: 'category', label: 'Main category', options: TOOL_CATEGORIES }, { kind: 'multi', key: 'categories', label: 'Also shown under (optional)', options: TOOL_CATEGORIES, help: 'A tool can belong to more than one category. It shows under its main category and under each one you tick here.' },
       { kind: 'bool', key: 'confirmed', label: 'I use this tool', help: 'Switch this on to show the tool on your site.' }, { kind: 'textarea', key: 'usage', label: 'How I use it (optional)', help: 'Be specific. It is shown on the tool card for everyone to read. Leave it empty to show just the logo and name.' },
       { kind: 'url', key: 'link', label: 'Link to the tool (optional)' },
       { kind: 'group', label: 'Logo', open: true, help: 'Most well known tools get their logo automatically from the name. Pick one below, upload the official logo, or paste a link to one.', fields: [
