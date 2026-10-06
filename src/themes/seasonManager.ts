@@ -45,14 +45,50 @@ export function resolveSeason(settings: Pick<SeasonSettings, 'mode' | 'ranges'>,
 const HEX = /^#[0-9a-f]{6}$/i
 const FONT_SAFE = /^[A-Za-z0-9 ,'"-]{1,160}$/
 
-export const FONT_CHOICES = [
+export type FontStyle = 'script' | 'display' | 'serif' | 'sans' | 'system'
+export interface FontChoice { label: string; value: string; style?: FontStyle }
+const stack = (family: string, fallback: string) => `'${family}', ${fallback}`
+const SCRIPT_FALLBACK = "'Snell Roundhand', cursive"
+const SERIF_FALLBACK = "Georgia, 'Times New Roman', serif"
+const SANS_FALLBACK = 'system-ui, sans-serif'
+
+/** Every font an owner can choose, by what it is like. Italiana, Pinyon Script and Figtree are the originals; the rest are free fonts bundled with the site. */
+export const FONT_CHOICES: FontChoice[] = [
   { label: 'Theme default', value: '' },
-  { label: 'Italiana (editorial display)', value: "'Italiana', 'Didot', 'Bodoni 72', Georgia, serif" },
-  { label: 'Georgia (classic serif)', value: "Georgia, 'Times New Roman', serif" },
-  { label: 'Pinyon Script (signature)', value: "'Pinyon Script', 'Snell Roundhand', cursive" },
-  { label: 'Figtree (clean sans)', value: "'Figtree Variable', 'Figtree', system-ui, sans-serif" },
-  { label: 'System sans', value: 'system-ui, -apple-system, Segoe UI, sans-serif' },
+  { label: 'Italiana (editorial display)', value: "'Italiana', 'Didot', 'Bodoni 72', Georgia, serif", style: 'display' },
+  { label: 'Pinyon Script (signature)', value: "'Pinyon Script', 'Snell Roundhand', cursive", style: 'script' },
+  { label: 'Figtree (clean sans)', value: "'Figtree Variable', 'Figtree', system-ui, sans-serif", style: 'sans' },
+  // Handwritten and signature scripts
+  { label: 'Great Vibes (flowing script)', value: stack('Great Vibes', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Allura (elegant script)', value: stack('Allura', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Parisienne (romantic script)', value: stack('Parisienne', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Sacramento (thin monoline script)', value: stack('Sacramento', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Alex Brush (brush script)', value: stack('Alex Brush', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Satisfy (casual brush script)', value: stack('Satisfy', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Playball (sporty script)', value: stack('Playball', SCRIPT_FALLBACK), style: 'script' },
+  { label: 'Dancing Script (lively script)', value: stack('Dancing Script Variable', SCRIPT_FALLBACK), style: 'script' },
+  // Display and serif
+  { label: 'Playfair Display (high contrast serif)', value: stack('Playfair Display Variable', SERIF_FALLBACK), style: 'display' },
+  { label: 'Cormorant Garamond (refined serif)', value: stack('Cormorant Garamond', SERIF_FALLBACK), style: 'display' },
+  { label: 'Cinzel (classical capitals)', value: stack('Cinzel Variable', SERIF_FALLBACK), style: 'display' },
+  { label: 'DM Serif Display (bold serif)', value: stack('DM Serif Display', SERIF_FALLBACK), style: 'display' },
+  { label: 'Marcellus (graceful roman)', value: stack('Marcellus', SERIF_FALLBACK), style: 'display' },
+  { label: 'Lora (readable serif)', value: stack('Lora Variable', SERIF_FALLBACK), style: 'serif' },
+  { label: 'Georgia (classic serif)', value: "Georgia, 'Times New Roman', serif", style: 'serif' },
+  // Sans serif
+  { label: 'Inter (neutral sans)', value: stack('Inter Variable', SANS_FALLBACK), style: 'sans' },
+  { label: 'Poppins (geometric sans)', value: stack('Poppins', SANS_FALLBACK), style: 'sans' },
+  { label: 'Montserrat (modern sans)', value: stack('Montserrat Variable', SANS_FALLBACK), style: 'sans' },
+  { label: 'DM Sans (friendly sans)', value: stack('DM Sans Variable', SANS_FALLBACK), style: 'sans' },
+  { label: 'Nunito (rounded sans)', value: stack('Nunito Variable', SANS_FALLBACK), style: 'sans' },
+  { label: 'System sans', value: 'system-ui, -apple-system, Segoe UI, sans-serif', style: 'system' },
 ]
+
+/** The choices that suit a job: headings take display, serif and sans; the signature takes scripts and display; body text takes sans and serif. */
+export const fontOptions = (styles: FontStyle[], withDefault = false) => FONT_CHOICES.filter((f) => (f.value ? !!f.style && styles.includes(f.style) : withDefault))
+export const HEADING_FONTS: FontStyle[] = ['display', 'serif', 'sans', 'script']
+export const SCRIPT_FONTS: FontStyle[] = ['script', 'display', 'serif']
+export const BODY_FONTS: FontStyle[] = ['sans', 'serif', 'system']
 
 export function safeFont(value: string | undefined): string {
   return value && FONT_SAFE.test(value) ? value : ''

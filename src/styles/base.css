@@ -30,6 +30,8 @@ body {
   overflow-x: clip; -webkit-font-smoothing: antialiased;
 }
 img, svg, video, canvas { max-width: 100%; display: block; }
+/* Pictures carry their real width and height so the page does not jump while they load. When CSS narrows one, its height must follow or it is stretched. Zero specificity: any rule that sets a height on purpose still wins. */
+:where(img[width][height]) { height: auto; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
 ul, ol { margin: 0; padding: 0; list-style: none; }

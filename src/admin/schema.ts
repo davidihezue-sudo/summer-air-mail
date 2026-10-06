@@ -5,7 +5,7 @@ import {
   PROJECT_TYPES, newAiSkill, newContentItem, newPlatform, newProcessStep, newProject, newResult, newScreenshot,
   newService, newSkillGroup, newTestimonial, newTool, newWebsite, newCaseStudy,
 } from '../content/factories'
-import { FONT_CHOICES } from '../themes/seasonManager'
+import { BODY_FONTS, HEADING_FONTS, SCRIPT_FONTS, fontOptions } from '../themes/seasonManager'
 import { BRAND_CHOICES, brandDataUri, brandFor, platformAsTool } from '../content/brands'
 import { SERVICE_DRAWINGS } from '../content/serviceArt'
 
@@ -411,7 +411,7 @@ export const PAGES: Record<string, PageForm> = {
       { kind: 'select', key: 'professional', label: 'Professional intensity', options: [{ value: 'creative', label: 'Creative: full decoration and motion' }, { value: 'balanced', label: 'Balanced: personality with restraint (recommended)' }, { value: 'professional', label: 'Professional: calm, editorial, minimal motion' }], help: 'Use Professional for corporate applications. It switches off playful extras and uses plain section titles.' },
       { kind: 'select', key: 'animationIntensity', label: 'Maximum animation', options: [{ value: 'full', label: 'Full' }, { value: 'subtle', label: 'Subtle' }, { value: 'off', label: 'Off' }], help: 'A ceiling over everything else. Visitors who ask their device for reduced motion always get a calm site.' },
       { kind: 'group', label: 'Fonts', open: false, fields: [
-        { kind: 'select', key: 'fonts.display', label: 'Headings', options: FONT_CHOICES.filter((f) => f.value) }, { kind: 'select', key: 'fonts.script', label: 'Signature script', options: FONT_CHOICES.filter((f) => f.value) }, { kind: 'select', key: 'fonts.body', label: 'Body text', options: FONT_CHOICES.filter((f) => f.value) },
+        { kind: 'select', key: 'fonts.display', label: 'Headings', options: fontOptions(HEADING_FONTS) }, { kind: 'select', key: 'fonts.script', label: 'Signature script (your name at the top left, the footer and the menu)', options: fontOptions(SCRIPT_FONTS) }, { kind: 'select', key: 'fonts.body', label: 'Body text', options: fontOptions(BODY_FONTS) },
       ] },
     ] }],
   },

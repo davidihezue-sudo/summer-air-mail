@@ -1,4 +1,5 @@
 import type { Portfolio } from '../content/types'
+import { loadFont } from '../themes/fontLoader'
 import { darkPalette, type ResolvedTheme } from '../themes/seasonManager'
 import type { MotionPlan } from '../motion/motion'
 
@@ -48,9 +49,12 @@ export function applyTheme(resolved: ResolvedTheme, portfolio: Portfolio, plan: 
   root.style.setProperty('--c-green-text', derived.greenText)
   root.style.setProperty('--deep', dark?.deep ?? colors.ink)
   root.style.setProperty('--on-deep', dark?.onDeep ?? colors.paper)
-  root.style.setProperty('--font-display', fonts.display || portfolio.theme.fonts.display)
-  root.style.setProperty('--font-script', fonts.script || portfolio.theme.fonts.script)
-  root.style.setProperty('--font-body', fonts.body || portfolio.theme.fonts.body)
+  const fam = { display: fonts.display || portfolio.theme.fonts.display, script: fonts.script || portfolio.theme.fonts.script, body: fonts.body || portfolio.theme.fonts.body }
+  root.style.setProperty('--font-display', fam.display)
+  root.style.setProperty('--font-script', fam.script)
+  root.style.setProperty('--font-body', fam.body)
+  // An optional font is only downloaded once something uses it.
+  loadFont(fam.display); loadFont(fam.script); loadFont(fam.body)
   root.style.setProperty('--hero-bg', dark ? `radial-gradient(120% 90% at 78% 30%, ${colors.butter} 0%, ${colors.sand} 70%, ${colors.paper} 100%)` : theme.heroBg)
   root.style.setProperty('--sun', theme.sun)
   root.style.setProperty('--texture', noiseTexture(theme.textureFreq))

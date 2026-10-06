@@ -162,9 +162,14 @@ describe('writing rules', () => {
     const offenders = files.filter((f) => readFileSync(f, 'utf8').includes(dash))
     expect(offenders).toEqual([])
   })
-  it('does not use banned fonts', () => {
-    const css = walk('src').filter((f) => f.endsWith('.css') || f.endsWith('.ts')).map((f) => readFileSync(f, 'utf8')).join('\n')
+  it('uses only Italiana, Pinyon Script and Figtree by default; other fonts exist only as choices the owner opts into', () => {
+    // The choice lists are the one place the extra fonts may be named. Nothing else in the site, and no default, may use them.
+    const optIn = ['fontLoader.ts', 'seasonManager.ts']
+    const css = walk('src').filter((f) => (f.endsWith('.css') || f.endsWith('.ts')) && !optIn.some((o) => f.endsWith(o))).map((f) => readFileSync(f, 'utf8')).join('\n')
     expect(css).not.toMatch(/\b(Inter|Roboto|Arial|Open Sans|Poppins|Montserrat|Lato|Nunito|DM Sans)\b/)
+    expect(baseContent.portfolio.theme.fonts.display).toMatch(/Italiana/)
+    expect(baseContent.portfolio.theme.fonts.script).toMatch(/Pinyon Script/)
+    expect(baseContent.portfolio.theme.fonts.body).toMatch(/Figtree/)
   })
   it('ships no fabricated achievements by default', () => {
     expect(baseContent.projects).toHaveLength(0)
