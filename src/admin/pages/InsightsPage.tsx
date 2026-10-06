@@ -27,19 +27,20 @@ function Bars({ title, data }: { title: string; data: [string, number][] }) {
   )
 }
 
-/** Who opened the tailored link you sent them, and when. Your own previews are counted under "You and home", not here. */
+/** Who opened a tailored link or an audience view, and when. Your own previews are counted under "You and home", not here. */
 function ApplicationLinks({ data }: { data: InsightsSummary }) {
   const { content } = useAdmin()
-  const apps = content.applications
-  if (!apps.length) return null
-  const rows = apps.map((a) => ({ a, views: data.paths[`/for/${a.slug}`] ?? 0, last: data.pathLast?.[`/for/${a.slug}`] ?? '' })).sort((x, y) => y.views - x.views || x.a.slug.localeCompare(y.a.slug))
+  const views = content.audiences.map((v) => ({ key: v.id, title: v.name || v.slug, slug: v.slug, off: v.enabled === false, kind: 'view' as const }))
+  const apps = content.applications.map((a) => ({ key: a.id, title: a.company || a.label || a.slug, slug: a.slug, off: a.enabled === false, kind: 'link' as const }))
+  if (!views.length && !apps.length) return null
+  const rows = [...views, ...apps].filter((x) => x.slug).map((x) => ({ x, views: data.paths[`/for/${x.slug}`] ?? 0, last: data.pathLast?.[`/for/${x.slug}`] ?? '' })).sort((p, q) => q.views - p.views || p.x.slug.localeCompare(q.x.slug))
   return (
-    <Card title="Application links">
+    <Card title="Audience views and application links">
       <ul className="arows">
-        {rows.map(({ a, views, last }) => (
-          <li key={a.id} className="arow-item">
-            <span className="arow-item__main"><span className="arow-item__text"><strong>{a.company || a.label || a.slug}</strong><span className="ahelp">/for/{a.slug}{a.enabled === false ? ' · switched off' : ''}</span></span></span>
-            <span className="arow-item__badges">{views > 0 ? <Badge tone="good">Opened {views} time{views === 1 ? '' : 's'}{last ? `, last on ${last}` : ''}</Badge> : <Badge>Not opened yet</Badge>}</span>
+        {rows.map(({ x, views: n, last }) => (
+          <li key={x.key} className="arow-item">
+            <span className="arow-item__main"><span className="arow-item__text"><strong>{x.title}</strong><span className="ahelp">{x.kind === 'view' ? 'Audience view' : 'Application link'} · /for/{x.slug}{x.off ? ' · switched off' : ''}</span></span></span>
+            <span className="arow-item__badges">{n > 0 ? <Badge tone="good">Opened {n} time{n === 1 ? '' : 's'}{last ? `, last on ${last}` : ''}</Badge> : <Badge>Not opened yet</Badge>}</span>
           </li>
         ))}
       </ul>

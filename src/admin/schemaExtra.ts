@@ -1,12 +1,13 @@
 // Entities and pages added in version 3. Registered into the same tables the rest of the admin reads.
 import type { SiteContent } from '../content/types'
-import { newApplication, newFaq, newJourney, newNote, newResource, newShortLink } from '../content/factories'
+import { SECTION_LABELS } from '../content/sections'
+import { newApplication, newAudience, newFaq, newJourney, newNote, newResource, newShortLink } from '../content/factories'
 import { ENTITIES, PAGES, type EntityDef } from './schema'
 import type { Field } from './fields'
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const hiddenToggle = { shown: (x: any) => !x.hidden, setShown: (x: any, v: boolean) => { x.hidden = !v }, shownLabels: ['Published', 'Draft'] as [string, string] }
-const sectionOptions = (c: SiteContent) => c.portfolio.sections.filter((x) => x.type !== 'hero').map((x) => ({ value: x.id, label: x.heading || x.navLabel || x.id }))
+const sectionOptions = (c: SiteContent) => c.portfolio.sections.filter((x) => x.type !== 'hero').map((x) => ({ value: x.id, label: x.heading || x.navLabel || SECTION_LABELS[x.type] || x.id }))
 
 const defs: EntityDef[] = [
   {
@@ -54,6 +55,43 @@ const defs: EntityDef[] = [
     ],
   },
   {
+    id: 'audiences', title: 'Audience Views', singular: 'audience view', collection: 'audiences', make: newAudience,
+    intro: 'One version of your site for each kind of visitor, such as recruiters, freelance clients, agencies and collaborators. Set it up once, then share its address. A view only changes what you set; everything else follows the main site. Views are not listed or indexed by Google.',
+    titleOf: (a) => a.name || 'Untitled view', subtitleOf: (a) => (a.slug ? `/for/${a.slug}` : 'Needs an address'),
+    shown: (a) => a.enabled !== false, setShown: (a, v) => { a.enabled = v }, shownLabels: ['Active', 'Switched off'],
+    fields: [
+      { kind: 'text', key: 'name', label: 'Name of this view', placeholder: 'For example: Recruiters', maxLength: 60, help: 'Only for your own use, but note it is part of the published page data, so keep it to something like Recruiters or Clients.' },
+      { kind: 'text', key: 'slug', label: 'Address', placeholder: 'recruiters', maxLength: 40, help: 'Letters, numbers and dashes. The view lives at yoursite.com/for/<address>. Application links use the same /for/ space, so the two cannot share a name.' },
+      { kind: 'group', label: 'What this audience reads first', open: true, fields: [
+        { kind: 'group', key: 'hero', label: 'Hero words', open: true, fields: [{ kind: 'text', key: 'label', label: 'Label' }, { kind: 'text', key: 'headline', label: 'Headline' }, { kind: 'text', key: 'supporting', label: 'Supporting line' }, { kind: 'textarea', key: 'intro', label: 'Intro' }] },
+        { kind: 'list', key: 'ctas', label: 'Hero buttons for this view (empty keeps the main site buttons)', item: (c: any) => c.label, make: () => ({ label: '', target: 'contact' }), addLabel: 'Add button', fields: [{ kind: 'text', key: 'label', label: 'Button text' }, { kind: 'select', key: 'target', label: 'Goes to', options: sectionOptions }] },
+        { kind: 'textarea', key: 'bio', label: 'About text for this view (empty keeps the main text)', rows: 6, help: 'Leave a blank line between paragraphs.' },
+        { kind: 'list', key: 'sectionWording', label: 'Different heading or intro for a section', item: (w: any) => w.heading || w.sectionId || 'Section', make: () => ({ sectionId: '', heading: '', intro: '' }), addLabel: 'Reword a section', fields: [{ kind: 'select', key: 'sectionId', label: 'Section', options: sectionOptions }, { kind: 'text', key: 'heading', label: 'Heading' }, { kind: 'textarea', key: 'intro', label: 'Intro' }] },
+      ] },
+      { kind: 'group', label: 'Which sections show, and in what order', open: true, fields: [
+        { kind: 'multi', key: 'hideSectionIds', label: 'Hide these sections', options: sectionOptions, help: 'Not relevant to this audience? Tick it here. The main site is not affected.' },
+        { kind: 'multi', key: 'firstSectionIds', label: 'Bring these sections to the top (after the hero)', options: sectionOptions, help: 'They appear in the order the site normally uses; tick only what should come first.' },
+      ] },
+      { kind: 'group', label: 'Leave out individual items', open: false, fields: [
+        { kind: 'group', key: 'hide', label: 'Hide for this audience', open: true, fields: [
+          { kind: 'refs', key: 'projects', label: 'Projects', from: 'projects' }, { kind: 'refs', key: 'services', label: 'Services', from: 'services' }, { kind: 'refs', key: 'tools', label: 'Tools', from: 'tools' },
+          { kind: 'refs', key: 'results', label: 'Results', from: 'results' }, { kind: 'refs', key: 'testimonials', label: 'Testimonials', from: 'testimonials' }, { kind: 'refs', key: 'faqs', label: 'FAQ questions', from: 'faqs' },
+          { kind: 'refs', key: 'websites', label: 'Websites', from: 'websites' }, { kind: 'refs', key: 'notes', label: 'Notes', from: 'notes' },
+        ] },
+      ] },
+      { kind: 'group', label: 'What to emphasise', open: false, fields: [
+        { kind: 'refs', key: 'featuredProjectIds', label: 'Projects to put first', from: 'projects' },
+        { kind: 'bool', key: 'onlyFeatured', label: 'Show only those projects' },
+        { kind: 'strings', key: 'highlightSkills', label: 'Skills and competencies to list first' },
+      ] },
+      { kind: 'group', label: 'Look and CV', open: false, fields: [
+        { kind: 'select', key: 'professional', label: 'Professional intensity', options: [{ value: '', label: 'Keep the site setting' }, { value: 'creative', label: 'Creative' }, { value: 'balanced', label: 'Balanced' }, { value: 'professional', label: 'Professional' }] },
+        { kind: 'select', key: 'season', label: 'Season', options: [{ value: '', label: 'Keep the site setting' }, 'spring', 'summer', 'autumn', 'winter'] },
+        { kind: 'file', key: 'cvFile', label: 'CV for this audience (replaces the main CV here)', accept: 'any' }, { kind: 'text', key: 'cvFilename', label: 'Download file name' },
+      ] },
+    ],
+  },
+  {
     id: 'applications', title: 'Application Links', singular: 'application link', collection: 'applications', make: newApplication,
     intro: 'A private version of your portfolio for one employer or client, at /for/<code>. It is never listed or indexed, and only someone with the link can open it. Publish to make a new link work.',
     titleOf: (a) => a.label || a.company || 'Untitled link', subtitleOf: (a) => [a.company, a.role, a.slug && `/for/${a.slug}`].filter(Boolean).join(' · '),
@@ -73,6 +111,7 @@ const defs: EntityDef[] = [
         { kind: 'multi', key: 'hideSectionIds', label: 'Hide these sections', options: sectionOptions },
       ] },
       { kind: 'group', label: 'Look and CV', open: false, fields: [
+        { kind: 'ref', key: 'audienceId', label: 'Build on an audience view', from: 'audiences', help: 'Start from one of your audience views (for example Recruiters), then change only what is different for this application. Updating the view updates every link built on it.' },
         { kind: 'ref', key: 'lookId', label: 'Saved look to use', from: 'looks' },
         { kind: 'select', key: 'professional', label: 'Professional intensity', options: [{ value: '', label: 'Keep the site setting' }, { value: 'creative', label: 'Creative' }, { value: 'balanced', label: 'Balanced' }, { value: 'professional', label: 'Professional' }] },
         { kind: 'select', key: 'season', label: 'Season', options: [{ value: '', label: 'Keep the site setting' }, 'spring', 'summer', 'autumn', 'winter'] },

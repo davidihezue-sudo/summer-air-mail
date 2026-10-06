@@ -1,6 +1,6 @@
 import type {
   AiSkill, Block, BlockType, CaseStudy, ContentItem, PlatformExpertise, ProcessStep, Project, ResultEntry,
-  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject, JourneyItem, Faq, Resource, Note, Application, ShortLink, Look, LanguagePack,
+  ScreenshotItem, Service, SkillGroup, Testimonial, Tool, WebsiteProject, JourneyItem, Faq, Audience, Resource, Note, Application, ShortLink, Look, LanguagePack,
 } from './types'
 
 export const uid = (prefix = 'id') => `${prefix}-${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-3)}`
@@ -106,7 +106,13 @@ export const newNote = (): Note => ({
 export const newApplication = (): Application => ({
   id: uid('application'), slug: Math.random().toString(36).slice(2, 10), label: '', company: '', role: '', enabled: true, expiresAt: '',
   hero: { label: '', headline: '', supporting: '', intro: '' }, greeting: { enabled: false, text: '' }, featuredProjectIds: [],
-  onlyFeatured: false, highlightSkills: [], hideSectionIds: [], lookId: '', professional: '', season: '', cvFile: '', cvFilename: '',
+  onlyFeatured: false, highlightSkills: [], hideSectionIds: [], lookId: '', professional: '', season: '', cvFile: '', cvFilename: '', audienceId: '',
+})
+export const newAudience = (): Audience => ({
+  id: uid('audience'), slug: '', name: '', enabled: true,
+  hero: { label: '', headline: '', supporting: '', intro: '' }, ctas: [], bio: '', sectionWording: [], firstSectionIds: [], hideSectionIds: [],
+  hide: { projects: [], services: [], tools: [], results: [], testimonials: [], faqs: [], websites: [], notes: [] },
+  featuredProjectIds: [], onlyFeatured: false, highlightSkills: [], professional: '', season: '', cvFile: '', cvFilename: '',
 })
 export const newShortLink = (): ShortLink => ({ id: uid('link'), slug: '', label: '', target: { type: 'section', value: 'work' }, enabled: true })
 export const newLook = (): Look => ({

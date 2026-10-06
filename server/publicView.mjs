@@ -10,6 +10,8 @@ export function publicView(content) {
   out.applications = []
   out.shortLinks = []
   out.looks = []
+  // Audience views are public (they live at /for/<name>) but a switched off one must not be reachable.
+  if (Array.isArray(content.audiences)) out.audiences = content.audiences.filter((a) => a && a.enabled !== false)
   for (const key of HIDEABLE) {
     if (Array.isArray(content[key])) out[key] = content[key].filter((x) => x && x.hidden !== true)
   }

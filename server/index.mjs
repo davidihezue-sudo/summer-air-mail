@@ -587,8 +587,10 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
           const m = /^\/for\/([^/]+)\/?$/.exec(req.path)
           if (m) {
             noindex.push('application')
-            const a = (c.applications ?? []).find((x) => x.slug === decodeURIComponent(m[1]))
-            if (!a || a.enabled === false || (a.expiresAt && Date.parse(a.expiresAt) + 864e5 < Date.now())) status = 404
+            const want = decodeURIComponent(m[1])
+            const a = (c.applications ?? []).find((x) => x.slug === want)
+            const view = (c.audiences ?? []).find((x) => x.enabled !== false && String(x.slug).toLowerCase() === want.toLowerCase())
+            if (!view && (!a || a.enabled === false || (a.expiresAt && Date.parse(a.expiresAt) + 864e5 < Date.now()))) status = 404
           } else if (req.path !== '/' && !seo && !/^\/(go|feed\.xml)/.test(req.path)) status = 404
           if (p.maintenance?.enabled && !owner && p.maintenance.status503) status = 503
         }

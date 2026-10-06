@@ -804,6 +804,44 @@ export interface Application {
   season: SeasonName | ''
   cvFile: string
   cvFilename: string
+  /** Builds on one of your audience views: that view is applied first, then this link's own settings on top. */
+  audienceId: string
+}
+
+/** The kinds of item an audience view can leave out. */
+export type AudienceHideKey = 'projects' | 'services' | 'tools' | 'results' | 'testimonials' | 'faqs' | 'websites' | 'notes'
+
+/**
+ * A reusable version of the whole site for one kind of visitor (recruiters, freelance clients, agencies, collaborators).
+ * It lives at /for/<slug>, is not listed or indexed, and only changes what it sets; everything else follows the main site.
+ * Hiding is for relevance, not secrecy: the page data still holds everything you published.
+ */
+export interface Audience {
+  id: string
+  /** Part of the address: yoursite.com/for/<slug>. */
+  slug: string
+  /** What you call this view, for example Recruiters. */
+  name: string
+  enabled: boolean
+  hero: { label: string; headline: string; supporting: string; intro: string }
+  /** Hero buttons for this view. Empty keeps the main site's buttons. */
+  ctas: { label: string; target: string }[]
+  /** About paragraphs for this view, separated by a blank line. Empty keeps the main text. */
+  bio: string
+  /** A different heading or intro for a section, only in this view. */
+  sectionWording: { sectionId: string; heading: string; intro: string }[]
+  /** Sections to bring to the top, right after the hero, in this order. */
+  firstSectionIds: string[]
+  hideSectionIds: string[]
+  /** Individual items to leave out of this view. */
+  hide: Record<AudienceHideKey, string[]>
+  featuredProjectIds: string[]
+  onlyFeatured: boolean
+  highlightSkills: string[]
+  professional: ProfessionalIntensity | ''
+  season: SeasonName | ''
+  cvFile: string
+  cvFilename: string
 }
 
 /** One question and its answer, shown in the FAQ section. Nothing appears until it has both and is published. */
@@ -1051,6 +1089,7 @@ export interface SiteContent {
   categories: string[]
   journey: JourneyItem[]
   faqs: Faq[]
+  audiences: Audience[]
   resources: Resource[]
   notes: Note[]
   /** Private. Never sent to visitors; one is delivered only to someone who knows its link. */

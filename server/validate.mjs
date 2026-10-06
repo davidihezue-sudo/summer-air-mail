@@ -4,7 +4,7 @@
 const BLOCKED_KEYS = new Set(['__proto__', 'constructor', 'prototype'])
 const DANGEROUS = /^\s*(javascript|vbscript|data:text\/html|data:application)/i
 export const MAX_BYTES = 3 * 1024 * 1024
-const COLLECTIONS = ['projects', 'services', 'tools', 'testimonials', 'contentItems', 'websites', 'skills', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'categories', 'journey', 'faqs', 'resources', 'notes', 'applications', 'shortLinks', 'looks']
+const COLLECTIONS = ['projects', 'services', 'tools', 'testimonials', 'contentItems', 'websites', 'skills', 'platforms', 'aiSkills', 'results', 'screenshots', 'process', 'categories', 'journey', 'faqs', 'audiences', 'resources', 'notes', 'applications', 'shortLinks', 'looks']
 const SECTION_TYPES = new Set(['hero', 'overview', 'about', 'services', 'skills', 'platforms', 'process', 'work', 'caseStudies', 'results', 'tools', 'ai', 'content', 'screenshots', 'strategy', 'websites', 'testimonials', 'mentoring', 'richText', 'contact', 'journey', 'resources', 'notes', 'newsletter', 'siteStats', 'faq'])
 
 function clean(value, depth, path) {
@@ -53,8 +53,11 @@ export function validateContent(input) {
         ids.add(item.id)
       }
     }
+    // Audience views and application links share the /for/ address, so one name cannot be both.
+    const taken = new Set((content.applications ?? []).map((x) => String(x.slug ?? '').toLowerCase()).filter(Boolean))
+    for (const a of content.audiences ?? []) if (a.slug && taken.has(String(a.slug).toLowerCase())) return { ok: false, error: `The address "${a.slug}" is used by both an audience view and an application link. Change one.` }
     const SLUG = /^[a-zA-Z0-9][a-zA-Z0-9-]{1,79}$/
-    for (const [coll, label] of [['notes', 'Note address'], ['applications', 'Application code'], ['shortLinks', 'Short link code']]) {
+    for (const [coll, label] of [['notes', 'Note address'], ['applications', 'Application code'], ['audiences', 'Audience view address'], ['shortLinks', 'Short link code']]) {
       const seen = new Set()
       for (const item of content[coll] ?? []) {
         const slug = item.slug

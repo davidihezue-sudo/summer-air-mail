@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import App from './App'
 import { normalizeContent, type LoadedContent } from './content/bundle'
-import { applyApplication, applyLanguage, applySchedule, applicationExpired, type ApplicationBundle } from './content/derive'
+import { applyApplication, applyAudience, applyLanguage, applySchedule, applicationExpired, type ApplicationBundle } from './content/derive'
 import { ContentProvider } from './hooks/useContent'
 import { ThemeProvider, type ThemePreview } from './hooks/useTheme'
 import { ConsentBanner } from './components/layout/ConsentBanner'
@@ -68,8 +68,10 @@ export default function Root({ initial }: { initial: LoadedContent }) {
 
   // A tailored application link: fetched by its slug, never part of the public content.
   const slug = route.kind === 'application' ? route.slug : ''
+  // An audience view (Recruiters, Clients...) shares the /for/ address. It is part of the public content, so it needs no request.
+  const audience = useMemo(() => (slug ? raw.audiences.find((a) => a.enabled !== false && a.slug.toLowerCase() === slug.toLowerCase()) : undefined), [raw.audiences, slug])
   useEffect(() => {
-    if (!slug) { setAppState({ status: 'idle' }); return }
+    if (!slug || audience) { setAppState({ status: 'idle' }); return }
     let live = true
     setAppState({ status: 'loading' })
     fetch(`/api/application/${encodeURIComponent(slug)}`, { headers: { Accept: 'application/json' } })
@@ -80,7 +82,7 @@ export default function Root({ initial }: { initial: LoadedContent }) {
       })
       .catch(() => live && setAppState({ status: 'missing' }))
     return () => { live = false }
-  }, [slug])
+  }, [slug, audience])
 
   const i18n = raw.portfolio.i18n
   const packs = useMemo(() => (i18n.enabled ? i18n.languages.filter((l) => l.code) : []), [i18n])
@@ -93,10 +95,13 @@ export default function Root({ initial }: { initial: LoadedContent }) {
 
   const content = useMemo<SiteContent>(() => {
     let c = raw
+    // A link can build on a view: the view first, then the link's own settings on top.
+    const base = audience ?? (appState.status === 'ok' ? raw.audiences.find((a) => a.id === appState.app.audienceId && a.enabled !== false) : undefined)
+    if (base) c = applyAudience(c, base)
     if (appState.status === 'ok') c = applyApplication(c, appState.app)
     c = applySchedule(c)
     return applyLanguage(c, pack)
-  }, [raw, appState, pack])
+  }, [raw, appState, pack, audience])
 
   useEffect(() => {
     document.documentElement.lang = pack?.code || raw.portfolio.site.locale.split('-')[0] || 'en'
@@ -114,8 +119,8 @@ export default function Root({ initial }: { initial: LoadedContent }) {
   else if (route.kind === 'profile' && content.portfolio.profilePage.enabled) page = <ProfilePage />
   else if (route.kind === 'card' && content.portfolio.card.enabled) page = <CardPage />
   else if (route.kind === 'note') page = <NotePage slug={route.slug} />
-  else if (route.kind === 'notfound' || (route.kind === 'profile') || route.kind === 'card' || (route.kind === 'application' && appState.status === 'missing')) page = <NotFound />
-  else if (route.kind === 'application' && appState.status !== 'ok') page = null
+  else if (route.kind === 'notfound' || (route.kind === 'profile') || route.kind === 'card' || (route.kind === 'application' && !audience && appState.status === 'missing')) page = <NotFound />
+  else if (route.kind === 'application' && !audience && appState.status !== 'ok') page = null
   else page = <App />
 
   return (

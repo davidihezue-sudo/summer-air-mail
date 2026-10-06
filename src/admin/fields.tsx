@@ -11,7 +11,7 @@ import { BlockListEditor } from './blocks'
 
 export type Opt = string | { value: string; label: string }
 type Pred = (obj: any, root: SiteContent) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
-export type RefSource = 'projects' | 'services' | 'tools' | 'aiSkills' | 'results' | 'contentItems' | 'screenshots' | 'looks' | 'notes'
+export type RefSource = 'projects' | 'services' | 'tools' | 'aiSkills' | 'results' | 'contentItems' | 'screenshots' | 'looks' | 'notes' | 'testimonials' | 'faqs' | 'websites' | 'audiences'
 
 interface Base { label: string; help?: string; showIf?: Pred }
 export type Field =
@@ -366,7 +366,8 @@ function ListField({ f, base }: { f: Extract<Field, { kind: 'list' }>; base: str
 
 const REF_LABEL: Record<RefSource, (x: any) => string> = { // eslint-disable-line @typescript-eslint/no-explicit-any
   projects: (x) => x.title || x.id, services: (x) => x.name || x.id, tools: (x) => x.name || x.id, aiSkills: (x) => x.name || x.id,
-  looks: (x) => x.name || x.id, notes: (x) => x.title || x.id,
+  looks: (x) => x.name || x.id, notes: (x) => x.title || x.id, testimonials: (x) => [x.name, x.company].filter(Boolean).join(', ') || x.id, faqs: (x) => x.question || x.id, websites: (x) => x.name || x.id,
+  audiences: (x) => x.name || x.slug || x.id,
   results: (x) => x.metric || x.id, contentItems: (x) => x.title || x.id, screenshots: (x) => x.caption || x.image?.alt || x.id,
 }
 

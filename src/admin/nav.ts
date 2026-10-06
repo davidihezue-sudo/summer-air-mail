@@ -17,7 +17,7 @@ export const NAV: { group: string; items: { id: string; label: string; icon: typ
     { id: 'navigation', label: 'Navigation', icon: Compass }, { id: 'footer', label: 'Footer', icon: Footprints },
   ] },
   { group: 'Reach and engagement', items: [
-    { id: 'applications', label: 'Application Links', icon: UserSquare }, { id: 'profilePage', label: 'One Page Profile', icon: FileDown }, { id: 'shortLinks', label: 'Short Links', icon: LinkIcon },
+    { id: 'audiences', label: 'Audience Views', icon: Users }, { id: 'applications', label: 'Application Links', icon: UserSquare }, { id: 'profilePage', label: 'One Page Profile', icon: FileDown }, { id: 'shortLinks', label: 'Short Links', icon: LinkIcon },
     { id: 'notes', label: 'Notes (blog)', icon: NotebookPen }, { id: 'journey', label: 'Career Journey', icon: Route }, { id: 'faq', label: 'FAQ', icon: CircleHelp }, { id: 'faqDisplay', label: 'FAQ Display', icon: Brush }, { id: 'resources', label: 'Resources', icon: Files },
     { id: 'engage', label: 'Booking & Newsletter', icon: Horn }, { id: 'announcement', label: 'Banner & Schedule', icon: Timer }, { id: 'languages', label: 'Languages', icon: Languages },
     { id: 'maintenance', label: 'Maintenance & 404', icon: Type },

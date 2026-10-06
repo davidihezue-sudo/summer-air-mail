@@ -1,4 +1,4 @@
-import type { Application, Look, ScheduleRule, SiteContent, LanguagePack } from './types'
+import type { Application, Audience, Look, ScheduleRule, SiteContent, LanguagePack } from './types'
 
 const clone = <T,>(v: T): T => structuredClone(v)
 const filled = (s: string | undefined | null): s is string => !!s && s.trim().length > 0
@@ -69,9 +69,10 @@ export function applicationExpired(a: Pick<Application, 'expiresAt'>, now = new 
   return filled(a.expiresAt) && Date.parse(a.expiresAt) + 864e5 < now.getTime()
 }
 
-/** Re-shape the whole site for one application. Only what the application sets changes. */
-export function applyApplication(content: SiteContent, a: ApplicationBundle): SiteContent {
-  let c = a.look ? applyLook(content, a.look) : clone(content)
+/** What an application link and an audience view both change: hero words, intensity, season, CV, projects, skills and hidden sections. */
+type Tailoring = Pick<Application, 'hero' | 'featuredProjectIds' | 'onlyFeatured' | 'highlightSkills' | 'hideSectionIds' | 'professional' | 'season' | 'cvFile' | 'cvFilename'>
+
+function tailor(c: SiteContent, a: Tailoring) {
   const p = c.portfolio
   for (const k of ['label', 'headline', 'supporting', 'intro'] as const) if (filled(a.hero[k])) p.hero[k] = a.hero[k]
   if (a.professional) p.theme.professional = a.professional
@@ -89,8 +90,47 @@ export function applyApplication(content: SiteContent, a: ApplicationBundle): Si
     p.recruiter.competencies = [...p.recruiter.competencies].sort((x, y) => Number(want.has(y.toLowerCase())) - Number(want.has(x.toLowerCase())))
   }
   for (const s of p.sections) if (a.hideSectionIds.includes(s.id) && s.type !== 'hero') s.enabled = false
+}
+
+/** Re-shape the whole site for one application. Only what the application sets changes. */
+export function applyApplication(content: SiteContent, a: ApplicationBundle): SiteContent {
+  let c = a.look ? applyLook(content, a.look) : clone(content)
+  tailor(c, a)
   c = { ...c, applications: [], looks: [] }
   return c
+}
+
+export const AUDIENCE_HIDE_KEYS = ['projects', 'services', 'tools', 'results', 'testimonials', 'faqs', 'websites', 'notes'] as const
+
+/**
+ * Re-shape the whole site for one audience view. Like an application link, only what the view sets changes. On top of that a view
+ * can swap the About text and hero buttons, reword sections, move sections up, and leave out individual items.
+ */
+export function applyAudience(content: SiteContent, a: Audience): SiteContent {
+  const c = clone(content)
+  tailor(c, a)
+  const p = c.portfolio
+  const bio = a.bio.split(/\n\s*\n/).map((x) => x.trim()).filter(Boolean)
+  if (bio.length) p.profile.bio = bio
+  const ctas = (a.ctas ?? []).filter((x) => filled(x.label) && filled(x.target))
+  if (ctas.length) p.hero.ctas = ctas
+  for (const w of a.sectionWording ?? []) {
+    const s = p.sections.find((x) => x.id === w.sectionId)
+    if (!s) continue
+    if (filled(w.heading)) s.heading = w.heading
+    if (filled(w.intro)) s.intro = w.intro
+  }
+  if (a.firstSectionIds?.length) {
+    const head = p.sections.filter((s) => s.type === 'hero')
+    const first = a.firstSectionIds.map((id) => p.sections.find((s) => s.id === id && s.type !== 'hero')).filter((s): s is NonNullable<typeof s> => !!s)
+    const rest = p.sections.filter((s) => s.type !== 'hero' && !first.includes(s))
+    p.sections = [...head, ...first, ...rest]
+  }
+  for (const key of AUDIENCE_HIDE_KEYS) {
+    const ids = a.hide?.[key] ?? []
+    if (ids.length) (c as unknown as Record<string, { id: string }[]>)[key] = (c[key] as { id: string }[]).filter((x) => !ids.includes(x.id))
+  }
+  return { ...c, applications: [], looks: [], audiences: [] }
 }
 
 /* ---------- languages ---------- */

@@ -24,6 +24,7 @@ const SYNONYMS: Record<string, string> = {
   design: 'dark mode night light theme corners rounded buttons shadows card style text size font scale',
   appearance: 'professional intensity creative balanced fonts animation motion',
   seasons: 'spring summer autumn fall winter colour color palette dates hero image',
+  audiences: 'audience views recruiters clients freelance agencies collaborators versions different people hide sections who sees what employer',
   faq: 'faq questions answers help common questions pricing topics accordion',
   faqDisplay: 'faq topics chips search open one at a time closing line button',
   resultsDisplay: 'results explorer compare table csv download chart sort filter',

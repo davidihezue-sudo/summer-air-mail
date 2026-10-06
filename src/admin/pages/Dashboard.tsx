@@ -40,6 +40,7 @@ export function Dashboard() {
       { label: 'Testimonials approved', value: c.testimonials.filter((t) => t.approved).length, to: 'testimonials' },
       { label: 'Social links', value: socials, to: 'social' },
       { label: 'Career journey entries', value: pub(c.journey), to: 'journey' },
+      { label: 'Audience views', value: c.audiences.filter((a) => a.enabled !== false).length, to: 'audiences' },
       { label: 'FAQ questions', value: pub(c.faqs), to: 'faq' },
       { label: 'Notes published', value: pub(c.notes), to: 'notes' },
       { label: 'Application links active', value: c.applications.filter((a) => a.enabled !== false).length, to: 'applications' },
