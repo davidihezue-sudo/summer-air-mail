@@ -123,4 +123,4 @@ export const newLook = (): Look => ({
     hero: { layout: 'stamp-right', alignment: 'left', breakout: true, animation: 'inherit', decorativeElements: true, background: 'season' },
   },
 })
-export const newLanguage = (): LanguagePack => ({ code: '', label: '', rtl: false, ui: {}, text: {} })
+export const newLanguage = (): LanguagePack => ({ code: '', label: '', rtl: false, ui: {}, text: {}, auto: [] })

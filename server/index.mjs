@@ -17,6 +17,7 @@ import { createEnquiries, createEndorsements, createSubscribers, createInsights,
 import { createMailer } from './mailer.mjs'
 import { createBackups, backupStream } from './backup.mjs'
 import { createLimiter, parseContact, parseEndorsement } from './routes.mjs'
+import { createTranslate, validLang, validEmail } from './translate.mjs'
 import { s3FromEnv } from './s3.mjs'
 import { restoreBackup } from './restore.mjs'
 import { renderCard, readPicture } from './ogcard.mjs'
@@ -357,6 +358,18 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     storage: multer.diskStorage({ destination: (_req, _f, cb) => cb(null, media.tmpDir), filename: (_req, _f, cb) => cb(null, `up-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`) }),
     limits: { fileSize: maxVideoMb * 1024 * 1024, files: 1, fields: 8 },
   })
+  /* ---------- free automatic translation (used by the Languages page) ---------- */
+  const translator = createTranslate({ fetchImpl: deps.fetchImpl })
+  const translateLimit = createLimiter({ max: 600, windowMs: 3600 * 1000 })
+  admin.post('/translate', need('edit'), async (req, res) => {
+    const { texts, from, to, email } = req.body ?? {}
+    if (!validLang(from) || !validLang(to) || from.split('-')[0] === to.split('-')[0]) return res.status(400).json({ error: 'Choose two different language codes, such as en and fr.' })
+    if (!Array.isArray(texts) || !texts.length || texts.length > 30 || texts.some((t) => typeof t !== 'string' || !t.trim() || t.length > 6000) || texts.reduce((n, t) => n + t.length, 0) > 20000) return res.status(400).json({ error: 'Send between 1 and 30 pieces of text, each under 6,000 characters.' })
+    if (email !== undefined && email !== '' && !validEmail(email)) return res.status(400).json({ error: 'That email address does not look right.' })
+    if (!translateLimit(req.ip ?? 'x')) return res.status(429).json({ error: 'That is a lot of translating in an hour. Try again later.' })
+    try { res.json({ texts: await translator.texts(texts, { from, to, email: email || '' }) }) } catch (e) { res.status(e.status ?? 502).json({ error: e.status ? e.message : 'Translation failed.' }) }
+  })
+
   admin.get('/media', (_req, res) => res.json({ media: media.list() }))
   admin.post('/media', (req, res) => {
     upload.single('file')(req, res, async (err) => {

@@ -71,7 +71,7 @@ export function sampleContent(base: ContentBundle): SiteContent {
       booking: { enabled: true, label: 'Sample booking', url: 'https://example.com/book', showIn: ['hero', 'contact', 'header'] },
       newsletter: { ...base.portfolio.newsletter, enabled: true, mode: 'link', link: 'https://example.com/news' },
       design: { ...base.portfolio.design, colorToggle: true },
-      i18n: { enabled: true, defaultLabel: 'English', switcher: true, languages: [{ code: 'fr', label: 'Sample FR', rtl: false, ui: { 'cv.nav': 'CV (fr)' }, text: { 'portfolio.profile.tagline': 'Sample tagline in French' } }] },
+      i18n: { enabled: true, defaultLabel: 'English', switcher: true, languages: [{ code: 'fr', label: 'Sample FR', rtl: false, ui: { 'cv.nav': 'CV (fr)' }, text: { 'portfolio.profile.tagline': 'Sample tagline in French' } }], translateEmail: '' },
       contact: { ...base.portfolio.contact, delivery: 'both' },
     },
     journey: [{ id: 'j1', period: 'Sample 2022 to 2024', title: 'Sample role', org: 'Sample employer', description: 'Sample description of a role.', kind: 'role', link: '', image: null, hidden: false }, { id: 'j2', period: 'Sample 2024', title: 'Sample award', org: 'Sample body', description: 'Sample award.', kind: 'award', link: '', image: null, hidden: false }],

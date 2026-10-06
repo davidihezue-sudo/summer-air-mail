@@ -169,34 +169,7 @@ export function applyLanguage(content: SiteContent, pack: LanguagePack | undefin
   return c
 }
 
-export interface TranslatableField { path: string; label: string; value: string }
-
-/** Everything a visitor reads that can be translated, with a stable path. */
-export function translatableFields(c: SiteContent): TranslatableField[] {
-  const out: TranslatableField[] = []
-  const add = (path: string, label: string, value: unknown) => { if (typeof value === 'string' && filled(value)) out.push({ path, label, value }) }
-  const p = c.portfolio
-  add('portfolio.hero.label', 'Hero label', p.hero.label); add('portfolio.hero.headline', 'Hero headline', p.hero.headline)
-  add('portfolio.hero.supporting', 'Hero supporting line', p.hero.supporting); add('portfolio.hero.intro', 'Hero intro', p.hero.intro)
-  for (const k of ['title', 'tagline', 'intro', 'availability'] as const) add(`portfolio.profile.${k}`, `Profile ${k}`, p.profile[k])
-  p.profile.bio.forEach((b, i) => add(`portfolio.profile.bio.${i}`, `Bio paragraph ${i + 1}`, b))
-  add('portfolio.seo.title', 'Page title', p.seo.title); add('portfolio.seo.description', 'Page description', p.seo.description)
-  add('portfolio.footer.tagline', 'Footer tagline', p.footer.tagline)
-  add('portfolio.announcement.text', 'Announcement', p.announcement.text)
-  add('portfolio.contact.successMessage', 'Contact success message', p.contact.successMessage)
-  for (const k of ['heading', 'text', 'buttonLabel', 'consentText', 'successMessage'] as const) add(`portfolio.newsletter.${k}`, `Newsletter ${k}`, p.newsletter[k])
-  for (const k of ['heading', 'intro', 'label', 'hint'] as const) add(`portfolio.strategy.${k}`, `Strategy ${k}`, p.strategy[k])
-  for (const s of p.sections) for (const k of ['eyebrow', 'heading', 'intro', 'navLabel'] as const) add(`portfolio.sections.${s.id}.${k}`, `Section ${s.id} ${k}`, s[k])
-  c.projects.forEach((x) => { add(`projects.${x.id}.title`, `Project: ${x.title}`, x.title); add(`projects.${x.id}.description`, `Project description: ${x.title}`, x.description) })
-  c.services.forEach((x) => { add(`services.${x.id}.name`, `Service: ${x.name}`, x.name); add(`services.${x.id}.description`, `Service description: ${x.name}`, x.description) })
-  c.testimonials.forEach((x) => add(`testimonials.${x.id}.quote`, `Quote: ${x.name}`, x.quote))
-  for (const k of ['allLabel', 'searchLabel', 'closingText', 'closingLabel'] as const) add(`portfolio.faq.${k}`, `FAQ ${k}`, p.faq[k])
-  c.faqs.forEach((x) => { add(`faqs.${x.id}.question`, `FAQ question`, x.question); add(`faqs.${x.id}.answer`, `FAQ answer: ${x.question}`, x.answer) })
-  c.journey.forEach((x) => { add(`journey.${x.id}.title`, `Journey: ${x.title}`, x.title); add(`journey.${x.id}.description`, `Journey description: ${x.title}`, x.description) })
-  c.resources.forEach((x) => { add(`resources.${x.id}.title`, `Resource: ${x.title}`, x.title); add(`resources.${x.id}.description`, `Resource description: ${x.title}`, x.description) })
-  c.notes.forEach((x) => { add(`notes.${x.id}.title`, `Note: ${x.title}`, x.title); add(`notes.${x.id}.summary`, `Note summary: ${x.title}`, x.summary); add(`notes.${x.id}.body`, `Note body: ${x.title}`, x.body) })
-  return out
-}
+export { translatableFields, type TranslatableField } from './translatable'
 
 /* ---------- quality and completeness ---------- */
 

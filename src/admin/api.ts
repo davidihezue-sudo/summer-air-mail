@@ -98,6 +98,7 @@ export const api = {
     }),
   updateMedia: (id: string, patch: Partial<Pick<MediaAsset, 'alt' | 'caption' | 'tags' | 'projectIds'>>) =>
     request<{ asset: MediaAsset }>(`/media/${id}`, { method: 'PATCH', body: JSON.stringify(patch) }),
+  translate: (texts: string[], from: string, to: string, email: string) => request<{ texts: string[] }>('/translate', { method: 'POST', body: JSON.stringify({ texts, from, to, email }) }),
   deleteMedia: (id: string) => request<{ ok: true }>(`/media/${id}`, { method: 'DELETE' }),
   enquiries: () => request<{ items: Enquiry[]; unread: number; due: number }>('/enquiries'),
   endorsements: () => request<{ items: Endorsement[]; pending: number }>('/endorsements'),

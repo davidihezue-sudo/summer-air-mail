@@ -924,6 +924,8 @@ export interface LanguagePack {
   ui: Record<string, string>
   /** Content strings by path, for example "portfolio.profile.intro" or "projects.<id>.title". */
   text: Record<string, string>
+  /** Entries that were translated by the machine and not yet checked or edited by you: "text:<path>" or "ui:<key>". */
+  auto?: string[]
 }
 
 export interface Portfolio {
@@ -1011,7 +1013,7 @@ export interface Portfolio {
   }
   maintenance: { enabled: boolean; title: string; message: string; status503: boolean; showContact: boolean; showSocial: boolean }
   notFound: { title: string; message: string; buttonLabel: string }
-  i18n: { enabled: boolean; defaultLabel: string; switcher: boolean; languages: LanguagePack[] }
+  i18n: { enabled: boolean; defaultLabel: string; switcher: boolean; languages: LanguagePack[]; /** Optional. Sent to the free translation service to raise its daily allowance. */ translateEmail: string }
   insights: { enabled: boolean; respectDoNotTrack: boolean; requireConsent: boolean; retentionDays: number; /** Count the owner's own visits (signed in, or from the home network) apart from outside visitors. Off ignores them. */ countOwn: boolean }
   quality: { minDescription: number; requireCover: boolean; requireAlt: boolean; requirePeriod: boolean; requireLink: boolean }
   sections: SectionConfig[]

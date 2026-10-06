@@ -78,6 +78,22 @@ export function seedBuiltIns(c: SiteContent): { content: SiteContent; changed: b
   return { content: { ...c, portfolio: { ...c.portfolio, toolsSeeded: TOOLS_SEED_VERSION }, tools: [...c.tools, ...ADDED_TOOLS.filter((t) => !have.has(t.id))] }, changed: true }
 }
 
+/**
+ * Translations are stored under flat keys that contain dots ("faqs.f1.question", "menu.open"). Earlier versions of the Languages page
+ * saved a typed translation as nested objects instead, which the site never read. This turns those back into flat keys, so nothing a
+ * person typed is lost.
+ */
+export function flattenStrings(value: unknown): Record<string, string> {
+  const out: Record<string, string> = {}
+  const walk = (v: unknown, prefix: string) => {
+    if (typeof v === 'string') { if (prefix) out[prefix] = v; return }
+    if (!isObj(v)) return
+    for (const [k, x] of Object.entries(v)) walk(x, prefix ? `${prefix}.${k}` : k)
+  }
+  walk(value, '')
+  return out
+}
+
 /** Accepts anything from storage or the API and returns a complete, safe SiteContent. */
 export function normalizeContent(raw: unknown): SiteContent {
   const r = isObj(raw) ? raw : {}
@@ -86,6 +102,7 @@ export function normalizeContent(raw: unknown): SiteContent {
   const oldDesign = isObj(r.portfolio) && isObj(r.portfolio.design) ? r.portfolio.design : null
   if (oldDesign && oldDesign.dialogAnimation === false && oldDesign.dialogTransition === undefined) p.design.dialogTransition = 'none'
   p.sections = normalizeSections(isObj(r.portfolio) ? r.portfolio.sections : undefined)
+  p.i18n.languages = (Array.isArray(p.i18n.languages) ? p.i18n.languages : []).filter(isObj).map((l) => ({ ...l, ui: flattenStrings(l.ui), text: flattenStrings(l.text), auto: Array.isArray(l.auto) ? l.auto.filter((k) => typeof k === 'string') : [] }))
   const has = (k: string) => Array.isArray(r[k])
   return {
     portfolio: p,

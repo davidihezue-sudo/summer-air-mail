@@ -149,7 +149,7 @@ export const portfolio: Portfolio = {
   },
   maintenance: { enabled: false, title: 'Back soon', message: 'The portfolio is being updated. Please check back shortly.', status503: false, showContact: true, showSocial: true },
   notFound: { title: 'This page has moved on', message: 'The page you were looking for is not here. The portfolio home page is a good place to start.', buttonLabel: 'Back to the portfolio' },
-  i18n: { enabled: false, defaultLabel: 'English', switcher: true, languages: [] },
+  i18n: { enabled: false, defaultLabel: 'English', switcher: true, languages: [], translateEmail: '' },
   insights: { enabled: false, respectDoNotTrack: true, requireConsent: false, retentionDays: 365, countOwn: true },
   quality: { minDescription: 60, requireCover: true, requireAlt: true, requirePeriod: false, requireLink: false },
   sections: defaultSections(),
