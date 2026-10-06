@@ -357,3 +357,6 @@ a.abtn--primary { color: var(--a-primary-text); }
 .atrans__run { display: grid; gap: .3rem; }
 .atrans__run progress { width: 100%; height: 12px; }
 .atrans__badge { display: inline-block; margin-top: .25rem; font-size: .72rem; padding: .1rem .5rem; border-radius: 999px; background: #fff4d6; color: #7a5b00; }
+
+/* Section list inside an audience view */
+.aview__grip { flex: none; color: #8a949b; cursor: grab; }

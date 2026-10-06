@@ -145,3 +145,46 @@ describe('audience views on the server', () => {
     expect(await (await fetch(base + '/sitemap.xml')).text()).not.toContain('/for/')
   })
 })
+
+describe('a view\'s own section order', () => {
+  const ids = (c: ReturnType<typeof site>) => c.portfolio.sections.filter((s) => s.type !== 'hero').map((s) => s.id)
+  it('puts the hero first, then the view\'s order, then anything it does not mention in the main order', () => {
+    const c = site()
+    const all = ids(c)
+    const want = [all[5], all[2], all[9]]
+    const out = applyAudience(c, view({ sectionOrder: want }))
+    const got = out.portfolio.sections
+    expect(got[0].type).toBe('hero')
+    expect(got.slice(1, 4).map((s) => s.id)).toEqual(want)
+    expect(got.slice(4).map((s) => s.id)).toEqual(all.filter((x) => !want.includes(x)))
+    expect(got).toHaveLength(all.length + 1)
+  })
+  it('ignores unknown and repeated ids, and an empty order follows the main site', () => {
+    const c = site()
+    const all = ids(c)
+    const out = applyAudience(c, view({ sectionOrder: ['nope', all[3], all[3], 'top'] }))
+    expect(out.portfolio.sections.map((s) => s.id).slice(0, 2)).toEqual([c.portfolio.sections[0].id, all[3]])
+    expect(applyAudience(c, view({})).portfolio.sections.map((s) => s.id)).toEqual(c.portfolio.sections.map((s) => s.id))
+  })
+  it('still honours the older "bring to the top" list when no order is set, and the new order wins when both are', () => {
+    const c = site()
+    const all = ids(c)
+    expect(applyAudience(c, view({ firstSectionIds: [all[4]] })).portfolio.sections[1].id).toBe(all[4])
+    expect(applyAudience(c, view({ firstSectionIds: [all[4]], sectionOrder: [all[7]] })).portfolio.sections[1].id).toBe(all[7])
+  })
+  it('can show a section the main site has switched off, but a hidden one stays hidden', () => {
+    const c = site()
+    const m = c.portfolio.sections.find((s) => s.type === 'mentoring')!
+    expect(m.enabled).toBe(false)
+    expect(applyAudience(c, view({ showSectionIds: [m.id] })).portfolio.sections.find((s) => s.id === m.id)?.enabled).toBe(true)
+    expect(applyAudience(c, view({ showSectionIds: [m.id], hideSectionIds: [m.id] })).portfolio.sections.find((s) => s.id === m.id)?.enabled).toBe(false)
+    expect(c.portfolio.sections.find((s) => s.id === m.id)?.enabled).toBe(false)
+  })
+  it('keeps the order through saving and loading', () => {
+    const c = normalizeContent({ ...baseContent, audiences: [{ id: 'a', slug: 'clients', name: 'Clients', sectionOrder: ['contact', 'work'], showSectionIds: ['mentoring'] }] })
+    expect(c.audiences[0].sectionOrder).toEqual(['contact', 'work'])
+    expect(c.audiences[0].showSectionIds).toEqual(['mentoring'])
+    expect(validateContent(c).ok).toBe(true)
+    expect(normalizeContent({ ...baseContent, audiences: [{ id: 'old', slug: 'old-view', name: 'Old' }] }).audiences[0].sectionOrder).toEqual([])
+  })
+})

@@ -830,9 +830,13 @@ export interface Audience {
   bio: string
   /** A different heading or intro for a section, only in this view. */
   sectionWording: { sectionId: string; heading: string; intro: string }[]
-  /** Sections to bring to the top, right after the hero, in this order. */
+  /** The order of the sections in this view, hero first. Empty means the main site's order. Sections not listed follow, in the main site's order. */
+  sectionOrder: string[]
+  /** Older setting, still honoured when sectionOrder is empty: sections to bring to the top, right after the hero. */
   firstSectionIds: string[]
   hideSectionIds: string[]
+  /** Sections that are switched off on the main site but shown in this view (a section with no content still stays hidden). */
+  showSectionIds: string[]
   /** Individual items to leave out of this view. */
   hide: Record<AudienceHideKey, string[]>
   featuredProjectIds: string[]

@@ -12,7 +12,7 @@ const dig = (o: any, path: string) => path.split('.').filter(Boolean).reduce((v,
 function leaves(fields: Field[], base: string, out: { path: string; kind: string; label: string }[] = []) {
   for (const f of fields as any[]) {
     if (f.kind === 'group') leaves(f.fields, f.key ? `${base}.${f.key}` : base, out)
-    else if (f.kind === 'blocks') continue
+    else if (f.kind === 'blocks' || f.kind === 'viewSections') continue
     else out.push({ path: `${base}.${f.key}`, kind: f.kind, label: f.label })
   }
   return out

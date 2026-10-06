@@ -69,8 +69,7 @@ const defs: EntityDef[] = [
         { kind: 'list', key: 'sectionWording', label: 'Different heading or intro for a section', item: (w: any) => w.heading || w.sectionId || 'Section', make: () => ({ sectionId: '', heading: '', intro: '' }), addLabel: 'Reword a section', fields: [{ kind: 'select', key: 'sectionId', label: 'Section', options: sectionOptions }, { kind: 'text', key: 'heading', label: 'Heading', inherit: (c: SiteContent, sib: (k: string) => unknown) => c.portfolio.sections.find((s) => s.id === sib('sectionId'))?.heading ?? '' }, { kind: 'textarea', key: 'intro', label: 'Intro', inherit: (c: SiteContent, sib: (k: string) => unknown) => c.portfolio.sections.find((s) => s.id === sib('sectionId'))?.intro ?? '' }] },
       ] },
       { kind: 'group', label: 'Which sections show, and in what order', open: true, fields: [
-        { kind: 'multi', key: 'hideSectionIds', label: 'Hide these sections', options: sectionOptions, help: 'Not relevant to this audience? Tick it here. The main site is not affected.' },
-        { kind: 'multi', key: 'firstSectionIds', label: 'Bring these sections to the top (after the hero)', options: sectionOptions, help: 'They appear in the order the site normally uses; tick only what should come first.' },
+        { kind: 'viewSections', label: 'Sections in this view' },
       ] },
       { kind: 'group', label: 'Leave out individual items', open: false, fields: [
         { kind: 'group', key: 'hide', label: 'Hide for this audience', open: true, fields: [

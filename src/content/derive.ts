@@ -100,6 +100,19 @@ export function applyApplication(content: SiteContent, a: ApplicationBundle): Si
   return c
 }
 
+/**
+ * The sections in the order a view shows them: the hero first, then the view's own order, then any section it does not mention
+ * (for example one added later) in the main site's order. Used by the site and by the admin list, so the two always agree.
+ */
+export function orderSections<T extends { id: string; type: string }>(sections: T[], a: Pick<Audience, 'sectionOrder' | 'firstSectionIds'>): T[] {
+  const head = sections.filter((s) => s.type === 'hero')
+  const body = sections.filter((s) => s.type !== 'hero')
+  const want = a.sectionOrder?.length ? a.sectionOrder : a.firstSectionIds ?? []
+  const picked: T[] = []
+  for (const id of want) { const s = body.find((x) => x.id === id); if (s && !picked.includes(s)) picked.push(s) }
+  return [...head, ...picked, ...body.filter((s) => !picked.includes(s))]
+}
+
 export const AUDIENCE_HIDE_KEYS = ['projects', 'services', 'tools', 'results', 'testimonials', 'faqs', 'websites', 'notes'] as const
 
 /**
@@ -120,12 +133,9 @@ export function applyAudience(content: SiteContent, a: Audience): SiteContent {
     if (filled(w.heading)) s.heading = w.heading
     if (filled(w.intro)) s.intro = w.intro
   }
-  if (a.firstSectionIds?.length) {
-    const head = p.sections.filter((s) => s.type === 'hero')
-    const first = a.firstSectionIds.map((id) => p.sections.find((s) => s.id === id && s.type !== 'hero')).filter((s): s is NonNullable<typeof s> => !!s)
-    const rest = p.sections.filter((s) => s.type !== 'hero' && !first.includes(s))
-    p.sections = [...head, ...first, ...rest]
-  }
+  p.sections = orderSections(p.sections, a)
+  // A section the main site has switched off can be switched on for this view. Hiding wins if both are set.
+  for (const s of p.sections) if ((a.showSectionIds ?? []).includes(s.id) && !(a.hideSectionIds ?? []).includes(s.id) && s.type !== 'hero') s.enabled = true
   for (const key of AUDIENCE_HIDE_KEYS) {
     const ids = a.hide?.[key] ?? []
     if (ids.length) (c as unknown as Record<string, { id: string }[]>)[key] = (c[key] as { id: string }[]).filter((x) => !ids.includes(x.id))

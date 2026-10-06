@@ -110,7 +110,7 @@ export const newApplication = (): Application => ({
 })
 export const newAudience = (): Audience => ({
   id: uid('audience'), slug: '', name: '', enabled: true,
-  hero: { label: '', headline: '', supporting: '', intro: '' }, ctas: [], bio: '', sectionWording: [], firstSectionIds: [], hideSectionIds: [],
+  hero: { label: '', headline: '', supporting: '', intro: '' }, ctas: [], bio: '', sectionWording: [], sectionOrder: [], firstSectionIds: [], hideSectionIds: [], showSectionIds: [],
   hide: { projects: [], services: [], tools: [], results: [], testimonials: [], faqs: [], websites: [], notes: [] },
   featuredProjectIds: [], onlyFeatured: false, highlightSkills: [], professional: '', season: '', cvFile: '', cvFilename: '',
 })

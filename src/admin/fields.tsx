@@ -8,6 +8,7 @@ import { getIn, moveItem } from './paths'
 import { useAdmin } from './store'
 import { useMediaPicker, type Accept } from './media'
 import { BlockListEditor } from './blocks'
+import { ViewSectionsField } from './ViewSections'
 
 export type Opt = string | { value: string; label: string }
 type Pred = (obj: any, root: SiteContent) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -40,6 +41,7 @@ export type Field =
   | (Base & { kind: 'refs'; key: string; from: RefSource })
   | (Base & { kind: 'ref'; key: string; from: RefSource })
   | (Base & { kind: 'blocks'; key: string })
+  | (Base & { kind: 'viewSections' })
 
 const optOf = (o: Opt) => (typeof o === 'string' ? { value: o, label: o } : o)
 
@@ -92,6 +94,7 @@ function FieldView({ f, base }: { f: Field; base: string }) {
     case 'refs': case 'ref': return <RefField f={f} base={base} />
     case 'range': return <RangeField f={f} base={base} />
     case 'blocks': return <BlocksField f={f} base={base} />
+    case 'viewSections': return <ViewSectionsField base={base} />
   }
 }
 
