@@ -40,3 +40,15 @@ describe('built-in tools added later', () => {
     expect(normalizeContent(old).tools.map((t) => t.id)).toEqual(['canva'])
   })
 })
+
+describe('logos for the added tools', () => {
+  it('Grok has a built-in mark, found by name', async () => {
+    const { brandFor } = await import('../src/content/brands')
+    for (const name of ['Grok', 'Grok AI', 'grok']) expect(brandFor({ name }).kind).toBe('svg')
+  })
+  it('Higgsfield has none, so it shows a letter tile until its logo is uploaded', async () => {
+    const { brandFor } = await import('../src/content/brands')
+    expect(brandFor({ name: 'Higgsfield' }).kind).toBe('mono')
+    expect(brandFor({ name: 'Higgsfield', logo: '/uploads/higgsfield.png' }).kind).toBe('image')
+  })
+})

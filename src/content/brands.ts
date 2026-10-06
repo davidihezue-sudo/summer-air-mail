@@ -12,7 +12,7 @@ const ALIASES: Record<string, string> = {
   googledocs: 'googledocs', googlesheets: 'googlesheets', googledrive: 'googledrive', zoom: 'zoom', loom: 'loom', miro: 'miro', clickup: 'clickup', substack: 'substack',
   medium: 'medium', spotify: 'spotify', twitch: 'twitch', reddit: 'reddit', whatsapp: 'whatsapp', telegram: 'telegram', discord: 'discord', github: 'github', looker: 'looker',
   lookerstudio: 'looker', elevenlabs: 'elevenlabs', unsplash: 'unsplash', pexels: 'pexels', giphy: 'giphy', obs: 'obsstudio', obsstudio: 'obsstudio',
-  chatgpt: 'chatgpt', chatgpt4: 'chatgpt', chatgpt5: 'chatgpt', openai: 'openai', canva: 'canva', canvapro: 'canva', linkedin: 'linkedin', slack: 'slack',
+  grok: 'grok', grokai: 'grok', xaigrok: 'grok', chatgpt: 'chatgpt', chatgpt4: 'chatgpt', chatgpt5: 'chatgpt', openai: 'openai', canva: 'canva', canvapro: 'canva', linkedin: 'linkedin', slack: 'slack',
   adobe: 'adobe', adobecreativecloud: 'adobecreativecloud', creativecloud: 'adobecreativecloud', adobecc: 'adobecreativecloud', photoshop: 'adobephotoshop', adobephotoshop: 'adobephotoshop',
   premiere: 'adobepremierepro', premierepro: 'adobepremierepro', adobepremierepro: 'adobepremierepro', adobepremiere: 'adobepremierepro', aftereffects: 'adobeaftereffects', adobeaftereffects: 'adobeaftereffects',
   illustrator: 'adobeillustrator', adobeillustrator: 'adobeillustrator', lightroom: 'adobelightroom', adobelightroom: 'adobelightroom',
