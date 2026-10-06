@@ -150,7 +150,7 @@ export const STATS_FIELDS: Field[] = [
 /** The switches for counting visits. They live on the Visit Insights page, next to the numbers they control. */
 export const INSIGHT_FIELDS: Field[] = [
         { kind: 'bool', key: 'enabled', label: 'Count visits on my own server', help: 'Stores daily totals only. No IP address, cookie or profile of any visitor is kept.' },
-        { kind: 'bool', key: 'countOwn', label: 'Count my own visits separately', help: 'Your visits (signed in, on a device you have used for the admin, or from the network you signed in from) are shown apart as "You and home" and never added to outside visitors. Off ignores them completely.' },
+        { kind: 'bool', key: 'countOwn', label: 'Count my own visits separately', help: 'Your visits (signed in, on a device you have used for the admin, from the network you signed in from, or on a device you added with a link) are shown apart as "You and home" and never added to outside visitors. Off ignores them completely.' },
         { kind: 'bool', key: 'respectDoNotTrack', label: 'Skip visitors who send Do Not Track' }, { kind: 'bool', key: 'requireConsent', label: 'Count only visitors who accepted cookies and analytics' },
         { kind: 'number', key: 'retentionDays', label: 'Keep daily totals for (days)', min: 7, max: 3650, nullable: false },
 ]

@@ -373,3 +373,13 @@ a.abtn--primary { color: var(--a-primary-text); }
 .afontpick__opt svg { margin-left: auto; align-self: center; flex: none; color: var(--a-primary); }
 .afontpick__opt.is-active { background: #eef3f6; }
 .afontpick__opt.is-on .afontpick__name { text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 4px; }
+
+/* Household devices and per-view counts in Visit Insights */
+.ahousehold { border-top: 1px solid var(--a-line); margin-top: 1rem; padding-top: 1rem; display: grid; gap: .7rem; }
+.ahousehold__title { margin: 0; font-size: 1rem; }
+.ahousehold__list { margin: 0; padding-left: 1.2rem; display: grid; gap: .35rem; font-size: .92rem; }
+.ahousehold__link { display: flex; flex-wrap: wrap; gap: 1rem; align-items: flex-start; padding: .9rem; border: 1px dashed var(--a-line); border-radius: 10px; background: #fff; }
+.ahousehold__link input { width: 100%; min-width: 220px; margin: .3rem 0; }
+.arow-item--stack { flex-wrap: wrap; row-gap: .25rem; }
+.arow-item--stack > .ahelp { flex: 1 1 100%; }
+.ahome { color: #5d6a72; font-style: italic; }

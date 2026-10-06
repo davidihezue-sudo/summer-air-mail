@@ -6,7 +6,7 @@ import { ContentProvider } from './hooks/useContent'
 import { ThemeProvider, type ThemePreview } from './hooks/useTheme'
 import { ConsentBanner } from './components/layout/ConsentBanner'
 import { useAnalytics } from './utils/analytics'
-import { configureTracking, track } from './utils/track'
+import { configureTracking, setVia, track } from './utils/track'
 import { LangProvider } from './i18n/useT'
 import { DomTranslate } from './i18n/DomTranslate'
 import { parseRoute, isPreviewMode } from './utils/route'
@@ -16,6 +16,7 @@ import { NotFound } from './pages/NotFound'
 // Pages other than the home page load only when someone goes to them.
 const ProfilePage = lazy(() => import('./pages/ProfilePage').then((m) => ({ default: m.ProfilePage })))
 const CardPage = lazy(() => import('./pages/CardPage').then((m) => ({ default: m.CardPage })))
+const OwnDevicePage = lazy(() => import('./pages/OwnDevicePage').then((m) => ({ default: m.OwnDevicePage })))
 const NotePage = lazy(() => import('./pages/NotePage').then((m) => ({ default: m.NotePage })))
 const Maintenance = lazy(() => import('./pages/Maintenance').then((m) => ({ default: m.Maintenance })))
 import type { SeasonName, SiteContent } from './content/types'
@@ -110,7 +111,10 @@ export default function Root({ initial }: { initial: LoadedContent }) {
   }, [pack, raw.portfolio.site.locale])
 
   useEffect(() => { configureTracking(raw.portfolio.insights, isPreview) }, [raw.portfolio.insights, isPreview])
-  useEffect(() => { track('view') }, [path])
+  // A visit that starts in an audience view or application link is remembered for this tab, so what the visitor does next is credited to it.
+  useEffect(() => { if (route.kind === 'application' && (audience || appState.status === 'ok')) setVia(route.slug) }, [route, audience, appState.status])
+  // The page behind the "add this device" link is not a visit.
+  useEffect(() => { if (route.kind !== 'own') track('view') }, [path]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const owner = !!document.querySelector('meta[name="sam-owner"]')
   const maintenance = content.portfolio.maintenance.enabled && !owner && !isPreview && initial.source !== 'draft'
@@ -118,6 +122,7 @@ export default function Root({ initial }: { initial: LoadedContent }) {
   let page
   if (maintenance) page = <Maintenance />
   else if (route.kind === 'profile' && content.portfolio.profilePage.enabled) page = <ProfilePage />
+  else if (route.kind === 'own') page = <OwnDevicePage token={route.token} />
   else if (route.kind === 'card' && content.portfolio.card.enabled) page = <CardPage />
   else if (route.kind === 'note') page = <NotePage slug={route.slug} />
   else if (route.kind === 'notfound' || (route.kind === 'profile') || route.kind === 'card' || (route.kind === 'application' && !audience && appState.status === 'missing')) page = <NotFound />

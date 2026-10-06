@@ -92,6 +92,10 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   app.disable('x-powered-by')
   if (env.TRUST_PROXY) app.set('trust proxy', Number(env.TRUST_PROXY) || 1)
 
+  /** A household device: the browser carries the sealed cookie the server gave it. */
+  const MINE = 'sam_mine'
+  const isMineReq = (req) => insights.isMine(parseCookies(req.headers.cookie)[MINE])
+  const setMine = (req, res) => res.cookie(MINE, insights.mineValue(), { httpOnly: true, sameSite: 'lax', secure: secureCookie(req), maxAge: 365 * 864e5, path: '/' })
   const secureCookie = (req) => env.COOKIE_SECURE === 'true' || req.secure || req.headers['x-forwarded-proto'] === 'https'
 
   app.use(compression())
@@ -185,9 +189,22 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
     const b = req.body ?? {}
     // The owner's own visits (a signed-in browser, or the network they signed in from) are counted apart, or dropped if the owner prefers.
     const countOwn = i.countOwn !== false
-    const own = b.own === true || insights.isHome(req.ip)
+    const own = b.own === true || insights.isHome(req.ip) || isMineReq(req)
     if (own && !countOwn) return
-    await insights.record({ type: b.type, path: b.path, ref: b.ref, name: b.name, ip: req.ip, ua: req.headers['user-agent'] ?? '', own })
+    // A visit that started in one of the audience views or links is credited to it, but only for a name that really exists.
+    const pubc = published()
+    const via = typeof b.via === 'string' && ((pubc?.audiences ?? []).some((a) => a.enabled !== false && String(a.slug).toLowerCase() === b.via.toLowerCase()) || (pubc?.applications ?? []).some((a) => a.enabled !== false && a.slug === b.via)) ? b.via : ''
+    await insights.record({ type: b.type, path: b.path, ref: b.ref, name: b.name, ip: req.ip, ua: req.headers['user-agent'] ?? '', own, via })
+  })
+
+  /** Adds the device that opens a one-time link from the admin. It then counts as yours on any network. */
+  const claimLimit = createLimiter({ max: 20, windowMs: 3600 * 1000 })
+  app.post('/api/own/claim', publicJson, async (req, res) => {
+    res.set('Cache-Control', 'no-store')
+    if (!claimLimit(req.ip ?? 'x')) return res.status(429).json({ error: 'Too many tries. Try again later.' })
+    if (!(await insights.claim(req.body?.token))) return res.status(400).json({ error: 'This link has already been used or has expired. Make a new one in Visit Insights.' })
+    setMine(req, res)
+    res.json({ ok: true })
   })
 
   /** A tailored application link. Only someone who knows the slug can fetch it; it is never in the public JSON. */
@@ -212,7 +229,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
       : type === 'note' ? `/notes/${encodeURIComponent(value)}`
       : type === 'application' ? `/for/${encodeURIComponent(value)}`
       : type === 'profile' ? '/profile' : '/'
-    const own = insights.isHome(req.ip)
+    const own = insights.isHome(req.ip) || isMineReq(req)
     if (!(own && published()?.portfolio?.insights?.countOwn === false)) void insights.record({ type: 'share', name: `/go/${l.slug}`, ip: req.ip, ua: req.headers['user-agent'] ?? '', own }).catch(() => {})
     res.set('Cache-Control', 'no-store').redirect(302, to)
   })
@@ -276,7 +293,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
 
   admin.get('/session', async (req, res) => {
     const me = auth.check(tokenOf(req))
-    if (me) void insights.markHome(req.ip)
+    if (me) { void insights.markHome(req.ip); if (!isMineReq(req)) setMine(req, res) }
     res.json({ configured: await auth.configured(), authenticated: !!me, username: me?.username ?? '', role: me?.role ?? '', canPublish: me ? can(me, 'publish') : false, storage: kv.kind })
   })
 
@@ -292,6 +309,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
       return res.status(401).json({ error: 'Incorrect username or password.' })
     }
     res.cookie(COOKIE, r.token, { httpOnly: true, sameSite: 'strict', secure: secureCookie(req), maxAge: r.maxAge * 1000, path: '/' })
+    setMine(req, res)
     void insights.markHome(req.ip)
     res.json({ ok: true, role: r.role })
   })
@@ -422,6 +440,8 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
   admin.get('/subscribers.csv', (_req, res) => res.type('text/csv').set('Content-Disposition', 'attachment; filename="subscribers.csv"').send(subscribers.csv()))
   admin.delete('/subscribers/:id', async (req, res) => ((await subscribers.remove(req.params.id)) ? res.json({ ok: true }) : res.status(404).json({ error: 'Not found.' })))
   admin.get('/insights', (req, res) => res.json(insights.summary(Math.max(7, Math.min(365, Number(req.query.range) || 30)))))
+  admin.post('/own-link', ownerOnly, (_req, res) => { const l = insights.newLink(); res.json({ path: `/own/${l.token}`, expiresAt: l.expiresAt }) })
+  admin.delete('/insights/devices', ownerOnly, async (_req, res) => { await insights.forgetDevices(); res.json({ ok: true }) })
   admin.delete('/insights/home', ownerOnly, async (_req, res) => { await insights.forgetHome(); res.json({ ok: true }) })
 
   /* ---------- undo for a single item ---------- */
@@ -604,7 +624,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
             const a = (c.applications ?? []).find((x) => x.slug === want)
             const view = (c.audiences ?? []).find((x) => x.enabled !== false && String(x.slug).toLowerCase() === want.toLowerCase())
             if (!view && (!a || a.enabled === false || (a.expiresAt && Date.parse(a.expiresAt) + 864e5 < Date.now()))) status = 404
-          } else if (req.path !== '/' && !seo && !/^\/(go|feed\.xml)/.test(req.path)) status = 404
+          } else if (/^\/own\/[^/]+\/?$/.test(req.path)) { noindex.push('own') } else if (req.path !== '/' && !seo && !/^\/(go|feed\.xml)/.test(req.path)) status = 404
           if (p.maintenance?.enabled && !owner && p.maintenance.status503) status = 503
         }
         let html = headP ? injectHead(await template(), headP) : await template()
@@ -623,6 +643,7 @@ export async function createApp({ dataDir, distDir, env = process.env, deps = {}
         res.set('Content-Security-Policy', p ? buildCsp(p) : await fallbackCsp())
         if (isAdmin || noindex.length) res.set({ 'Cache-Control': 'no-store', 'X-Robots-Tag': 'noindex, nofollow' })
         else res.set('Cache-Control', 'no-cache')
+        if (noindex.includes('own')) res.set('Referrer-Policy', 'no-referrer') // the link carries a one-time code
         res.status(status).type('html').send(html)
       } catch {
         res.status(500).send('Site is not built. Run npm run build.')

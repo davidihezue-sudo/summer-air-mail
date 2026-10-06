@@ -60,6 +60,7 @@ export const BUILTIN_STRINGS: string[] = [
   "Free to download",
   "Fresh from the garden",
   "From insight to impact",
+  "Go to the site",
   "Goal",
   "Great tip",
   "Hiring, collaborating or just curious about what social-first marketing could do for your brand? Send a note and I will reply personally.",

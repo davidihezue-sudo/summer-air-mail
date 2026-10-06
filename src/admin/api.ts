@@ -46,8 +46,12 @@ export interface Subscriber { id: string; at: string; email: string; consent: st
 export interface InsightsSummary {
   views: number; visitors: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; pathLast: Record<string, string>; refs: Record<string, number>; events: Record<string, number>; items: Record<string, Record<string, number>>
   /** Visits by the owner: a signed-in browser, or the home network. Kept apart from everyone else. */
-  own: { views: number; visitors: number; daysSeen: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number> }
+  own: { views: number; visitors: number; daysSeen: number; series: { day: string; views: number; visitors: number }[]; paths: Record<string, number>; via: Record<string, { views: number; events: Record<string, number> }> }
+  /** What outside visitors did during a visit that started in an audience view or application link, by its address. */
+  via: Record<string, { views: number; visitors: number; events: Record<string, number> }>
   homeNetworks: number
+  /** Devices added with a one-time link. */
+  devices: { added: number; last: string }
 }
 export interface ServerSettings { notifyEmail: string; notifyOnEnquiry: boolean; notifyOnSubscriber: boolean; enquiryRetentionDays: number; editorsCanPublish: boolean; backups: { enabled: boolean; everyHours: number; keep: number; s3: boolean }; digest: { enabled: boolean; day: number; hour: number; timezone: string; lastSent: string } }
 export interface EnvInfo { dataDir?: string; emailConfigured: boolean; webhookConfigured: boolean; s3Configured: boolean; storage: string }
@@ -110,6 +114,8 @@ export const api = {
   subscribers: () => request<{ items: Subscriber[] }>('/subscribers'),
   deleteSubscriber: (id: string) => request<{ ok: true }>(`/subscribers/${id}`, { method: 'DELETE' }),
   insights: (range: number) => request<InsightsSummary>(`/insights?range=${range}`),
+  ownLink: () => request<{ path: string; expiresAt: string }>('/own-link', { method: 'POST' }),
+  forgetDevices: () => request<{ ok: boolean }>('/insights/devices', { method: 'DELETE' }),
   forgetHome: () => request<{ ok: boolean }>('/insights/home', { method: 'DELETE' }),
   itemVersions: (collection: string, id: string) => request<{ versions: { index: number; at: string; title: string }[] }>(`/history/item/${collection}/${id}`),
   restoreItem: (collection: string, id: string, index: number) => request<{ draft: SiteContent; rev: number } & Status>(`/history/item/${collection}/${id}/restore`, { method: 'POST', body: JSON.stringify({ index }) }),

@@ -1,6 +1,6 @@
 // Small JSON-file collections for things that are not site content: enquiries, subscribers,
 // insights, per-item snapshots and server settings. Atomic writes, one writer queue each.
-import { createHash, randomBytes } from 'node:crypto'
+import { createHash, createHmac, randomBytes, timingSafeEqual } from 'node:crypto'
 import { asKv } from './kv.mjs'
 
 function jsonFile(kvOrDir, name, initial) {
@@ -116,9 +116,20 @@ const EVENTS = new Set(['view', 'project', 'cta', 'download', 'contact', 'note',
 const clip = (s, n = 120) => String(s ?? '').slice(0, n)
 const HOME_DAYS = 90
 const HOME_MAX = 5
+const VIA_MAX = 60 // distinct views or links recorded per day, so nobody can fill the file with made-up names
+const LINK_MINUTES = 15
+
+/** The day's record for one audience view or application link, or nothing when the name is missing or the day is full. */
+function viaSlot(rec, via) {
+  if (!/^[A-Za-z0-9][A-Za-z0-9-]{1,79}$/.test(via)) return null
+  const all = (rec.via ??= {})
+  if (!all[via] && Object.keys(all).length >= VIA_MAX) return null
+  return (all[via] ??= { views: 0, visitors: 0, events: {} })
+}
 
 export function createInsights(dir, { salt = randomBytes(16).toString('hex') } = {}) {
-  const f = jsonFile(dir, 'insights.json', { days: {}, home: {}, homeSalt: '' })
+  const f = jsonFile(dir, 'insights.json', { days: {}, home: {}, homeSalt: '', mineSecret: '', claims: 0, lastClaim: '' })
+  const links = new Map() // one-time links for adding another device, held in memory and gone after use or a restart
   const seen = new Map() // day -> Set of hashes, memory only and dropped when the day ends
   const day = (d = new Date()) => d.toISOString().slice(0, 10)
   const bump = (o, k) => { if (k) o[k] = (o[k] ?? 0) + 1 }
@@ -128,6 +139,7 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
     async init() {
       await f.init()
       if (!f.get().homeSalt) { f.get().homeSalt = randomBytes(16).toString('hex'); await f.save() }
+      if (!f.get().mineSecret) { f.get().mineSecret = randomBytes(24).toString('hex'); await f.save() }
     },
     flush: f.flush,
     /** Remember the network an admin signed in from, so later visits from it count as the owner's own. Keeps the five most recent. */
@@ -149,15 +161,52 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
       return !!last && last >= day(new Date(now.getTime() - HOME_DAYS * 864e5))
     },
     homeCount: () => Object.keys(f.get().home).length,
+    /**
+     * Household devices. A device you add gets a sealed cookie from the server, so it keeps counting as yours on any network (a phone on
+     * mobile data, say) and survives Safari clearing a page's own storage. The cookie says nothing about who you are.
+     */
+    mineValue: () => createHmac('sha256', f.get().mineSecret).update('mine').digest('hex').slice(0, 40),
+    isMine(value) {
+      if (typeof value !== 'string' || value.length !== 40) return false
+      const want = createHmac('sha256', f.get().mineSecret).update('mine').digest('hex').slice(0, 40)
+      return timingSafeEqual(Buffer.from(value), Buffer.from(want))
+    },
+    /** A one-time link, good for 15 minutes, that adds the device that opens it. */
+    newLink(now = new Date()) {
+      for (const [k, t] of links) if (t < now.getTime()) links.delete(k)
+      const token = randomBytes(24).toString('base64url')
+      const expires = now.getTime() + LINK_MINUTES * 60000
+      links.set(createHash('sha256').update(token).digest('hex'), expires)
+      return { token, expiresAt: new Date(expires).toISOString() }
+    },
+    /** Uses up a link. True once, and only while it is still fresh. */
+    async claim(token, now = new Date()) {
+      if (typeof token !== 'string' || token.length < 20 || token.length > 80) return false
+      const k = createHash('sha256').update(token).digest('hex')
+      const t = links.get(k)
+      if (!t) return false
+      links.delete(k)
+      if (t < now.getTime()) return false
+      f.get().claims = (f.get().claims ?? 0) + 1
+      f.get().lastClaim = day(now)
+      await f.save()
+      return true
+    },
+    devices: () => ({ added: f.get().claims ?? 0, last: f.get().lastClaim ?? '' }),
+    /** Stops every added device counting as yours. Each can be added again with a new link. */
+    async forgetDevices() { f.get().mineSecret = randomBytes(24).toString('hex'); f.get().claims = 0; f.get().lastClaim = ''; links.clear(); await f.save() },
     async forgetHome() { f.get().home = {}; await f.save() },
     /** No IP or user agent is stored. The visitor hash uses a salt that changes daily and is never written to disk. */
-    async record({ type, path = '', ref = '', name = '', ip = '', ua = '', own = false }, now = new Date()) {
+    async record({ type, path = '', ref = '', name = '', ip = '', ua = '', own = false, via = '' }, now = new Date()) {
       if (!EVENTS.has(type)) return false
       const d = day(now)
-      for (const k of seen.keys()) if (k !== d && !k.startsWith(`own|${d}`)) seen.delete(k)
+      for (const k of seen.keys()) if (k !== d && !k.startsWith(`own|${d}`) && !k.startsWith(`via|${d}|`)) seen.delete(k)
       if (own) {
         // The owner and the home network are counted apart, so outside visitors are never inflated by checking the site.
         const o = (f.get().days[d] ??= { views: 0, visitors: 0, paths: {}, refs: {}, events: {}, items: {} }).own ??= { views: 0, visitors: 0, paths: {}, events: 0 }
+        // What the household did during a visit that started in one of the audience views or links, kept apart from outsiders.
+        const ov = viaSlot(o, via)
+        if (ov) { if (type === 'view') ov.views++; else bump(ov.events, type) }
         if (type === 'view') {
           o.views++
           const h = createHash('sha256').update(`${salt}|${d}|${ip}|${ua}`).digest('hex').slice(0, 16)
@@ -170,15 +219,23 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
         return true
       }
       const rec = (f.get().days[d] ??= { views: 0, visitors: 0, paths: {}, refs: {}, events: {}, items: {} })
+      const rv = viaSlot(rec, via)
       if (type === 'view') {
         rec.views++
         const h = createHash('sha256').update(`${salt}|${d}|${ip}|${ua}`).digest('hex').slice(0, 16)
         const s = seen.get(d) ?? new Set(); seen.set(d, s)
         if (!s.has(h)) { s.add(h); rec.visitors++ }
+        if (rv) {
+          rv.views++
+          const vk = `via|${d}|${via}`
+          const vs = seen.get(vk) ?? new Set(); seen.set(vk, vs)
+          if (!vs.has(h)) { vs.add(h); rv.visitors++ }
+        }
         bump(rec.paths, clip(path, 80) || '/')
         bump(rec.refs, clip(ref, 80) || 'direct')
       } else {
         bump(rec.events, type)
+        if (rv) bump(rv.events, type)
         if (name) bump((rec.items[type] ??= {}), clip(name, 80))
       }
       await f.save()
@@ -193,7 +250,7 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
     },
     days: () => f.get().days,
     summary(range = 30, now = new Date()) {
-      const out = { views: 0, visitors: 0, series: [], paths: {}, pathLast: {}, refs: {}, events: {}, items: {}, own: { views: 0, visitors: 0, daysSeen: 0, series: [], paths: {} }, homeNetworks: Object.keys(f.get().home).length }
+      const out = { views: 0, visitors: 0, series: [], paths: {}, pathLast: {}, refs: {}, events: {}, items: {}, own: { views: 0, visitors: 0, daysSeen: 0, series: [], paths: {}, via: {} }, via: {}, homeNetworks: Object.keys(f.get().home).length, devices: { added: f.get().claims ?? 0, last: f.get().lastClaim ?? '' } }
       for (let i = range - 1; i >= 0; i--) {
         const d = day(new Date(now.getTime() - i * 864e5))
         const r = f.get().days[d]
@@ -204,8 +261,10 @@ export function createInsights(dir, { salt = randomBytes(16).toString('hex') } =
           out.own.views += r.own.views; out.own.visitors += r.own.visitors
           if (r.own.views) out.own.daysSeen++
           for (const [k, v] of Object.entries(r.own.paths ?? {})) out.own.paths[k] = (out.own.paths[k] ?? 0) + v
+          for (const [k, v] of Object.entries(r.own.via ?? {})) { const t = (out.own.via[k] ??= { views: 0, events: {} }); t.views += v.views; for (const [e, n] of Object.entries(v.events ?? {})) t.events[e] = (t.events[e] ?? 0) + n }
         }
         if (!r) continue
+        for (const [k, v] of Object.entries(r.via ?? {})) { const t = (out.via[k] ??= { views: 0, visitors: 0, events: {} }); t.views += v.views; t.visitors += v.visitors; for (const [e, n] of Object.entries(v.events ?? {})) t.events[e] = (t.events[e] ?? 0) + n }
         out.views += r.views; out.visitors += r.visitors
         for (const [k, v] of Object.entries(r.paths)) out.paths[k] = (out.paths[k] ?? 0) + v
         for (const [k, v] of Object.entries(r.refs)) out.refs[k] = (out.refs[k] ?? 0) + v

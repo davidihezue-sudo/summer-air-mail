@@ -5,6 +5,7 @@ export type Route =
   | { kind: 'card' }
   | { kind: 'note'; slug: string }
   | { kind: 'application'; slug: string }
+  | { kind: 'own'; token: string }
   | { kind: 'notfound' }
 
 const dec = (s: string) => { try { return decodeURIComponent(s) } catch { return s } }
@@ -17,6 +18,7 @@ export function parseRoute(path: string): Route {
   if (p === '/profile') return { kind: 'profile' }
   if (p === '/card') return { kind: 'card' }
   if ((m = /^\/notes\/([^/]+)$/.exec(p))) return { kind: 'note', slug: dec(m[1]) }
+  if ((m = /^\/own\/([^/]+)$/.exec(p))) return { kind: 'own', token: dec(m[1]) }
   if ((m = /^\/for\/([^/]+)$/.exec(p))) return { kind: 'application', slug: dec(m[1]) }
   return { kind: 'notfound' }
 }
