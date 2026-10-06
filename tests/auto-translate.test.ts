@@ -200,3 +200,30 @@ describe('translations typed in by hand', () => {
     expect(c.portfolio.i18n.translateEmail).toBe('')
   })
 })
+
+describe('the list of wording built into the page', () => {
+  it('matches the page code, so nothing new is left out of translation', async () => {
+    const { extractBuiltinStrings } = await import('../scripts/gen-ui-strings.mjs')
+    const { UI_DEFAULTS } = await import('../src/i18n/ui')
+    const { BUILTIN_STRINGS } = await import('../src/i18n/builtin')
+    const fresh = extractBuiltinStrings(process.cwd(), Object.values(UI_DEFAULTS))
+    expect(BUILTIN_STRINGS, 'Run: node scripts/gen-ui-strings.mjs').toEqual(fresh)
+  })
+  it('includes section headings, filters, form labels and season titles, and no code', async () => {
+    const { BUILTIN_STRINGS } = await import('../src/i18n/builtin')
+    for (const s of ['Recent work', 'Questions, answered', 'Scroll', 'Clear filters', 'Your recommendation', 'The toolkit', 'Pinned to the board']) expect(BUILTIN_STRINGS).toContain(s)
+    for (const s of BUILTIN_STRINGS) { expect(s).not.toMatch(/[{}<>=]|className|=>/); expect(s.length).toBeLessThanOrEqual(160) }
+  })
+})
+
+describe('chips and headline lines are translatable', () => {
+  it('includes the hero headline lines and the "available for" chips, but not the enquiry types the form depends on', () => {
+    const c = normalizeContent(baseContent)
+    c.portfolio.profile.roles = ['Social Media Strategist', 'Brand Storyteller']
+    c.portfolio.contact.availableFor = ['Full-time roles']
+    c.portfolio.contact.workModes = ['Hybrid']
+    const paths = translatableFields(c).map((x) => x.path)
+    expect(paths).toEqual(expect.arrayContaining(['portfolio.profile.roles.0', 'portfolio.profile.roles.1', 'portfolio.contact.availableFor.0', 'portfolio.contact.workModes.0']))
+    expect(paths.some((p) => p.startsWith('portfolio.contact.enquiryTypes'))).toBe(false)
+  })
+})

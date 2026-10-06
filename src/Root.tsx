@@ -8,6 +8,7 @@ import { ConsentBanner } from './components/layout/ConsentBanner'
 import { useAnalytics } from './utils/analytics'
 import { configureTracking, track } from './utils/track'
 import { LangProvider } from './i18n/useT'
+import { DomTranslate } from './i18n/DomTranslate'
 import { parseRoute, isPreviewMode } from './utils/route'
 import { Suspense, lazy } from 'react'
 import { NotFound } from './pages/NotFound'
@@ -127,6 +128,7 @@ export default function Root({ initial }: { initial: LoadedContent }) {
     <ContentProvider content={content}>
       <LangProvider pack={pack} languages={languages} lang={pack ? lang : ''} setLang={setLang}>
         <ThemeProvider preview={preview}>
+          <DomTranslate ui={pack?.ui} />
           <Shell source={initial.source} preview={isPreview} greeting={appState.status === 'ok' && appState.app.greeting.enabled ? appState.app.greeting.text : ''}>
             <Suspense fallback={null}>{page}</Suspense>
           </Shell>

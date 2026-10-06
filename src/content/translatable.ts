@@ -38,7 +38,7 @@ const COLLECTIONS: Record<string, Rule> = {
 /** The parts of the portfolio settings that visitors read, with the words that may be translated in each. */
 const BRANCHES: Record<string, string[]> = {
   hero: ['label', 'headline', 'supporting', 'intro'],
-  profile: ['title', 'tagline', 'intro', 'availability', 'bio'],
+  profile: ['title', 'tagline', 'intro', 'availability', 'bio', 'roles'],
   recruiter: ['competencies', 'industries', 'achievements', 'title', 'place', 'role', 'summary'],
   mentoring: ['heading', 'overview', 'topics', 'outcomes', 'format'],
   strategy: ['heading', 'intro', 'label', 'hint', 'title', 'description', 'items', 'text'],
@@ -47,7 +47,7 @@ const BRANCHES: Record<string, string[]> = {
   announcement: ['text'],
   booking: ['label'],
   newsletter: ['heading', 'text', 'buttonLabel', 'consentText', 'successMessage'],
-  contact: ['successMessage'],
+  contact: ['successMessage', 'availableFor', 'workModes'],
   card: ['note'],
   endorsements: ['heading', 'text', 'buttonLabel', 'consentText', 'successMessage'],
   publicStats: ['note'],
@@ -56,7 +56,7 @@ const BRANCHES: Record<string, string[]> = {
   seo: ['title', 'description'],
 }
 
-const ARRAY_OF_TEXT = new Set(['bio', 'topics', 'outcomes', 'competencies', 'industries', 'achievements', 'items', 'responsibilities', 'personal', 'team', 'lessons', 'execution', 'distribution', 'deliverables', 'objectives', 'services', 'analytics', 'advertising'])
+const ARRAY_OF_TEXT = new Set(['bio', 'roles', 'availableFor', 'workModes', 'topics', 'outcomes', 'competencies', 'industries', 'achievements', 'items', 'responsibilities', 'personal', 'team', 'lessons', 'execution', 'distribution', 'deliverables', 'objectives', 'services', 'analytics', 'advertising'])
 const NOT_TEXT = /^(https?:|mailto:|tel:|\/|#)|^[\d\s.,:;%+\-/$€£#@]*$/
 const wanted = (v: unknown): v is string => typeof v === 'string' && v.trim().length >= 1 && !NOT_TEXT.test(v.trim())
 

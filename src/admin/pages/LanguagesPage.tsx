@@ -5,6 +5,7 @@ import { Card, Confirm, PageHead, Switch } from '../ui'
 import { newLanguage } from '../../content/factories'
 import { translatableFields } from '../../content/derive'
 import { UI_DEFAULTS } from '../../i18n/ui'
+import { BUILTIN_STRINGS } from '../../i18n/builtin'
 import { translateFields, type Engine, type TranslateReport } from '../../utils/translate'
 import { baseLang, chromeAvailability, chromeEngine, onlineEngine, type EngineChoice } from '../translateEngines'
 
@@ -37,9 +38,11 @@ export function LanguagesPage() {
     if (key.startsWith('ui:')) l.ui[key.slice(3)] = value; else l.text[key.slice(5)] = value
     l.auto = (l.auto ?? []).filter((k) => k !== key)
   })
+  // Fixed wording: the named buttons and labels, then the headings, filters and sentences written into the page (keyed by their English text).
+  const uiRows = useMemo<[string, string][]>(() => [...(Object.entries(UI_DEFAULTS) as [string, string][]), ...BUILTIN_STRINGS.map((x): [string, string] => [x, x])], [])
   const todo = useMemo(() => (lang ? fields.filter((f) => !(lang.text[f.path] ?? '').trim()) : []), [fields, lang])
-  const uiTodo = useMemo(() => (lang ? Object.entries(UI_DEFAULTS).filter(([k]) => !(lang.ui[k] ?? '').trim()) : []), [lang])
-  const chars = (redo ? fields.reduce((n, f) => n + f.value.length, 0) + Object.values(UI_DEFAULTS).reduce((n, v) => n + v.length, 0) : todo.reduce((n, f) => n + f.value.length, 0) + uiTodo.reduce((n, [, v]) => n + v.length, 0))
+  const uiTodo = useMemo(() => (lang ? uiRows.filter(([k]) => !(lang.ui[k] ?? '').trim()) : []), [lang, uiRows])
+  const chars = (redo ? fields.reduce((n, f) => n + f.value.length, 0) + uiRows.reduce((n, [, v]) => n + v.length, 0) : todo.reduce((n, f) => n + f.value.length, 0) + uiTodo.reduce((n, [, v]) => n + v.length, 0))
   const chromeOk = chrome === 'available' || chrome === 'downloadable' || chrome === 'downloading'
   const useChrome = choice === 'chrome' || (choice === 'auto' && chromeOk)
 
@@ -47,7 +50,7 @@ export function LanguagesPage() {
     if (!lang || !ready) return
     setResult(null); setRedo(false)
     const ctl = new AbortController(); stop.current = ctl
-    const ui = (replace ? Object.entries(UI_DEFAULTS) : uiTodo).map(([k, v]) => ({ path: `ui:${k}`, value: v as string }))
+    const ui = (replace ? uiRows : uiTodo).map(([k, v]) => ({ path: `ui:${k}`, value: v }))
     const text = (replace ? fields : todo).map((f) => ({ path: `text:${f.path}`, value: f.value }))
     const all = [...ui, ...text]
     if (!all.length) { setResult({ ok: true, text: 'Nothing to translate: every box already has a translation.' }); return }
@@ -133,11 +136,14 @@ export function LanguagesPage() {
                   <button role="tab" aria-selected={tab === 'ui'} type="button" className={`achip ${tab === 'ui' ? 'is-on' : ''}`} onClick={() => setTab('ui')}>Buttons and labels</button>
                 </div>
                 {tab === 'ui' ? (
+                  <>
+                  <p className="ahelp">The first rows are named buttons. The rest is wording built into the page (headings, filters, form labels, sentences), listed by its English text.</p>
                   <div className="atable-wrap"><table className="atable atable--stack"><thead><tr><th>English</th><th>{lang.label || lang.code}</th></tr></thead><tbody>
-                    {Object.entries(UI_DEFAULTS).map(([k, en]) => (
+                    {uiRows.map(([k, en]) => (
                       <tr key={k}><td>{en}</td><td><input aria-label={`${lang.label} for "${en}"`} value={lang.ui[k] ?? ''} onChange={(e) => typed(`ui:${k}`, e.target.value)} />{isAuto(`ui:${k}`) && <span className="atrans__badge">machine translated</span>}</td></tr>
                     ))}
                   </tbody></table></div>
+                  </>
                 ) : (
                   <>
                     <label className="afield"><span className="alabel">Show</span>
