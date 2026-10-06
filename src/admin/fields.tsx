@@ -13,11 +13,18 @@ export type Opt = string | { value: string; label: string }
 type Pred = (obj: any, root: SiteContent) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
 export type RefSource = 'projects' | 'services' | 'tools' | 'aiSkills' | 'results' | 'contentItems' | 'screenshots' | 'looks' | 'notes' | 'testimonials' | 'faqs' | 'websites' | 'audiences'
 
+/** Reads a sibling field of the same item, for fields whose main-site value depends on another choice. */
+type Sibling = (key: string) => unknown
+/**
+ * For a field that can override the main site (a view or an application link): what the main site says here. When the field is
+ * empty the main site's words are used; the control under the field shows them and lets the owner start from them and edit.
+ */
+type Inherit = (root: SiteContent, sibling: Sibling) => string
 interface Base { label: string; help?: string; showIf?: Pred }
 export type Field =
-  | (Base & { kind: 'text' | 'url' | 'email' | 'tel' | 'date'; key: string; placeholder?: string; maxLength?: number })
+  | (Base & { kind: 'text' | 'url' | 'email' | 'tel' | 'date'; key: string; placeholder?: string; maxLength?: number; inherit?: Inherit })
   | (Base & { kind: 'number'; key: string; min?: number; max?: number; step?: number; nullable?: boolean })
-  | (Base & { kind: 'textarea' | 'rich'; key: string; rows?: number; placeholder?: string })
+  | (Base & { kind: 'textarea' | 'rich'; key: string; rows?: number; placeholder?: string; inherit?: Inherit })
   | (Base & { kind: 'range'; key: string; min: number; max: number; step?: number; unit?: string })
   | (Base & { kind: 'bool'; key: string })
   | (Base & { kind: 'select'; key: string; options: Opt[] | ((root: SiteContent) => Opt[]); custom?: boolean })
@@ -29,7 +36,7 @@ export type Field =
   | (Base & { kind: 'tone'; key: string })
   | (Base & { kind: 'icon'; key: string })
   | (Base & { kind: 'group'; key?: string; fields: Field[]; open?: boolean })
-  | (Base & { kind: 'list'; key: string; fields: Field[]; make: () => unknown; item: (it: any, i: number) => string; addLabel?: string }) // eslint-disable-line @typescript-eslint/no-explicit-any
+  | (Base & { kind: 'list'; key: string; fields: Field[]; make: () => unknown; item: (it: any, i: number) => string; addLabel?: string; seed?: (root: SiteContent) => unknown[] }) // eslint-disable-line @typescript-eslint/no-explicit-any
   | (Base & { kind: 'refs'; key: string; from: RefSource })
   | (Base & { kind: 'ref'; key: string; from: RefSource })
   | (Base & { kind: 'blocks'; key: string })
@@ -88,12 +95,34 @@ function FieldView({ f, base }: { f: Field; base: string }) {
   }
 }
 
+/** Under a field that can override the main site: says which text is in use and offers to copy the main site's words in to edit. */
+function InheritBar({ main, value, path, set }: { main: string; value: string; path: string; set: (p: string, v: string) => void }) {
+  const custom = value.trim() !== ''
+  return (
+    <span className="ainherit">
+      {custom ? (
+        <>
+          <span className="ahelp">Written just for this view.</span>
+          <button type="button" className="abtn abtn--ghost" onClick={() => set(path, '')}>Use the main site's text instead</button>
+        </>
+      ) : main.trim() ? (
+        <>
+          <span className="ahelp">Using the main site's text as it is.</span>
+          <button type="button" className="abtn abtn--ghost" onClick={() => set(path, main)}>Start from the main site's text and edit it</button>
+        </>
+      ) : <span className="ahelp">Using the main site's usual wording.</span>}
+    </span>
+  )
+}
+
 function TextField({ f, base }: { f: Extract<Field, { kind: 'text' | 'url' | 'email' | 'tel' | 'date' }>; base: string }) {
-  const { value, path, set } = useValue(base, f.key)
+  const { value, path, set, content } = useValue(base, f.key)
   const id = useId()
+  const main = f.inherit ? f.inherit(content, (k) => getIn(content, base ? `${base}.${k}` : k)) : ''
   return (
     <Shell label={f.label} help={f.help} htmlFor={id}>
-      <input id={id} type={f.kind === 'text' ? 'text' : f.kind} value={(value as string) ?? ''} placeholder={f.placeholder} maxLength={f.maxLength} onChange={(e) => set(path, e.target.value)} autoComplete="off" />
+      <input id={id} type={f.kind === 'text' ? 'text' : f.kind} value={(value as string) ?? ''} placeholder={main || f.placeholder} maxLength={f.maxLength} onChange={(e) => set(path, e.target.value)} autoComplete="off" />
+      {f.inherit && <InheritBar main={main} value={(value as string) ?? ''} path={path} set={set} />}
     </Shell>
   )
 }
@@ -123,12 +152,14 @@ function RangeField({ f, base }: { f: Extract<Field, { kind: 'range' }>; base: s
 }
 
 function AreaField({ f, base }: { f: Extract<Field, { kind: 'textarea' | 'rich' }>; base: string }) {
-  const { value, path, set } = useValue(base, f.key)
+  const { value, path, set, content } = useValue(base, f.key)
+  const main = f.inherit ? f.inherit(content, (k) => getIn(content, base ? `${base}.${k}` : k)) : ''
   const id = useId()
   const help = f.kind === 'rich' ? `${f.help ? f.help + ' ' : ''}Formatting: blank line for a new paragraph, "- " for bullets, **bold**, *italic*, [label](https://link).` : f.help
   return (
     <Shell label={f.label} help={help} htmlFor={id}>
-      <textarea id={id} rows={f.rows ?? (f.kind === 'rich' ? 6 : 3)} value={(value as string) ?? ''} placeholder={f.placeholder} onChange={(e) => set(path, e.target.value)} />
+      <textarea id={id} rows={f.rows ?? (f.kind === 'rich' ? 6 : 3)} value={(value as string) ?? ''} placeholder={main || f.placeholder} onChange={(e) => set(path, e.target.value)} />
+      {f.inherit && <InheritBar main={main} value={(value as string) ?? ''} path={path} set={set} />}
     </Shell>
   )
 }
@@ -335,7 +366,7 @@ function GroupField({ f, base }: { f: Extract<Field, { kind: 'group' }>; base: s
 }
 
 function ListField({ f, base }: { f: Extract<Field, { kind: 'list' }>; base: string }) {
-  const { value, path, set } = useValue(base, f.key)
+  const { value, path, set, content } = useValue(base, f.key)
   const list = (Array.isArray(value) ? value : []) as unknown[]
   const [open, setOpen] = useState<number | null>(null)
   const [drag, setDrag] = useState<number | null>(null)
@@ -360,6 +391,16 @@ function ListField({ f, base }: { f: Extract<Field, { kind: 'list' }>; base: str
         ))}
       </ol>
       <button type="button" className="abtn" onClick={() => { set(path, [...list, f.make()]); setOpen(list.length) }}><Plus size={14} aria-hidden /> {f.addLabel ?? 'Add'}</button>
+      {f.seed && (
+        <span className="ainherit">
+          {list.length === 0 ? (
+            <>
+              <span className="ahelp">Using the main site's as they are.</span>
+              <button type="button" className="abtn abtn--ghost" onClick={() => set(path, structuredClone(f.seed!(content)))} disabled={f.seed(content).length === 0}>Start from the main site's and edit them</button>
+            </>
+          ) : <button type="button" className="abtn abtn--ghost" onClick={() => set(path, [])}>Use the main site's instead</button>}
+        </span>
+      )}
     </Shell>
   )
 }

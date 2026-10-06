@@ -347,3 +347,6 @@ a.abtn--primary { color: var(--a-primary-text); }
 .amedia__del:disabled { color: #8a949b; cursor: not-allowed; }
 @media (hover: none) { .amedia__del { opacity: 1; } }
 .amedia__tools { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .9rem; }
+
+/* "Use the main site's text, or start from it" under fields that can override the main site */
+.ainherit { display: flex; flex-wrap: wrap; align-items: center; gap: .3rem .8rem; margin-top: .35rem; }
