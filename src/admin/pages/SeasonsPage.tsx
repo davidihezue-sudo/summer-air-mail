@@ -4,7 +4,7 @@ import { Fields, type Field } from '../fields'
 import { Badge, Card, PageHead, Switch } from '../ui'
 import { PreviewFrame, type Viewport } from '../PreviewFrame'
 import { THEMES, SEASON_ORDER } from '../../themes'
-import { DEFAULT_RANGES, BODY_FONTS, HEADING_FONTS, SCRIPT_FONTS, deriveTokens, fontOptions, rangesAreUsable, resolveSeason, resolveTheme, validDate } from '../../themes/seasonManager'
+import { DEFAULT_RANGES, BODY_FONTS, HEADING_FONTS, SCRIPT_FONTS, deriveTokens, rangesAreUsable, resolveSeason, resolveTheme, validDate } from '../../themes/seasonManager'
 import type { Level, SeasonMode, SeasonName, ThemeColors } from '../../content/types'
 
 const MONTHS = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
@@ -19,7 +19,7 @@ const seasonFields = (s: SeasonName): Field[] => [
   { kind: 'select', key: 'intensity', label: 'Decoration and animation intensity', options: INTENSITY, help: 'Also capped by Appearance > Professional intensity and by visitors\' reduced motion settings.' },
   { kind: 'bool', key: 'texture', label: 'Paper and grain texture' },
   { kind: 'group', label: 'Fonts (optional)', open: false, fields: [
-    { kind: 'select', key: 'fonts.display', label: 'Headings', options: fontOptions(HEADING_FONTS, true) }, { kind: 'select', key: 'fonts.script', label: 'Signature script', options: fontOptions(SCRIPT_FONTS, true) }, { kind: 'select', key: 'fonts.body', label: 'Body text', options: fontOptions(BODY_FONTS, true) },
+    { kind: 'font', key: 'fonts.display', label: 'Headings', styles: HEADING_FONTS, withDefault: true }, { kind: 'font', key: 'fonts.script', label: 'Signature script', styles: SCRIPT_FONTS, withDefault: true }, { kind: 'font', key: 'fonts.body', label: 'Body text', styles: BODY_FONTS, withDefault: true },
   ] },
   { kind: 'group', label: `${THEMES[s].label} images (optional)`, open: false, help: 'If an image is not set, the default hero image and built-in artwork are used.', fields: [
     { kind: 'image', key: 'heroCutout', label: 'Hero portrait for this season' }, { kind: 'image', key: 'heroFlowers', label: 'Hero decorative image for this season' },

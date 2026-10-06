@@ -3,6 +3,10 @@
  * downloaded by a visitor's browser when the site actually uses it, so unused choices cost nothing.
  */
 const LOADERS: Record<string, () => Promise<unknown>> = {
+  // The originals are already part of the public site; the admin asks for them here so the font picker can show them.
+  'Italiana': () => import('@fontsource/italiana/latin-400.css'),
+  'Pinyon Script': () => import('@fontsource/pinyon-script/latin-400.css'),
+  'Figtree Variable': () => import('@fontsource-variable/figtree/wght.css'),
   'Great Vibes': () => import('@fontsource/great-vibes/latin-400.css'),
   'Allura': () => import('@fontsource/allura/latin-400.css'),
   'Parisienne': () => import('@fontsource/parisienne/latin-400.css'),

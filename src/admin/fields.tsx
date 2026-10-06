@@ -2,6 +2,7 @@ import { useId, useState, type ReactNode } from 'react'
 import { isVideoSrc } from '../utils/media'
 import { ArrowDown, ArrowUp, ChevronDown, Copy, ImagePlus, Plus, Trash2, X } from 'lucide-react'
 import type { ImageRef, SiteContent } from '../content/types'
+import type { FontStyle } from '../themes/seasonManager'
 import { ICON_NAMES } from '../components/ui/iconMap'
 import { TONE_NAMES } from '../utils/theme'
 import { getIn, moveItem } from './paths'
@@ -9,6 +10,7 @@ import { useAdmin } from './store'
 import { useMediaPicker, type Accept } from './media'
 import { BlockListEditor } from './blocks'
 import { ViewSectionsField } from './ViewSections'
+import { FontPicker } from './FontPicker'
 
 export type Opt = string | { value: string; label: string }
 type Pred = (obj: any, root: SiteContent) => boolean // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -42,6 +44,7 @@ export type Field =
   | (Base & { kind: 'ref'; key: string; from: RefSource })
   | (Base & { kind: 'blocks'; key: string })
   | (Base & { kind: 'viewSections' })
+  | (Base & { kind: 'font'; key: string; styles: FontStyle[]; withDefault?: boolean })
 
 const optOf = (o: Opt) => (typeof o === 'string' ? { value: o, label: o } : o)
 
@@ -95,6 +98,7 @@ function FieldView({ f, base }: { f: Field; base: string }) {
     case 'range': return <RangeField f={f} base={base} />
     case 'blocks': return <BlocksField f={f} base={base} />
     case 'viewSections': return <ViewSectionsField base={base} />
+    case 'font': return <FontField f={f} base={base} />
   }
 }
 
@@ -195,6 +199,11 @@ function SelectField({ f, base }: { f: Extract<Field, { kind: 'select' }>; base:
       {f.custom && <CustomAdd label={`Add your own ${f.label.toLowerCase()}`} onAdd={(v) => set(path, v)} />}
     </Shell>
   )
+}
+
+function FontField({ f, base }: { f: Extract<Field, { kind: 'font' }>; base: string }) {
+  const { value, path, set } = useValue(base, f.key)
+  return <FontPicker label={f.label} help={f.help} value={(value as string) ?? ''} onChange={(v) => set(path, v)} styles={f.styles} withDefault={f.withDefault} />
 }
 
 function CustomAdd({ label, onAdd }: { label: string; onAdd: (v: string) => void }) {

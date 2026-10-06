@@ -10,7 +10,7 @@ describe('font choices', () => {
     expect(named.length).toBeGreaterThanOrEqual(20)
   })
   it('every optional font has a loader, and every loader is offered', () => {
-    const builtIn = new Set(['Italiana', 'Pinyon Script', 'Figtree Variable', 'Georgia', 'system-ui'])
+    const builtIn = new Set(['Georgia', 'system-ui'])
     const optional = named.map((f) => firstFamily(f.value)).filter((f) => !builtIn.has(f))
     for (const f of optional) expect(LOADABLE_FONTS, `no loader for ${f}`).toContain(f)
     for (const f of LOADABLE_FONTS) expect(optional, `${f} is bundled but not offered`).toContain(f)
